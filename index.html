@@ -485,6 +485,7 @@ function renderHistory() {
     <div class="history-card">
       <div class="history-date-bar day-${r.day}">
         <span>Day ${r.day} — ${fmt(r.date)}</span>
+        <button onclick="deleteRecord('${r.date}','${r.day}')" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:0 4px;">🗑️</button>
       </div>
       ${r.exercises.map(ex => `
         <div class="history-row">
@@ -498,6 +499,16 @@ function renderHistory() {
 function fmt(s) {
   const d = new Date(s + 'T00:00:00');
   return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function deleteRecord(date, day) {
+  if (!confirm(`${fmt(date)} Day ${day} の記録を削除しますか？`)) return;
+  records = records.filter(r => !(r.date === date && r.day === day));
+  saveToLocalStorage();
+  exportJSON();
+  renderExercises();
+  renderHistory();
+  showToast('🗑️ 削除しました');
 }
 
 function saveToLocalStorage() {
