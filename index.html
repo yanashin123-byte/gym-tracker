@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>筋トレ記録</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f0f0f;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: #1a1a1a;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  header h1 { font-size: 18px; font-weight: 700; }
+
+  .header-btns { display: flex; gap: 8px; }
+
+  .icon-btn {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .day-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .day-tab {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #2a2a2a;
+    color: #666;
+    transition: all 0.2s;
+    line-height: 1.4;
+  }
+
+  .day-tab.active-A { background: #dc5050; color: #fff; }
+  .day-tab.active-B { background: #34a89a; color: #fff; }
+  .day-tab.active-C { background: #4285f4; color: #fff; }
+
+  .date-bar {
+    padding: 10px 20px;
+    background: #161616;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #222;
+  }
+
+  .date-bar label { color: #666; font-size: 12px; white-space: nowrap; }
+
+  .date-bar input[type="date"] {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    color: #eee;
+    padding: 7px 10px;
+    font-size: 15px;
+    flex: 1;
+  }
+
+  .today-btn {
+    background: #2a2a2a;
+    border: 1px solid #3a3a3a;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 7px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .section-wrap { padding: 14px 20px; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #555;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .exercise-card {
+    background: #1e1e1e;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+  }
+
+  .exercise-header {
+    padding: 12px 14px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .exercise-name { font-weight: 700; font-size: 15px; }
+
+  .prev-box { text-align: right; }
+
+  .prev-label { font-size: 10px; color: #555; margin-bottom: 2px; }
+
+  .prev-val { font-size: 13px; font-weight: 700; color: #555; }
+  .prev-val.has-data { color: #f0c040; }
+
+  .prev-date { font-size: 10px; color: #444; }
+
+  .weight-row {
+    padding: 0 14px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .weight-label { font-size: 11px; color: #555; white-space: nowrap; }
+
+  select {
+    background: #2a2a2a;
+    border: 1px solid #383838;
+    border-radius: 8px;
+    color: #eee;
+    padding: 8px 6px;
+    font-size: 15px;
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    text-align: center;
+  }
+
+  .sets-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 0 14px 12px;
+  }
+
+  .set-col { display: flex; flex-direction: column; gap: 4px; }
+  .set-label { font-size: 10px; color: #555; text-align: center; font-weight: 600; }
+
+  .save-btn {
+    display: block;
+    width: calc(100% - 40px);
+    margin: 4px 20px 0;
+    padding: 15px;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .save-btn:active { opacity: 0.75; }
+  .save-A { background: #dc5050; color: #fff; }
+  .save-B { background: #34a89a; color: #fff; }
+  .save-C { background: #4285f4; color: #fff; }
+
+  .export-row {
+    display: flex;
+    gap: 10px;
+    padding: 14px 20px 0;
+  }
+
+  .export-btn {
+    flex: 1;
+    padding: 11px;
+    border: 1px solid #333;
+    border-radius: 10px;
+    background: #1e1e1e;
+    color: #aaa;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .export-btn:active { background: #2a2a2a; }
+
+  .divider { height: 1px; background: #1e1e1e; margin: 16px 0 0; }
+
+  .history-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    border: 1px solid #222;
+  }
+
+  .history-date-bar {
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .history-date-bar.day-A { background: #2a1010; color: #dc5050; }
+  .history-date-bar.day-B { background: #0a2420; color: #34a89a; }
+  .history-date-bar.day-C { background: #0a1828; color: #4285f4; }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 14px;
+    border-top: 1px solid #1e1e1e;
+    gap: 8px;
+  }
+
+  .h-name { flex: 1; font-size: 12px; color: #bbb; }
+  .h-weight { font-size: 13px; font-weight: 700; color: #eee; min-width: 55px; text-align: right; }
+  .h-sets { font-size: 11px; color: #555; text-align: right; }
+
+  .empty { color: #444; font-size: 14px; text-align: center; padding: 36px 0; }
+
+  .toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #eee;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: #1e1e1e;
+    border-radius: 20px 20px 0 0;
+    padding: 20px;
+    width: 100%;
+    max-height: 70vh;
+  }
+
+  .modal h3 { font-size: 15px; margin-bottom: 12px; color: #eee; }
+
+  .modal textarea {
+    width: 100%;
+    height: 180px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #6aff6a;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 12px;
+    resize: none;
+  }
+
+  .modal-btns { display: flex; gap: 8px; margin-top: 12px; }
+
+  .modal-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .modal-copy { background: #4285f4; color: #fff; }
+  .modal-close { background: #2a2a2a; color: #aaa; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>💪 筋トレ記録</h1>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="showImport()">📂 読込</button>
+    </div>
+  </div>
+  <div class="day-tabs">
+    <button class="day-tab" id="tab-A" onclick="switchDay('A')">Day A<br>Push</button>
+    <button class="day-tab" id="tab-B" onclick="switchDay('B')">Day B<br>Pull</button>
+    <button class="day-tab" id="tab-C" onclick="switchDay('C')">Day C<br>Legs</button>
+  </div>
+</header>
+
+<div class="date-bar">
+  <label>日付</label>
+  <input type="date" id="date-input">
+  <button class="today-btn" onclick="setToday()">今日</button>
+</div>
+
+<div class="section-wrap">
+  <div class="section-title">今日の記録</div>
+  <div id="exercise-cards"></div>
+</div>
+
+<button class="save-btn save-A" id="save-btn" onclick="saveRecord()">✅ 保存</button>
+
+<div class="export-row">
+  <button class="export-btn" onclick="exportJSON()">☁️ iCloudに保存</button>
+  <button class="export-btn" onclick="showJSON()">📋 JSONを表示</button>
+</div>
+
+<div class="divider"></div>
+
+<div class="section-wrap">
+  <div class="section-title">過去の記録</div>
+  <div id="history-list"></div>
+</div>
+
+<!-- JSONモーダル -->
+<div class="modal-overlay" id="json-modal">
+  <div class="modal">
+    <h3 id="modal-title">JSONデータ</h3>
+    <textarea id="modal-text" readonly></textarea>
+    <div class="modal-btns">
+      <button class="modal-btn modal-copy" onclick="copyJSON()">コピー</button>
+      <button class="modal-btn modal-close" onclick="closeModal()">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DAYS = {
+  A: ["ベンチプレス", "チェストプレス", "ショルダープレス", "トライセップスプッシュダウン"],
+  B: ["ラットプルダウン", "シーテッドロウ", "ケーブルロウ", "バーベルカール"],
+  C: ["スクワット", "レッグプレス", "レッグカール", "カーフレイズ"]
+};
+
+const WEIGHTS = [];
+for (let w = 5; w <= 150; w += 2.5) WEIGHTS.push(w);
+const REPS = Array.from({length: 20}, (_, i) => i + 1);
+
+let currentDay = 'A';
+let records = [];
+
+init();
+
+function init() {
+  setToday();
+  loadFromLocalStorage();
+  switchDay('A');
+}
+
+function setToday() {
+  const d = new Date();
+  document.getElementById('date-input').value =
+    `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function switchDay(day) {
+  currentDay = day;
+  ['A','B','C'].forEach(d => {
+    const t = document.getElementById(`tab-${d}`);
+    t.className = `day-tab${d === day ? ` active-${d}` : ''}`;
+  });
+  document.getElementById('save-btn').className = `save-btn save-${day}`;
+  renderExercises();
+  renderHistory();
+}
+
+function getPrev(name) {
+  for (let i = records.length - 1; i >= 0; i--) {
+    if (records[i].day !== currentDay) continue;
+    const ex = records[i].exercises.find(e => e.name === name);
+    if (ex) return { weight: ex.weight, date: records[i].date };
+  }
+  return null;
+}
+
+function renderExercises() {
+  const container = document.getElementById('exercise-cards');
+  container.innerHTML = DAYS[currentDay].map(name => {
+    const prev = getPrev(name);
+    const prevHTML = prev
+      ? `<div class="prev-box">
+           <div class="prev-label">前回</div>
+           <div class="prev-val has-data">${prev.weight}kg</div>
+           <div class="prev-date">${fmt(prev.date)}</div>
+         </div>`
+      : `<div class="prev-box"><div class="prev-val">初回</div></div>`;
+
+    const wOpts = WEIGHTS.map(w => {
+      const sel = prev && prev.weight === w ? 'selected' : '';
+      return `<option value="${w}" ${sel}>${w}kg</option>`;
+    }).join('');
+
+    const rOpts = REPS.map(r => `<option value="${r}">${r}</option>`).join('');
+
+    const sets = [1,2,3,4].map(s => `
+      <div class="set-col">
+        <div class="set-label">Set${s}</div>
+        <select id="${name}-set${s}">${rOpts}</select>
+      </div>`).join('');
+
+    return `
+      <div class="exercise-card">
+        <div class="exercise-header">
+          <div class="exercise-name">${name}</div>
+          ${prevHTML}
+        </div>
+        <div class="weight-row">
+          <div class="weight-label">重量</div>
+          <select id="${name}-weight">${wOpts}</select>
+        </div>
+        <div class="sets-grid">${sets}</div>
+      </div>`;
+  }).join('');
+}
+
+function saveRecord() {
+  const date = document.getElementById('date-input').value;
+  if (!date) { showToast('日付を入力してください'); return; }
+
+  const exercises = DAYS[currentDay].map(name => ({
+    name,
+    weight: parseFloat(document.getElementById(`${name}-weight`).value),
+    sets: [1,2,3,4].map(s => parseInt(document.getElementById(`${name}-set${s}`).value))
+  }));
+
+  const idx = records.findIndex(r => r.date === date && r.day === currentDay);
+  if (idx >= 0) records[idx] = { date, day: currentDay, exercises };
+  else records.push({ date, day: currentDay, exercises });
+
+  records.sort((a,b) => a.date.localeCompare(b.date));
+  saveToLocalStorage();
+  exportJSON();
+  renderExercises();
+  renderHistory();
+  showToast('✅ 保存 & iCloud出力完了');
+}
+
+function renderHistory() {
+  const list = records.filter(r => r.day === currentDay).slice().reverse();
+  const el = document.getElementById('history-list');
+  if (!list.length) { el.innerHTML = '<div class="empty">まだ記録がありません</div>'; return; }
+
+  el.innerHTML = list.map(r => `
+    <div class="history-card">
+      <div class="history-date-bar day-${r.day}">
+        <span>Day ${r.day} — ${fmt(r.date)}</span>
+      </div>
+      ${r.exercises.map(ex => `
+        <div class="history-row">
+          <div class="h-name">${ex.name}</div>
+          <div class="h-weight">${ex.weight}kg</div>
+          <div class="h-sets">${ex.sets.join(', ')}回</div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function fmt(s) {
+  const d = new Date(s + 'T00:00:00');
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+
+function saveToLocalStorage() {
+  localStorage.setItem('gym_records', JSON.stringify(records));
+}
+
+function loadFromLocalStorage() {
+  const s = localStorage.getItem('gym_records');
+  if (s) records = JSON.parse(s);
+}
+
+function getJSON() {
+  return JSON.stringify({ records }, null, 2);
+}
+
+function exportJSON() {
+  const blob = new Blob([getJSON()], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '筋トレ記録.json';
+  a.click();
+  showToast('☁️ ダウンロードしました');
+}
+
+function showJSON() {
+  document.getElementById('modal-title').textContent = 'JSONデータ（コピーしてClaudeに渡す）';
+  document.getElementById('modal-text').value = getJSON();
+  document.getElementById('json-modal').classList.add('open');
+}
+
+function copyJSON() {
+  const text = document.getElementById('modal-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('📋 コピーしました');
+    closeModal();
+  }).catch(() => {
+    document.getElementById('modal-text').select();
+    showToast('手動でコピーしてください');
+  });
+}
+
+function showImport() {
+  document.getElementById('modal-title').textContent = 'JSONを貼り付けて読込';
+  document.getElementById('modal-text').value = '';
+  document.getElementById('modal-text').removeAttribute('readonly');
+  document.getElementById('json-modal').classList.add('open');
+
+  // ボタンを「読込」に変更
+  const btns = document.querySelector('.modal-btns');
+  btns.innerHTML = `
+    <button class="modal-btn modal-copy" onclick="importJSON()">読込</button>
+    <button class="modal-btn modal-close" onclick="closeModal(); document.getElementById('modal-text').setAttribute('readonly','');">閉じる</button>`;
+}
+
+function importJSON() {
+  try {
+    const data = JSON.parse(document.getElementById('modal-text').value);
+    records = data.records || [];
+    saveToLocalStorage();
+    renderExercises();
+    renderHistory();
+    closeModal();
+    showToast('✅ 読込完了');
+    document.getElementById('modal-text').setAttribute('readonly', '');
+  } catch(e) {
+    showToast('❌ JSONが正しくありません');
+  }
+}
+
+function closeModal() {
+  document.getElementById('json-modal').classList.remove('open');
+  const btns = document.querySelector('.modal-btns');
+  btns.innerHTML = `
+    <button class="modal-btn modal-copy" onclick="copyJSON()">コピー</button>
+    <button class="modal-btn modal-close" onclick="closeModal()">閉じる</button>`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
