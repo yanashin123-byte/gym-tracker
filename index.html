@@ -171,6 +171,37 @@
   .set-col { display: flex; flex-direction: column; gap: 4px; }
   .set-label { font-size: 10px; color: #555; text-align: center; font-weight: 600; }
 
+  .weight-input {
+    background: #2a2a2a;
+    border: 1px solid #383838;
+    border-radius: 8px;
+    color: #eee;
+    padding: 8px 10px;
+    font-size: 18px;
+    width: 100%;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .weight-input::-webkit-outer-spin-button,
+  .weight-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .weight-input::placeholder { color: #444; }
+
+  .cheat-input {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    color: #f0a040;
+    padding: 4px;
+    font-size: 12px;
+    width: 100%;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+  .cheat-input::-webkit-outer-spin-button,
+  .cheat-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .cheat-input::placeholder { color: #333; font-size: 10px; }
+  .cheat-label { font-size: 9px; color: #444; text-align: center; }
+
   .save-btn {
     display: block;
     width: calc(100% - 40px);
@@ -320,8 +351,10 @@
 <header>
   <div class="header-top">
     <h1>💪 筋トレ記録</h1>
-    <div class="header-btns">
-      <button class="icon-btn" onclick="showImport()">📂 読込</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="sync-status" style="font-size:12px;color:#666;">⏳ 読込中...</span>
+      <button class="icon-btn" onclick="loadFromGitHub()">🔄</button>
+      <button class="icon-btn" onclick="openSettings()">⚙️</button>
     </div>
   </div>
   <div class="day-tabs">
@@ -352,6 +385,23 @@
   <div id="history-list"></div>
 </div>
 
+<!-- 設定モーダル -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <h3>⚙️ GitHub設定</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">GitHub Fine-grained PATを入力してください。<br>このデバイスのみに保存されます。</p>
+    <input type="password" id="token-input"
+      style="width:100%;background:#111;border:1px solid #333;border-radius:10px;color:#6aff6a;font-family:monospace;font-size:13px;padding:12px;margin-bottom:8px;"
+      placeholder="github_pat_...">
+    <div id="token-status" style="font-size:12px;color:#666;margin-bottom:12px;min-height:16px;"></div>
+    <div class="modal-btns">
+      <button class="modal-btn modal-copy" onclick="saveToken()">保存</button>
+      <button class="modal-btn" style="background:#5a1a1a;color:#f08080;" onclick="clearToken()">削除</button>
+      <button class="modal-btn modal-close" onclick="closeSettings()">閉じる</button>
+    </div>
+  </div>
+</div>
+
 <!-- JSONモーダル -->
 <div class="modal-overlay" id="json-modal">
   <div class="modal">
@@ -373,9 +423,7 @@ const DAYS = {
   C: ["スクワット", "レッグプレス", "レッグカール", "カーフレイズ"]
 };
 
-const WEIGHTS = [];
-for (let w = 5; w <= 150; w += 2.5) WEIGHTS.push(w);
-const REPS = Array.from({length: 20}, (_, i) => i + 1);
+const REPS = Array.from({length: 21}, (_, i) => i);
 
 let currentDay = 'A';
 let records = [];
@@ -386,6 +434,8 @@ function init() {
   setToday();
   loadFromLocalStorage();
   switchDay('A');
+  loadFromGitHub();
+  // GitHub読込後にもdraftを適用するため、loadFromGitHub内でも呼ぶ
 }
 
 function setToday() {
@@ -402,7 +452,59 @@ function switchDay(day) {
   });
   document.getElementById('save-btn').className = `save-btn save-${day}`;
   renderExercises();
+  loadDraft();
   renderHistory();
+}
+
+// --- 下書き自動保存（誤閉じ対策） ---
+let draftTimer = null;
+
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(saveDraft, 600);
+}
+
+function saveDraft() {
+  const date = document.getElementById('date-input').value;
+  if (!date) return;
+  const draft = {
+    day: currentDay,
+    date,
+    exercises: DAYS[currentDay].map(name => ({
+      name,
+      weight: document.getElementById(`${name}-weight`).value,
+      sets: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}`).value),
+      cheating: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}-cheat`).value)
+    }))
+  };
+  localStorage.setItem('gym_draft', JSON.stringify(draft));
+}
+
+function loadDraft() {
+  const s = localStorage.getItem('gym_draft');
+  if (!s) return;
+  try {
+    const draft = JSON.parse(s);
+    if (draft.day !== currentDay) return;
+    const date = document.getElementById('date-input').value;
+    if (draft.date !== date) return;
+    draft.exercises.forEach(ex => {
+      const wEl = document.getElementById(`${ex.name}-weight`);
+      if (wEl) wEl.value = ex.weight;
+      ex.sets.forEach((v, i) => {
+        const el = document.getElementById(`${ex.name}-set${i+1}`);
+        if (el) el.value = v;
+      });
+      ex.cheating.forEach((v, i) => {
+        const el = document.getElementById(`${ex.name}-set${i+1}-cheat`);
+        if (el && v) el.value = v;
+      });
+    });
+  } catch(e) {}
+}
+
+function clearDraft() {
+  localStorage.removeItem('gym_draft');
 }
 
 function getPrev(name) {
@@ -426,17 +528,18 @@ function renderExercises() {
          </div>`
       : `<div class="prev-box"><div class="prev-val">初回</div></div>`;
 
-    const wOpts = WEIGHTS.map(w => {
-      const sel = prev && prev.weight === w ? 'selected' : '';
-      return `<option value="${w}" ${sel}>${w}kg</option>`;
-    }).join('');
+    const prevWeight = prev ? prev.weight : '';
 
     const rOpts = REPS.map(r => `<option value="${r}">${r}</option>`).join('');
 
     const sets = [1,2,3,4].map(s => `
       <div class="set-col">
         <div class="set-label">Set${s}</div>
-        <select id="${name}-set${s}">${rOpts}</select>
+        <select id="${name}-set${s}" oninput="scheduleDraftSave()">${rOpts}</select>
+        <div class="cheat-label">チート</div>
+        <input type="number" inputmode="numeric" min="1" max="20"
+          class="cheat-input" id="${name}-set${s}-cheat"
+          placeholder="--" oninput="scheduleDraftSave()">
       </div>`).join('');
 
     return `
@@ -447,21 +550,27 @@ function renderExercises() {
         </div>
         <div class="weight-row">
           <div class="weight-label">重量</div>
-          <select id="${name}-weight">${wOpts}</select>
+          <input type="number" inputmode="decimal" step="0.5" min="0"
+            class="weight-input" id="${name}-weight"
+            value="${prevWeight}" placeholder="kg" oninput="scheduleDraftSave()">
         </div>
         <div class="sets-grid">${sets}</div>
       </div>`;
   }).join('');
 }
 
-function saveRecord() {
+async function saveRecord() {
   const date = document.getElementById('date-input').value;
   if (!date) { showToast('日付を入力してください'); return; }
 
   const exercises = DAYS[currentDay].map(name => ({
     name,
-    weight: parseFloat(document.getElementById(`${name}-weight`).value),
-    sets: [1,2,3,4].map(s => parseInt(document.getElementById(`${name}-set${s}`).value))
+    weight: parseFloat(document.getElementById(`${name}-weight`).value) || 0,
+    sets: [1,2,3,4].map(s => parseInt(document.getElementById(`${name}-set${s}`).value)),
+    cheating: [1,2,3,4].map(s => {
+      const v = document.getElementById(`${name}-set${s}-cheat`).value;
+      return v ? parseInt(v) : null;
+    })
   }));
 
   const idx = records.findIndex(r => r.date === date && r.day === currentDay);
@@ -469,11 +578,12 @@ function saveRecord() {
   else records.push({ date, day: currentDay, exercises });
 
   records.sort((a,b) => a.date.localeCompare(b.date));
-  saveToLocalStorage();
-  exportJSON();
+  clearDraft();
+  await saveToGitHub();
   renderExercises();
+  loadDraft();
   renderHistory();
-  showToast('✅ 保存 & iCloud出力完了');
+  showToast('✅ 保存しました');
 }
 
 function renderHistory() {
@@ -491,7 +601,10 @@ function renderHistory() {
         <div class="history-row">
           <div class="h-name">${ex.name}</div>
           <div class="h-weight">${ex.weight}kg</div>
-          <div class="h-sets">${ex.sets.join(', ')}回</div>
+          <div class="h-sets">${ex.sets.map((r, i) => {
+            const cheat = ex.cheating && ex.cheating[i];
+            return cheat ? `${r}(チ:${cheat}〜)` : r;
+          }).join(', ')}回</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -501,11 +614,127 @@ function fmt(s) {
   return `${d.getMonth()+1}/${d.getDate()}`;
 }
 
+// GitHub sync
+let GITHUB_TOKEN = localStorage.getItem('github_token') || '';
+const GITHUB_REPO = 'yanashin123-byte/gym-tracker';
+const RECORDS_FILE = 'records.json';
+let recordsSHA = null;
+
+async function loadFromGitHub() {
+  if (!GITHUB_TOKEN) {
+    loadFromLocalStorage();
+    showSyncStatus('🔑 トークン未設定');
+    return;
+  }
+  try {
+    showSyncStatus('⏳ 読込中...');
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      recordsSHA = data.sha;
+      const decoded = JSON.parse(atob(data.content.replace(/\n/g, '')));
+      records = decoded.records || [];
+      saveToLocalStorage();
+      renderExercises();
+      loadDraft();
+      renderHistory();
+      showSyncStatus('✅ 同期済み');
+    } else if (res.status === 404) {
+      // ファイルがまだない → ローカルから読んでそのまま使う
+      loadFromLocalStorage();
+      showSyncStatus('📱 ローカル（新規）');
+    } else if (res.status === 401) {
+      loadFromLocalStorage();
+      showSyncStatus('🔑 トークンエラー');
+    } else {
+      loadFromLocalStorage();
+      showSyncStatus('⚠️ 読込失敗');
+    }
+  } catch(e) {
+    loadFromLocalStorage();
+    showSyncStatus('📵 オフライン');
+  }
+}
+
+async function saveToGitHub() {
+  saveToLocalStorage();
+  if (!GITHUB_TOKEN) {
+    showSyncStatus('🔑 トークン未設定');
+    return;
+  }
+  try {
+    showSyncStatus('⏳ 保存中...');
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ records }, null, 2))));
+    const body = { message: `Update records ${new Date().toISOString()}`, content };
+    if (recordsSHA) body.sha = recordsSHA;
+
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      recordsSHA = data.content.sha;
+      showSyncStatus('✅ 同期済み');
+    } else if (res.status === 401) {
+      showSyncStatus('🔑 トークンエラー');
+    } else {
+      showSyncStatus('⚠️ 同期失敗');
+    }
+  } catch(e) {
+    showSyncStatus('📵 オフライン保存');
+  }
+}
+
+function openSettings() {
+  const input = document.getElementById('token-input');
+  input.value = '';
+  input.placeholder = GITHUB_TOKEN ? '（設定済み — 変更する場合は新しいトークンを入力）' : 'github_pat_...';
+  const status = document.getElementById('token-status');
+  status.textContent = GITHUB_TOKEN ? '✅ トークン設定済み' : '⚠️ トークン未設定';
+  status.style.color = GITHUB_TOKEN ? '#6aff6a' : '#f0a040';
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function saveToken() {
+  const val = document.getElementById('token-input').value.trim();
+  if (!val) { showToast('トークンを入力してください'); return; }
+  GITHUB_TOKEN = val;
+  localStorage.setItem('github_token', val);
+  closeSettings();
+  showToast('✅ トークンを保存しました');
+  loadFromGitHub();
+}
+
+function clearToken() {
+  if (!confirm('トークンを削除しますか？')) return;
+  GITHUB_TOKEN = '';
+  localStorage.removeItem('github_token');
+  closeSettings();
+  showSyncStatus('🔑 トークン未設定');
+  showToast('🗑️ トークンを削除しました');
+}
+
+function showSyncStatus(msg) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = msg;
+}
+
 function deleteRecord(date, day) {
   if (!confirm(`${fmt(date)} Day ${day} の記録を削除しますか？`)) return;
   records = records.filter(r => !(r.date === date && r.day === day));
-  saveToLocalStorage();
-  exportJSON();
+  saveToGitHub();
   renderExercises();
   renderHistory();
   showToast('🗑️ 削除しました');
@@ -522,15 +751,6 @@ function loadFromLocalStorage() {
 
 function getJSON() {
   return JSON.stringify({ records }, null, 2);
-}
-
-function exportJSON() {
-  const blob = new Blob([getJSON()], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '筋トレ記録.json';
-  a.click();
-  showToast('☁️ ダウンロードしました');
 }
 
 function showJSON() {
