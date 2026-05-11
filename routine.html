@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1.0">
+<title>食事・サプリ表</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    width: 390px;
+    min-height: 844px;
+    padding: 48px 20px 40px;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 800;
+    text-align: center;
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 11px;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+  }
+
+  .section {
+    margin-bottom: 10px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1e1e2e;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .gym .section-header   { background: #1a0f2e; color: #a78bfa; }
+  .no-gym .section-header { background: #0f1a10; color: #6ee7a0; }
+
+  .row {
+    display: flex;
+    align-items: center;
+    padding: 9px 14px;
+    border-top: 1px solid #151520;
+    gap: 10px;
+    background: #0f0f18;
+  }
+  .no-gym .row { background: #0c120d; border-color: #0f150f; }
+
+  .time {
+    font-size: 10px;
+    color: #555;
+    min-width: 62px;
+    font-weight: 700;
+  }
+  .items {
+    flex: 1;
+    font-size: 12px;
+    color: #ccc;
+    line-height: 1.5;
+  }
+  .items .supplement {
+    color: #a78bfa;
+    font-weight: 600;
+  }
+  .no-gym .items .supplement { color: #6ee7a0; }
+  .items .food { color: #f0c060; font-weight: 600; }
+  .protein {
+    font-size: 13px;
+    font-weight: 800;
+    min-width: 40px;
+    text-align: right;
+    color: #f87171;
+  }
+  .protein.na { color: #333; font-size: 11px; font-weight: 400; }
+
+  .total-box {
+    margin-top: 12px;
+    border-radius: 14px;
+    background: #12121f;
+    border: 1px solid #2a2a4a;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 12px; color: #777; }
+  .total-val {
+    font-size: 22px;
+    font-weight: 900;
+    color: #f87171;
+  }
+  .total-val span { font-size: 12px; color: #555; margin-left: 2px; }
+  .target { font-size: 11px; color: #444; text-align: right; }
+  .target b { color: #6ee7a0; }
+
+  .note {
+    margin-top: 10px;
+    font-size: 10px;
+    color: #444;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .note b { color: #f87171; }
+</style>
+</head>
+<body>
+
+<h1>💪 食事・サプリ ルーティン</h1>
+<div class="subtitle">タンパク質目標：140g / 日</div>
+
+<!-- ジムがある日 -->
+<div class="section gym">
+  <div class="section-header">🏋️ ジムがある日</div>
+
+  <div class="row">
+    <div class="time">起床後</div>
+    <div class="items">
+      <span class="supplement">マルチビタミン 1粒</span><br>
+      <span class="supplement">クレアチン 5g</span>（水に溶かす）<br>
+      <span class="food">ザバスソイプロテイン</span> + 豆乳<br>
+      <span class="food">卵 2個</span>（レンジ1分）
+    </div>
+    <div class="protein">45g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">ジム<br>30分前</div>
+    <div class="items">
+      <span class="supplement">C4 1スクープ</span>（水300ml）<br>
+      <span style="font-size:10px;color:#555;">※レッドブルと同日NG・21時以降NG</span>
+    </div>
+    <div class="protein na">—</div>
+  </div>
+
+  <div class="row">
+    <div class="time">ジム中</div>
+    <div class="items">
+      <span class="supplement">EAA 1スクープ</span>（水500mlに溶かす）
+    </div>
+    <div class="protein">10g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">ジム直後</div>
+    <div class="items">
+      <span class="supplement">ホエイプロテイン</span> + <span class="supplement">マルトデキストリン</span><br>
+      各1スクープ → 一緒にシェイク
+    </div>
+    <div class="protein">25g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">昼</div>
+    <div class="items">
+      <span class="food">サラダチキン 1本</span>
+    </div>
+    <div class="protein">28g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">夜</div>
+    <div class="items">
+      <span class="food">納豆 1パック</span> + <span class="food">豆腐 半丁</span>
+    </div>
+    <div class="protein">18g</div>
+  </div>
+</div>
+
+<!-- ジムがない日 -->
+<div class="section no-gym">
+  <div class="section-header">🛌 ジムがない日</div>
+
+  <div class="row">
+    <div class="time">起床後</div>
+    <div class="items">
+      <span class="supplement">マルチビタミン 1粒</span><br>
+      <span class="supplement">クレアチン 5g</span>（水に溶かす）<br>
+      <span class="food">ザバスソイプロテイン</span> + 豆乳<br>
+      <span class="food">卵 2個</span>（レンジ1分）
+    </div>
+    <div class="protein">45g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">昼</div>
+    <div class="items">
+      <span class="food">サラダチキン 1本</span>
+    </div>
+    <div class="protein">28g</div>
+  </div>
+
+  <div class="row">
+    <div class="time">夜</div>
+    <div class="items">
+      <span class="food">納豆 1パック</span> + <span class="food">豆腐 半丁</span><br>
+      <span class="supplement">ホエイプロテイン 1杯</span>
+    </div>
+    <div class="protein">43g</div>
+  </div>
+</div>
+
+<!-- 合計 -->
+<div class="total-box">
+  <div>
+    <div class="total-label">1日合計（ジムあり）</div>
+    <div class="total-val">126g<span>/ 140g</span></div>
+  </div>
+  <div class="target">
+    不足分は<br>プロテイン追加で<br><b>+25g</b>
+  </div>
+</div>
+
+<div class="note">
+  <b>クレアチンは毎日飲む</b>（ジムない日も）<br>
+  EAA・C4・マルトはジムある日のみ
+</div>
+
+</body>
+</html>
