@@ -634,7 +634,7 @@ async function loadFromGitHub() {
     if (res.ok) {
       const data = await res.json();
       recordsSHA = data.sha;
-      const decoded = JSON.parse(atob(data.content.replace(/\n/g, '')));
+      const decoded = JSON.parse(fromBase64UTF8(data.content));
       records = decoded.records || [];
       saveToLocalStorage();
       renderExercises();
@@ -658,6 +658,17 @@ async function loadFromGitHub() {
   }
 }
 
+function toBase64UTF8(str) {
+  const bytes = new TextEncoder().encode(str);
+  return btoa(Array.from(bytes).map(b => String.fromCharCode(b)).join(''));
+}
+
+function fromBase64UTF8(b64) {
+  const binaryStr = atob(b64.replace(/\n/g, ''));
+  const bytes = new Uint8Array(binaryStr.split('').map(c => c.charCodeAt(0)));
+  return new TextDecoder().decode(bytes);
+}
+
 async function saveToGitHub() {
   saveToLocalStorage();
   if (!GITHUB_TOKEN) {
@@ -666,7 +677,7 @@ async function saveToGitHub() {
   }
   try {
     showSyncStatus('⏳ 保存中...');
-    const content = btoa(unescape(encodeURIComponent(JSON.stringify({ records }, null, 2))));
+    const content = toBase64UTF8(JSON.stringify({ records }, null, 2));
     const body = { message: `Update records ${new Date().toISOString()}`, content };
     if (recordsSHA) body.sha = recordsSHA;
 
