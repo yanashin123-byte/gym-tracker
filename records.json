@@ -1,3 +1,74 @@
 {
-  "records": []
+  "records": [
+    {
+      "date": "2026-05-11",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "ベンチプレス",
+          "weight": 40,
+          "sets": [
+            10,
+            8,
+            8,
+            7
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "チェストプレス",
+          "weight": 25,
+          "sets": [
+            12,
+            10,
+            10,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ショルダープレス",
+          "weight": 9,
+          "sets": [
+            12,
+            10,
+            10,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "トライセップスプッシュダウン",
+          "weight": 9,
+          "sets": [
+            15,
+            12,
+            12,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ]
+    }
+  ]
 }
