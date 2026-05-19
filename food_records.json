@@ -1,7 +1,13 @@
 {
   "2026-05-18": {
     "breakfast": [],
-    "lunch": [],
+    "lunch": [
+      {
+        "name": "豚山　小ぶた汁なし",
+        "protein": 0,
+        "kcal": 0
+      }
+    ],
     "dinner": [],
     "snack": []
   }
