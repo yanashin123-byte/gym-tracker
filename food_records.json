@@ -16,6 +16,11 @@
         "name": "クレアチン",
         "protein": 5,
         "kcal": 20
+      },
+      {
+        "name": "マルトデキストリン",
+        "protein": 0,
+        "kcal": 76
       }
     ],
     "lunch": [],
