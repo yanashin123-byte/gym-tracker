@@ -391,7 +391,10 @@
       <input type="text" id="foodName" placeholder="例: 鶏むね肉" autocomplete="off" oninput="onFoodInput()" onkeydown="onFoodKeydown(event)" />
       <div id="suggestions" style="position:absolute;left:0;right:0;background:#2a2a2a;border-radius:0 0 10px 10px;z-index:10;display:none;max-height:200px;overflow-y:auto;"></div>
     </div>
-    <div id="nutritionStatus" style="font-size:12px;color:#888;margin:-8px 0 8px;min-height:18px;"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin:-8px 0 8px">
+      <div id="nutritionStatus" style="font-size:12px;color:#888;flex:1;min-height:18px;"></div>
+      <button id="claudeBtn" onclick="manualLookup()" style="display:none;background:#2a2a2a;border:none;border-radius:8px;color:#a78bfa;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap">🤖 調べる</button>
+    </div>
     <div class="form-row">
       <div class="form-group">
         <label>タンパク質 (g)</label>
@@ -414,7 +417,11 @@
     <div style="font-size:14px;font-weight:600;margin-bottom:12px">🤖 Claude API設定</div>
     <div style="font-size:12px;color:#888;margin-bottom:8px">APIキーを設定すると、DBにない食品も自動で栄養素を調べます</div>
     <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
-    <button onclick="saveApiKey()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">保存</button>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button onclick="saveApiKey()" style="flex:1;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">保存</button>
+      <button onclick="testApiKey()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#aaa;padding:12px;font-size:14px;cursor:pointer">🔬 テスト</button>
+    </div>
+    <div id="apiTestResult" style="font-size:12px;min-height:16px;text-align:center"></div>
   </div>
   <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
     <div style="font-size:14px;font-weight:600;margin-bottom:8px">🔗 GitHub同期</div>
@@ -610,6 +617,10 @@ function onFoodInput() {
   const results = searchFoodDB(val);
   const box = document.getElementById('suggestions');
   selectedSuggestion = -1;
+
+  // 「調べる」ボタンの表示制御
+  const claudeBtn = document.getElementById('claudeBtn');
+  if (claudeBtn) claudeBtn.style.display = val.length >= 1 ? 'block' : 'none';
 
   // DB候補を表示
   if (results.length > 0) {
@@ -852,6 +863,8 @@ function openModal(mealId) {
   document.getElementById('foodProtein').value = '';
   document.getElementById('foodKcal').value = '';
   document.getElementById('suggestions').style.display = 'none';
+  const claudeBtn = document.getElementById('claudeBtn');
+  if (claudeBtn) claudeBtn.style.display = 'none';
   setNutritionStatus('', '#888');
   // 前のClaude検索をキャンセル
   clearTimeout(claudeTimer);
@@ -913,6 +926,53 @@ function saveApiKey() {
   if (val && !val.endsWith('...')) {
     localStorage.setItem('anthropic_api_key', val);
     alert('APIキーを保存しました');
+  }
+}
+
+async function testApiKey() {
+  const el = document.getElementById('apiTestResult');
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    el.textContent = '❌ APIキーが未設定です';
+    el.style.color = '#F44336';
+    return;
+  }
+  el.textContent = '🔄 テスト中...';
+  el.style.color = '#888';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'hi' }]
+      })
+    });
+    if (res.ok) {
+      el.textContent = '✅ APIキー正常！Claude使用可能';
+      el.style.color = '#4CAF50';
+    } else {
+      const j = await res.json().catch(() => ({}));
+      el.textContent = `❌ HTTP ${res.status}: ${j.error?.message || '認証エラー'}`;
+      el.style.color = '#F44336';
+    }
+  } catch(e) {
+    el.textContent = `❌ 通信エラー: ${e.message}`;
+    el.style.color = '#F44336';
+  }
+}
+
+function manualLookup() {
+  const name = document.getElementById('foodName').value.trim();
+  if (name.length >= 1) {
+    clearTimeout(claudeTimer);
+    lookupWithClaude(name);
   }
 }
 
