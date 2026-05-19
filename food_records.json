@@ -6,6 +6,11 @@
         "name": "豚山　小ぶた　汁なし",
         "protein": 0,
         "kcal": 0
+      },
+      {
+        "name": "ごはん",
+        "protein": 3.8,
+        "kcal": 252
       }
     ],
     "dinner": [],
