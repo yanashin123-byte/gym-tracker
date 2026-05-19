@@ -1,24 +1,8 @@
 {
   "2026-05-18": {
     "breakfast": [],
-    "lunch": [
-      {
-        "name": "ごはん",
-        "protein": 3.8,
-        "kcal": 252
-      },
-      {
-        "name": "ソフトクリーム",
-        "protein": 0,
-        "kcal": 0
-      }
-    ],
+    "lunch": [],
     "dinner": [
-      {
-        "name": "ハルクファクター　ホエイプロテイン",
-        "protein": 0,
-        "kcal": 0
-      },
       {
         "name": "うまトマチーズ牛飯　大盛り",
         "protein": 0,
