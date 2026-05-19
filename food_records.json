@@ -18,7 +18,13 @@
         "kcal": 0
       }
     ],
-    "dinner": [],
+    "dinner": [
+      {
+        "name": "ハルクファクター　ホエイプロテイン",
+        "protein": 0,
+        "kcal": 0
+      }
+    ],
     "snack": []
   }
 }
