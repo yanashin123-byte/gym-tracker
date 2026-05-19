@@ -11,6 +11,11 @@
         "name": "HULX-FACTOR ホエイプロテイン",
         "protein": 21,
         "kcal": 134
+      },
+      {
+        "name": "クレアチン",
+        "protein": 5,
+        "kcal": 20
       }
     ],
     "lunch": [],
