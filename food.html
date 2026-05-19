@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>食事記録</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f0f0f;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: #1a1a1a;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  header h1 { font-size: 18px; font-weight: 700; }
+
+  .header-btns { display: flex; gap: 8px; }
+
+  .icon-btn {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .date-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .date-nav button {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 6px 12px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .date-label {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* タンパク質サマリー */
+  .protein-summary {
+    background: #1a1a1a;
+    margin: 16px;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .protein-label { font-size: 12px; color: #888; margin-bottom: 4px; }
+
+  .protein-numbers {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .protein-current { font-size: 42px; font-weight: 700; color: #4CAF50; }
+  .protein-unit { font-size: 16px; color: #888; }
+  .protein-target { font-size: 14px; color: #888; }
+
+  .progress-bar {
+    background: #2a2a2a;
+    border-radius: 6px;
+    height: 8px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, #4CAF50, #8BC34A);
+    transition: width 0.3s ease;
+  }
+
+  .progress-fill.over { background: linear-gradient(90deg, #FF9800, #F44336); }
+
+  /* 食事セクション */
+  .meal-section {
+    margin: 0 16px 16px;
+    background: #1a1a1a;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .meal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .meal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .meal-emoji { font-size: 18px; }
+
+  .meal-protein {
+    font-size: 13px;
+    color: #4CAF50;
+    font-weight: 600;
+  }
+
+  .add-food-btn {
+    background: #2a2a2a;
+    border: none;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .food-items { padding: 4px 0; }
+
+  .food-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid #222;
+  }
+
+  .food-item:last-child { border-bottom: none; }
+
+  .food-name { font-size: 14px; color: #ddd; flex: 1; }
+
+  .food-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .food-protein { font-size: 13px; color: #4CAF50; font-weight: 600; min-width: 40px; text-align: right; }
+  .food-kcal { font-size: 12px; color: #666; min-width: 52px; text-align: right; }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    color: #555;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .empty-meal {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+  }
+
+  /* よく使う食材 */
+  .quick-section {
+    margin: 0 16px 16px;
+  }
+
+  .quick-title {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 8px;
+    padding-left: 4px;
+  }
+
+  .quick-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .quick-item {
+    background: #1a1a1a;
+    border: none;
+    border-radius: 10px;
+    color: #ddd;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .quick-item span { color: #4CAF50; font-size: 11px; display: block; margin-top: 2px; }
+
+  /* モーダル */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: flex-end;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  .modal {
+    background: #1a1a1a;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h2 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    font-size: 12px;
+    color: #888;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    background: #2a2a2a;
+    border: none;
+    border-radius: 10px;
+    color: #eee;
+    padding: 12px 14px;
+    font-size: 15px;
+  }
+
+  .form-row { display: flex; gap: 12px; }
+  .form-row .form-group { flex: 1; }
+
+  .modal-btns { display: flex; gap: 12px; margin-top: 8px; }
+
+  .btn-cancel {
+    flex: 1;
+    background: #2a2a2a;
+    border: none;
+    border-radius: 12px;
+    color: #aaa;
+    padding: 14px;
+    font-size: 15px;
+    cursor: pointer;
+  }
+
+  .btn-add {
+    flex: 2;
+    background: #4CAF50;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .history-list { margin: 0 16px; }
+  .history-day {
+    background: #1a1a1a;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  .history-day-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .history-day-date { color: #888; }
+  .history-day-protein { color: #4CAF50; font-weight: 600; }
+
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+    display: flex;
+    padding: 8px 0 20px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: #666;
+    padding: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .tab-btn.active { color: #4CAF50; }
+  .tab-btn .tab-icon { font-size: 20px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>🥗 食事記録</h1>
+    <div class="header-btns">
+      <button class="icon-btn" onclick="exportData()">📤 エクスポート</button>
+    </div>
+  </div>
+  <div class="date-nav">
+    <button onclick="changeDay(-1)">‹</button>
+    <div class="date-label" id="dateLabel"></div>
+    <button onclick="changeDay(1)">›</button>
+    <span id="sync-status" style="font-size:11px;color:#666;white-space:nowrap">⏳</span>
+  </div>
+</header>
+
+<div id="todayView">
+  <!-- タンパク質サマリー -->
+  <div class="protein-summary">
+    <div class="protein-label">今日のタンパク質</div>
+    <div class="protein-numbers">
+      <span class="protein-current" id="totalProtein">0</span>
+      <span class="protein-unit">g</span>
+      <span class="protein-target">/ 140g</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- 食事セクション -->
+  <div id="mealSections"></div>
+
+  <!-- よく使う食材 -->
+  <div class="quick-section">
+    <div class="quick-title">⚡ クイック追加</div>
+    <div class="quick-grid" id="quickGrid"></div>
+  </div>
+</div>
+
+<div id="historyView" style="display:none">
+  <div style="padding:16px 16px 8px; font-size:13px; color:#888;">過去の記録</div>
+  <div class="history-list" id="historyList"></div>
+</div>
+
+<!-- 追加モーダル -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h2 id="modalTitle">食事を追加</h2>
+    <div class="form-group" style="position:relative">
+      <label>食材・料理名</label>
+      <input type="text" id="foodName" placeholder="例: 鶏むね肉" autocomplete="off" oninput="onFoodInput()" onkeydown="onFoodKeydown(event)" />
+      <div id="suggestions" style="position:absolute;left:0;right:0;background:#2a2a2a;border-radius:0 0 10px 10px;z-index:10;display:none;max-height:200px;overflow-y:auto;"></div>
+    </div>
+    <div id="nutritionStatus" style="font-size:12px;color:#888;margin:-8px 0 8px;min-height:18px;"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>タンパク質 (g)</label>
+        <input type="number" id="foodProtein" placeholder="自動入力" min="0" step="0.5" />
+      </div>
+      <div class="form-group">
+        <label>カロリー (kcal)</label>
+        <input type="number" id="foodKcal" placeholder="自動入力" min="0" />
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="btn-add" onclick="addFood()">追加</button>
+    </div>
+  </div>
+</div>
+
+<div id="settingsView" style="display:none;padding:16px">
+  <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px">🤖 Claude API設定</div>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">APIキーを設定すると、DBにない食品も自動で栄養素を調べます</div>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
+    <button onclick="saveApiKey()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">保存</button>
+  </div>
+  <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px">🔗 GitHub同期</div>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">Personal Access Tokenを設定するとMac・iPhone間でデータが同期されます</div>
+    <input type="password" id="tokenInput" placeholder="github_pat_..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
+    <button onclick="saveGitHubToken()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">トークンを保存</button>
+  </div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab-btn active" id="tabToday" onclick="showTab('today')">
+    <span class="tab-icon">🍽️</span>今日
+  </button>
+  <button class="tab-btn" id="tabHistory" onclick="showTab('history')">
+    <span class="tab-icon">📊</span>履歴
+  </button>
+  <button class="tab-btn" id="tabSettings" onclick="showTab('settings')">
+    <span class="tab-icon">⚙️</span>設定
+  </button>
+</div>
+
+<script>
+const MEALS = [
+  { id: 'breakfast', label: '朝食', emoji: '🌅' },
+  { id: 'lunch',     label: '昼食', emoji: '☀️' },
+  { id: 'dinner',    label: '夕食', emoji: '🌙' },
+  { id: 'snack',     label: '間食', emoji: '🍎' },
+];
+
+const GITHUB_REPO = 'yanashin123-byte/gym-tracker';
+const FOOD_FILE = 'food_records.json';
+let foodSHA = null;
+
+const QUICK_FOODS = [
+  { name: '豆乳 200ml', protein: 7, kcal: 92 },
+  { name: 'ザバスソイプロテイン 1杯', protein: 15, kcal: 90 },
+  { name: '納豆 1パック', protein: 8, kcal: 100 },
+  { name: '豆腐 150g', protein: 8, kcal: 88 },
+  { name: '鶏むね肉 100g', protein: 23, kcal: 108 },
+  { name: 'ゆで卵 1個', protein: 6, kcal: 78 },
+  { name: 'ギリシャヨーグルト 100g', protein: 10, kcal: 73 },
+  { name: 'ツナ缶 1缶', protein: 16, kcal: 70 },
+];
+
+// 内蔵食品DB（100gあたりの栄養素）
+const FOOD_DB = [
+  // タンパク質源
+  { name: '鶏むね肉', unit: '100g', protein: 23.3, kcal: 108 },
+  { name: '鶏もも肉', unit: '100g', protein: 17.3, kcal: 190 },
+  { name: '鶏ささみ', unit: '100g', protein: 24.6, kcal: 98 },
+  { name: '豚ロース', unit: '100g', protein: 19.3, kcal: 263 },
+  { name: '豚バラ', unit: '100g', protein: 14.4, kcal: 395 },
+  { name: '牛もも肉', unit: '100g', protein: 21.9, kcal: 182 },
+  { name: 'サーモン', unit: '100g', protein: 20.1, kcal: 208 },
+  { name: 'マグロ赤身', unit: '100g', protein: 26.4, kcal: 125 },
+  { name: 'ぶり', unit: '100g', protein: 21.4, kcal: 257 },
+  { name: 'サバ', unit: '100g', protein: 20.6, kcal: 211 },
+  { name: 'エビ', unit: '100g', protein: 21.7, kcal: 97 },
+  { name: 'ツナ缶（水煮）', unit: '1缶70g', protein: 16.5, kcal: 71 },
+  { name: 'ツナ缶', unit: '1缶70g', protein: 16.5, kcal: 71 },
+  { name: '卵', unit: '1個60g', protein: 7.4, kcal: 91 },
+  { name: 'ゆで卵', unit: '1個60g', protein: 7.4, kcal: 91 },
+  { name: '納豆', unit: '1パック45g', protein: 7.4, kcal: 90 },
+  { name: '豆腐（木綿）', unit: '150g', protein: 10.5, kcal: 108 },
+  { name: '豆腐（絹）', unit: '150g', protein: 7.5, kcal: 84 },
+  { name: '豆腐', unit: '150g', protein: 9.0, kcal: 96 },
+  { name: '豆乳', unit: '200ml', protein: 7.2, kcal: 92 },
+  { name: 'ギリシャヨーグルト', unit: '100g', protein: 10.0, kcal: 73 },
+  { name: 'プレーンヨーグルト', unit: '100g', protein: 3.6, kcal: 62 },
+  { name: 'カッテージチーズ', unit: '100g', protein: 13.3, kcal: 99 },
+  { name: 'プロテイン', unit: '1杯30g', protein: 21, kcal: 120 },
+  { name: 'ザバスソイプロテイン', unit: '1杯28g', protein: 15, kcal: 90 },
+  // 主食
+  { name: '白米', unit: '1膳150g', protein: 3.8, kcal: 252 },
+  { name: 'ごはん', unit: '1膳150g', protein: 3.8, kcal: 252 },
+  { name: '玄米', unit: '1膳150g', protein: 4.2, kcal: 248 },
+  { name: '食パン', unit: '1枚60g', protein: 5.3, kcal: 158 },
+  { name: 'パスタ', unit: '100g（乾）', protein: 12.9, kcal: 378 },
+  { name: 'オートミール', unit: '40g', protein: 5.5, kcal: 152 },
+  { name: 'そば', unit: '1人前200g茹', protein: 9.6, kcal: 264 },
+  { name: 'うどん', unit: '1玉200g', protein: 5.2, kcal: 210 },
+  // 野菜
+  { name: 'ブロッコリー', unit: '100g', protein: 4.3, kcal: 33 },
+  { name: 'ほうれん草', unit: '100g', protein: 2.2, kcal: 20 },
+  { name: 'アボカド', unit: '1個150g', protein: 3.0, kcal: 263 },
+  // 乳製品
+  { name: '牛乳', unit: '200ml', protein: 6.6, kcal: 134 },
+  { name: 'チーズ', unit: '1枚18g', protein: 4.1, kcal: 61 },
+  // 外食
+  { name: 'マクドナルド ビッグマック', unit: '1個', protein: 26, kcal: 525 },
+  { name: '吉野家 牛丼並', unit: '1杯', protein: 19, kcal: 652 },
+  { name: 'すき家 牛丼並', unit: '1杯', protein: 20, kcal: 669 },
+  { name: 'セブンイレブン サラダチキン', unit: '1個115g', protein: 26, kcal: 115 },
+  { name: 'サラダチキン', unit: '1個115g', protein: 26, kcal: 115 },
+];
+
+// Anthropic API キー（ローカル保存）
+function getApiKey() {
+  return localStorage.getItem('anthropic_api_key') || '';
+}
+
+// 食品名からDBを検索
+function searchFoodDB(query) {
+  if (!query || query.length < 1) return [];
+  const q = query.toLowerCase();
+  return FOOD_DB.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8);
+}
+
+// Claude APIで栄養素を推定
+let claudeTimer = null;
+async function lookupWithClaude(name) {
+  const apiKey = getApiKey();
+  if (!apiKey) {
+    // APIキーがなければスキップ
+    setNutritionStatus('⚠️ Claude APIキーが未設定です（設定タブから追加）', '#F44336');
+    return;
+  }
+  setNutritionStatus('🤖 Claudeが調べています...', '#888');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5',
+        max_tokens: 100,
+        messages: [{
+          role: 'user',
+          content: `食品「${name}」について、具体的な材料・量をもとに栄養素を推定してください。
+例：
+- オムライス大盛り：卵2個＋ライス300g＋鶏肉80g → タンパク質約22g、580kcal
+- カレー大盛り：ライス300g＋豚肉60g＋ルー → タンパク質約17g、750kcal
+このように実際の材料から計算し、JSON形式のみで返してください：
+{"protein": 数値, "kcal": 数値, "unit": "1人前の量の説明"}`
+        }]
+      })
+    });
+    const json = await res.json();
+    const text = json.content?.[0]?.text || '';
+    const match = text.match(/\{[^}]+\}/);
+    if (match) {
+      const parsed = JSON.parse(match[0]);
+      document.getElementById('foodProtein').value = parsed.protein || '';
+      document.getElementById('foodKcal').value = parsed.kcal || '';
+      setNutritionStatus(`✅ ${parsed.unit || '1人前'}: タンパク質${parsed.protein}g / ${parsed.kcal}kcal`, '#4CAF50');
+    } else {
+      setNutritionStatus('数値を手動で入力してください', '#888');
+    }
+  } catch(e) {
+    setNutritionStatus('数値を手動で入力してください', '#888');
+  }
+}
+
+function setNutritionStatus(msg, color) {
+  const el = document.getElementById('nutritionStatus');
+  el.textContent = msg;
+  el.style.color = color || '#888';
+}
+
+let selectedSuggestion = -1;
+
+function onFoodInput() {
+  const val = document.getElementById('foodName').value;
+  const results = searchFoodDB(val);
+  const box = document.getElementById('suggestions');
+  selectedSuggestion = -1;
+
+  // DB候補を表示
+  if (results.length > 0) {
+    box.style.display = 'block';
+    box.innerHTML = results.map((f, i) => `
+      <div onclick="selectFood(${i})" style="padding:10px 14px;border-bottom:1px solid #333;cursor:pointer;font-size:14px;"
+           onmouseover="this.style.background='#333'" onmouseout="this.style.background=''"
+           data-idx="${i}">
+        ${f.name} <span style="color:#4CAF50;float:right">${f.protein}g P</span>
+        <span style="color:#666;font-size:12px;display:block">${f.unit} / ${f.kcal}kcal</span>
+      </div>
+    `).join('');
+    window._suggestions = results;
+  } else {
+    box.style.display = 'none';
+    window._suggestions = [];
+    // DBにない場合 → Claude に聞く（300ms待機）
+    if (val.length >= 2) {
+      clearTimeout(claudeTimer);
+      setNutritionStatus('', '#888');
+      document.getElementById('foodProtein').value = '';
+      document.getElementById('foodKcal').value = '';
+      claudeTimer = setTimeout(() => lookupWithClaude(val), 800);
+    }
+  }
+}
+
+function selectFood(i) {
+  const f = window._suggestions[i];
+  document.getElementById('foodName').value = f.name;
+  document.getElementById('foodProtein').value = f.protein;
+  document.getElementById('foodKcal').value = f.kcal;
+  document.getElementById('suggestions').style.display = 'none';
+  setNutritionStatus(`✅ ${f.unit}: タンパク質${f.protein}g / ${f.kcal}kcal`, '#4CAF50');
+}
+
+function onFoodKeydown(e) {
+  const box = document.getElementById('suggestions');
+  const items = box.querySelectorAll('[data-idx]');
+  if (e.key === 'ArrowDown') {
+    selectedSuggestion = Math.min(selectedSuggestion + 1, items.length - 1);
+    items.forEach((el, i) => el.style.background = i === selectedSuggestion ? '#333' : '');
+  } else if (e.key === 'ArrowUp') {
+    selectedSuggestion = Math.max(selectedSuggestion - 1, 0);
+    items.forEach((el, i) => el.style.background = i === selectedSuggestion ? '#333' : '');
+  } else if (e.key === 'Enter' && selectedSuggestion >= 0) {
+    selectFood(selectedSuggestion);
+  }
+}
+
+let currentDate = new Date();
+currentDate.setHours(0,0,0,0);
+let currentMealId = 'breakfast';
+let data = {};
+
+function getKey(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function toBase64UTF8(str) {
+  const bytes = new TextEncoder().encode(str);
+  return btoa(Array.from(bytes).map(b => String.fromCharCode(b)).join(''));
+}
+function fromBase64UTF8(b64) {
+  const binaryStr = atob(b64.replace(/\n/g, ''));
+  const bytes = new Uint8Array(binaryStr.split('').map(c => c.charCodeAt(0)));
+  return new TextDecoder().decode(bytes);
+}
+function showSyncStatus(msg) {
+  const el = document.getElementById('sync-status');
+  if (el) el.textContent = msg;
+}
+function saveToLocalStorage() {
+  localStorage.setItem('shokuji_data', JSON.stringify(data));
+}
+function loadFromLocalStorage() {
+  const raw = localStorage.getItem('shokuji_data');
+  data = raw ? JSON.parse(raw) : {};
+}
+async function loadData() {
+  const token = localStorage.getItem('github_token') || '';
+  if (!token) { loadFromLocalStorage(); showSyncStatus('🔑 未設定'); return; }
+  try {
+    showSyncStatus('⏳');
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (res.ok) {
+      const d = await res.json();
+      foodSHA = d.sha;
+      data = JSON.parse(fromBase64UTF8(d.content));
+      saveToLocalStorage();
+      showSyncStatus('✅ 同期済み');
+    } else if (res.status === 404) {
+      loadFromLocalStorage(); showSyncStatus('📱 新規');
+    } else if (res.status === 401) {
+      loadFromLocalStorage(); showSyncStatus('🔑 エラー');
+    } else {
+      loadFromLocalStorage(); showSyncStatus('⚠️ 失敗');
+    }
+  } catch(e) { loadFromLocalStorage(); showSyncStatus('📵 オフライン'); }
+}
+async function saveData() {
+  saveToLocalStorage();
+  const token = localStorage.getItem('github_token') || '';
+  if (!token) { showSyncStatus('🔑 未設定'); return; }
+  try {
+    showSyncStatus('⏳ 保存中');
+    const content = toBase64UTF8(JSON.stringify(data, null, 2));
+    const body = { message: `food records ${new Date().toISOString()}`, content };
+    if (foodSHA) body.sha = foodSHA;
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
+      method: 'PUT',
+      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) {
+      const d = await res.json();
+      foodSHA = d.content.sha;
+      showSyncStatus('✅ 同期済み');
+    } else {
+      showSyncStatus('⚠️ 同期失敗');
+    }
+  } catch(e) { showSyncStatus('📵 オフライン保存'); }
+}
+function saveGitHubToken() {
+  const val = document.getElementById('tokenInput').value.trim();
+  if (!val) return;
+  localStorage.setItem('github_token', val);
+  alert('保存しました');
+  loadData().then(() => render());
+}
+
+function getDayData(date) {
+  const key = getKey(date);
+  if (!data[key]) {
+    data[key] = { breakfast: [], lunch: [], dinner: [], snack: [] };
+  }
+  return data[key];
+}
+
+function calcProtein(date) {
+  const d = getDayData(date);
+  return MEALS.reduce((sum, m) => sum + d[m.id].reduce((s, f) => s + (f.protein || 0), 0), 0);
+}
+
+function render() {
+  const key = getKey(currentDate);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const isToday = currentDate.getTime() === today.getTime();
+  const diff = Math.round((currentDate - today) / 86400000);
+
+  let label = '';
+  if (diff === 0) label = '今日';
+  else if (diff === -1) label = '昨日';
+  else label = `${currentDate.getMonth()+1}/${currentDate.getDate()}（${['日','月','火','水','木','金','土'][currentDate.getDay()]}）`;
+
+  document.getElementById('dateLabel').textContent = label;
+
+  const dayData = getDayData(currentDate);
+  const total = calcProtein(currentDate);
+  const pct = Math.min(total / 140 * 100, 100);
+
+  document.getElementById('totalProtein').textContent = total.toFixed(1);
+  const fill = document.getElementById('progressFill');
+  fill.style.width = pct + '%';
+  fill.className = 'progress-fill' + (total > 140 ? ' over' : '');
+
+  // 食事セクション
+  const container = document.getElementById('mealSections');
+  container.innerHTML = '';
+  MEALS.forEach(meal => {
+    const items = dayData[meal.id] || [];
+    const mealProtein = items.reduce((s, f) => s + (f.protein || 0), 0);
+
+    const sec = document.createElement('div');
+    sec.className = 'meal-section';
+    sec.innerHTML = `
+      <div class="meal-header">
+        <div class="meal-title">
+          <span class="meal-emoji">${meal.emoji}</span>
+          <span>${meal.label}</span>
+          ${mealProtein > 0 ? `<span class="meal-protein">${mealProtein.toFixed(1)}g</span>` : ''}
+        </div>
+        <button class="add-food-btn" onclick="openModal('${meal.id}')">＋ 追加</button>
+      </div>
+      <div class="food-items">
+        ${items.length === 0
+          ? `<div class="empty-meal">まだ記録なし</div>`
+          : items.map((f, i) => `
+            <div class="food-item">
+              <span class="food-name">${f.name}</span>
+              <div class="food-detail">
+                <span class="food-protein">${f.protein}g</span>
+                ${f.kcal ? `<span class="food-kcal">${f.kcal}kcal</span>` : ''}
+                <button class="delete-btn" onclick="deleteFood('${meal.id}', ${i})">×</button>
+              </div>
+            </div>
+          `).join('')
+        }
+      </div>
+    `;
+    container.appendChild(sec);
+  });
+
+  // クイック追加
+  const grid = document.getElementById('quickGrid');
+  grid.innerHTML = QUICK_FOODS.map(f => `
+    <button class="quick-item" onclick="quickAdd(${JSON.stringify(f).replace(/"/g, '&quot;')})">
+      ${f.name}<span>${f.protein}g P</span>
+    </button>
+  `).join('');
+}
+
+function changeDay(d) {
+  currentDate = new Date(currentDate.getTime() + d * 86400000);
+  render();
+}
+
+function openModal(mealId) {
+  currentMealId = mealId;
+  const meal = MEALS.find(m => m.id === mealId);
+  document.getElementById('modalTitle').textContent = `${meal.emoji} ${meal.label}に追加`;
+  document.getElementById('foodName').value = '';
+  document.getElementById('foodProtein').value = '';
+  document.getElementById('foodKcal').value = '';
+  document.getElementById('addModal').classList.add('active');
+  setTimeout(() => document.getElementById('foodName').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('addModal').classList.remove('active');
+}
+
+function addFood() {
+  const name = document.getElementById('foodName').value.trim();
+  const protein = parseFloat(document.getElementById('foodProtein').value) || 0;
+  const kcal = parseFloat(document.getElementById('foodKcal').value) || 0;
+  if (!name) return;
+
+  const dayData = getDayData(currentDate);
+  dayData[currentMealId].push({ name, protein, kcal });
+  saveData();
+  closeModal();
+  render();
+}
+
+function quickAdd(food) {
+  // どの食事かを選ぶ（簡易：時刻で判定）
+  const h = new Date().getHours();
+  let mealId = h < 10 ? 'breakfast' : h < 14 ? 'lunch' : h < 20 ? 'dinner' : 'snack';
+  const dayData = getDayData(currentDate);
+  dayData[mealId].push({ name: food.name, protein: food.protein, kcal: food.kcal });
+  saveData();
+  render();
+}
+
+function deleteFood(mealId, index) {
+  const dayData = getDayData(currentDate);
+  dayData[mealId].splice(index, 1);
+  saveData();
+  render();
+}
+
+function showTab(tab) {
+  document.getElementById('todayView').style.display = tab === 'today' ? 'block' : 'none';
+  document.getElementById('historyView').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('settingsView').style.display = tab === 'settings' ? 'block' : 'none';
+  document.getElementById('tabToday').className = 'tab-btn' + (tab === 'today' ? ' active' : '');
+  document.getElementById('tabHistory').className = 'tab-btn' + (tab === 'history' ? ' active' : '');
+  document.getElementById('tabSettings').className = 'tab-btn' + (tab === 'settings' ? ' active' : '');
+  if (tab === 'history') renderHistory();
+  if (tab === 'settings') {
+    const key = getApiKey();
+    document.getElementById('apiKeyInput').value = key ? key.substring(0, 20) + '...' : '';
+  }
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (val && !val.endsWith('...')) {
+    localStorage.setItem('anthropic_api_key', val);
+    alert('APIキーを保存しました');
+  }
+}
+
+function renderHistory() {
+  const container = document.getElementById('historyList');
+  const keys = Object.keys(data).sort().reverse().slice(0, 30);
+  if (keys.length === 0) {
+    container.innerHTML = '<div style="color:#555;text-align:center;padding:20px">記録なし</div>';
+    return;
+  }
+  container.innerHTML = keys.map(key => {
+    const d = data[key];
+    const total = MEALS.reduce((s, m) => s + (d[m.id] || []).reduce((ss, f) => ss + (f.protein || 0), 0), 0);
+    const date = new Date(key);
+    const label = `${date.getMonth()+1}/${date.getDate()}（${['日','月','火','水','木','金','土'][date.getDay()]}）`;
+    const allFoods = MEALS.flatMap(m => (d[m.id] || []).map(f => f.name));
+    return `
+      <div class="history-day">
+        <div class="history-day-header">
+          <span class="history-day-date">${label}</span>
+          <span class="history-day-protein">${total.toFixed(1)}g / 140g</span>
+        </div>
+        <div style="font-size:13px;color:#666">${allFoods.slice(0,5).join('・')}${allFoods.length > 5 ? ' 他' : ''}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function exportData() {
+  const json = JSON.stringify(data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `食事記録_${getKey(new Date())}.json`;
+  a.click();
+}
+
+// 初期化
+loadData().then(() => render());
+// APIキーは設定タブから入力してください
+</script>
+</body>
+</html>
