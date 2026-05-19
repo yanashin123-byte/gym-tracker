@@ -3,11 +3,6 @@
     "breakfast": [],
     "lunch": [
       {
-        "name": "豚山　小ぶた　汁なし",
-        "protein": 0,
-        "kcal": 0
-      },
-      {
         "name": "ごはん",
         "protein": 3.8,
         "kcal": 252
@@ -30,6 +25,18 @@
         "kcal": 0
       }
     ],
+    "snack": []
+  },
+  "2026-05-20": {
+    "breakfast": [],
+    "lunch": [],
+    "dinner": [],
+    "snack": []
+  },
+  "2026-05-19": {
+    "breakfast": [],
+    "lunch": [],
+    "dinner": [],
     "snack": []
   }
 }
