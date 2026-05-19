@@ -11,6 +11,11 @@
         "name": "ごはん",
         "protein": 3.8,
         "kcal": 252
+      },
+      {
+        "name": "ソフトクリーム",
+        "protein": 0,
+        "kcal": 0
       }
     ],
     "dinner": [],
