@@ -28,7 +28,13 @@
         "kcal": 0
       }
     ],
-    "lunch": [],
+    "lunch": [
+      {
+        "name": "オムライス（卵一個、白米120g）",
+        "protein": 10.5,
+        "kcal": 320
+      }
+    ],
     "dinner": [],
     "snack": []
   },
