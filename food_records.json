@@ -89,6 +89,11 @@
         "name": "キムチ５０g",
         "protein": 1.5,
         "kcal": 16
+      },
+      {
+        "name": "ビール５００",
+        "protein": 0,
+        "kcal": 215
       }
     ],
     "snack": []
