@@ -59,5 +59,17 @@
     "lunch": [],
     "dinner": [],
     "snack": []
+  },
+  "2026-05-21": {
+    "breakfast": [
+      {
+        "name": "鶏胸肉120.ご飯150.ゆで卵3",
+        "protein": 51,
+        "kcal": 565
+      }
+    ],
+    "lunch": [],
+    "dinner": [],
+    "snack": []
   }
 }
