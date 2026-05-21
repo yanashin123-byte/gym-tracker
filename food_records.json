@@ -71,6 +71,11 @@
         "name": "クレアチン5g",
         "protein": 0,
         "kcal": 0
+      },
+      {
+        "name": "プロテイン",
+        "protein": 21,
+        "kcal": 120
       }
     ],
     "lunch": [],
