@@ -635,8 +635,28 @@ async function loadFromGitHub() {
       const data = await res.json();
       recordsSHA = data.sha;
       const decoded = JSON.parse(fromBase64UTF8(data.content));
-      records = decoded.records || [];
+      const githubRecords = decoded.records || [];
+
+      // ローカルのレコードを取得（上書き前に保存）
+      const localStr = localStorage.getItem('gym_records');
+      const localRecords = localStr ? JSON.parse(localStr) : [];
+
+      // マージ: GitHub + ローカル（date+dayをキーに重複排除、両方残す）
+      const merged = new Map();
+      // まずGitHubのデータを入れる（ベース）
+      githubRecords.forEach(r => merged.set(`${r.date}-${r.day}`, r));
+      // ローカルにしかないレコードを追加（GitHubにないものだけ）
+      localRecords.forEach(r => {
+        const key = `${r.date}-${r.day}`;
+        if (!merged.has(key)) merged.set(key, r);
+      });
+
+      records = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
       saveToLocalStorage();
+
+      // マージ結果をGitHubに書き戻す（全デバイスで統一）
+      await saveToGitHub();
+
       renderExercises();
       loadDraft();
       renderHistory();
