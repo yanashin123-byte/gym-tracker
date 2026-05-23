@@ -144,6 +144,11 @@
         "name": "コーラ",
         "protein": 0,
         "kcal": 0
+      },
+      {
+        "name": "マックナゲット",
+        "protein": 0,
+        "kcal": 0
       }
     ],
     "dinner": [],
