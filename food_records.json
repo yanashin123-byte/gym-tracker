@@ -134,7 +134,13 @@
         "kcal": 90
       }
     ],
-    "lunch": [],
+    "lunch": [
+      {
+        "name": "メガマフィンセット",
+        "protein": 0,
+        "kcal": 0
+      }
+    ],
     "dinner": [],
     "snack": []
   }
