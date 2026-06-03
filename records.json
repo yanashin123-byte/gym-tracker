@@ -139,6 +139,92 @@
           ]
         }
       ]
+    },
+    {
+      "date": "2026-06-02",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "ベンチプレス",
+          "weight": 40,
+          "sets": [
+            10,
+            10,
+            8,
+            8
+          ],
+          "cheating": [
+            null,
+            null,
+            7,
+            null
+          ]
+        },
+        {
+          "name": "インクラインダンベルプレス",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ダンベルショルダープレス",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 13.6,
+          "sets": [
+            11,
+            12,
+            12,
+            0
+          ],
+          "cheating": [
+            null,
+            5,
+            4,
+            null
+          ]
+        }
+      ]
     }
   ]
 }
