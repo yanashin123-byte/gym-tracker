@@ -139,6 +139,21 @@
 
   .prev-date { font-size: 10px; color: #444; }
 
+  .rec-bar {
+    margin: 0 14px 10px;
+    padding: 7px 10px;
+    background: #0d2420;
+    border: 1px solid #1a3a30;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .rec-label { color: #34a89a; font-weight: 700; white-space: nowrap; }
+  .rec-val { color: #7dd8c8; font-weight: 700; }
+  .rec-note { color: #3a6a60; font-size: 11px; margin-left: auto; }
+
   .weight-row {
     padding: 0 14px 10px;
     display: flex;
@@ -516,6 +531,38 @@ function getPrev(name) {
   return null;
 }
 
+function getRecommendation(name) {
+  for (let i = records.length - 1; i >= 0; i--) {
+    if (records[i].day !== currentDay) continue;
+    const ex = records[i].exercises.find(e => e.name === name);
+    if (!ex) continue;
+    const activeSets = ex.sets.filter(s => s > 0);
+    if (!activeSets.length) continue;
+
+    const weight = ex.weight || 0;
+    const minReps = Math.min(...activeSets);
+    const setCount = activeSets.length;
+    const inc = weight < 20 ? 1 : 2.5;
+
+    let recWeight, targetReps, note;
+    if (minReps >= 12) {
+      recWeight = weight + inc;
+      targetReps = '10-12';
+      note = '重量アップ';
+    } else if (minReps >= 10) {
+      recWeight = weight;
+      targetReps = '12';
+      note = 'rep数アップ狙い';
+    } else {
+      recWeight = weight;
+      targetReps = '10';
+      note = '重量キープ';
+    }
+    return { weight: recWeight, reps: targetReps, sets: setCount, note };
+  }
+  return null;
+}
+
 function renderExercises() {
   const container = document.getElementById('exercise-cards');
   container.innerHTML = DAYS[currentDay].map(name => {
@@ -542,12 +589,22 @@ function renderExercises() {
           placeholder="--" oninput="scheduleDraftSave()">
       </div>`).join('');
 
+    const rec = getRecommendation(name);
+    const recHTML = rec
+      ? `<div class="rec-bar">
+           <span class="rec-label">次回</span>
+           <span class="rec-val">${rec.weight}kg × ${rec.reps}rep × ${rec.sets}set</span>
+           <span class="rec-note">${rec.note}</span>
+         </div>`
+      : '';
+
     return `
       <div class="exercise-card">
         <div class="exercise-header">
           <div class="exercise-name">${name}</div>
           ${prevHTML}
         </div>
+        ${recHTML}
         <div class="weight-row">
           <div class="weight-label">重量</div>
           <input type="number" inputmode="decimal" step="0.5" min="0"
