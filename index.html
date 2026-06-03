@@ -532,6 +532,12 @@ function getPrev(name) {
 }
 
 function getRecommendation(name) {
+  // ダブルプログレッション法（筋肥大エビデンスに基づく）
+  // 目標ゾーン: 8-12rep（ACSM筋肥大ガイドライン）
+  // 全セットが上限(12rep)に達したら約5%重量アップ → 下限(8rep)から再スタート
+  const ZONE_MIN = 8;
+  const ZONE_MAX = 12;
+
   for (let i = records.length - 1; i >= 0; i--) {
     if (records[i].day !== currentDay) continue;
     const ex = records[i].exercises.find(e => e.name === name);
@@ -542,22 +548,32 @@ function getRecommendation(name) {
     const weight = ex.weight || 0;
     const minReps = Math.min(...activeSets);
     const setCount = activeSets.length;
-    const inc = weight < 20 ? 1 : 2.5;
+    const inc = weight < 20 ? 1 : 2.5; // 約5%刻み
 
     let recWeight, targetReps, note;
-    if (minReps >= 12) {
+
+    if (minReps >= ZONE_MAX) {
+      // 全セット12rep以上 → 重量アップのサイン（ダブルプログレッション）
       recWeight = weight + inc;
-      targetReps = '10-12';
-      note = '重量アップ';
-    } else if (minReps >= 10) {
+      targetReps = `${ZONE_MIN}`;
+      note = '重量アップ ▲';
+    } else if (minReps >= ZONE_MIN) {
+      // ゾーン内（8-11rep）→ 同重量で全セット12repを目指す
       recWeight = weight;
-      targetReps = '12';
-      note = 'rep数アップ狙い';
+      targetReps = `${ZONE_MAX}`;
+      note = '全セット12rep目標';
+    } else if (minReps >= 6) {
+      // 下限割れ（6-7rep）→ 重量が少し重い。同重量でフォーム安定を優先
+      recWeight = weight;
+      targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
+      note = 'フォーム安定優先';
     } else {
-      recWeight = weight;
-      targetReps = '10';
-      note = '重量キープ';
+      // 5rep以下 → 重量過多。軽くして正しい刺激を入れる
+      recWeight = Math.max(0, weight - inc);
+      targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
+      note = '重量を下げる ▼';
     }
+
     return { weight: recWeight, reps: targetReps, sets: setCount, note };
   }
   return null;
