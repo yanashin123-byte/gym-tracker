@@ -225,6 +225,76 @@
           ]
         }
       ]
+    },
+    {
+      "date": "2026-06-03",
+      "day": "B",
+      "exercises": [
+        {
+          "name": "ラットプルダウン",
+          "weight": 41,
+          "sets": [
+            10,
+            12,
+            12,
+            13
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ワンハンドダンベルロウ",
+          "weight": 12,
+          "sets": [
+            10,
+            12,
+            12,
+            12
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ダンベルカール",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        },
+        {
+          "name": "ケーブルカール",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ]
     }
   ]
 }
