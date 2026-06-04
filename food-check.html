@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>食事・サプリ チェックリスト</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0f0f0f;
+    color: #eee;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: #1a1a1a;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #2a2a2a;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-title {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  /* ジム/休日 トグル */
+  .mode-toggle {
+    display: flex;
+    background: #2a2a2a;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 12px;
+  }
+  .mode-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    background: transparent;
+    color: #555;
+    transition: all 0.2s;
+  }
+  .mode-btn.active-gym  { background: #2a1060; color: #a78bfa; }
+  .mode-btn.active-rest { background: #0a2a10; color: #6ee7a0; }
+
+  /* タンパク質 進捗 */
+  .progress-wrap {
+    margin-bottom: 0;
+  }
+  .progress-nums {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+  }
+  .progress-cur {
+    font-size: 26px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1;
+  }
+  .progress-cur span { font-size: 13px; font-weight: 400; color: #666; margin-left: 2px; }
+  .progress-target { font-size: 12px; color: #555; }
+  .progress-bar-bg {
+    height: 6px;
+    background: #2a2a2a;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: #a78bfa;
+    transition: width 0.4s ease;
+  }
+  .progress-bar-fill.done { background: #6ee7a0; }
+
+  /* チェックリスト */
+  .section { padding: 14px 20px 0; }
+
+  .item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid #1e1e1e;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.2s;
+  }
+  .item:last-child { border-bottom: none; }
+  .item.checked { opacity: 0.45; }
+
+  /* チェックボックス */
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #333;
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: transparent;
+  }
+  .item.checked .checkbox {
+    border-color: #a78bfa;
+    background: #a78bfa;
+  }
+  .mode-rest .item.checked .checkbox {
+    border-color: #6ee7a0;
+    background: #6ee7a0;
+  }
+  .checkmark { font-size: 13px; display: none; }
+  .item.checked .checkmark { display: block; }
+
+  /* テキスト */
+  .item-body { flex: 1; }
+  .item-time {
+    font-size: 10px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+  }
+  .item-desc {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.5;
+  }
+  .item-supp { color: #a78bfa; font-weight: 700; }
+  .mode-rest .item-supp { color: #6ee7a0; }
+  .item-warn {
+    font-size: 11px;
+    color: #ef4444;
+    font-weight: 700;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* タンパク質 */
+  .item-protein {
+    font-size: 14px;
+    font-weight: 900;
+    color: #ef4444;
+    min-width: 36px;
+    text-align: right;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .item-protein.na { color: #333; font-size: 12px; font-weight: 400; }
+
+  /* ゴール */
+  .goal-banner {
+    margin: 16px 20px 0;
+    padding: 14px;
+    background: #0a2010;
+    border: 1px solid #1a4a25;
+    border-radius: 14px;
+    text-align: center;
+    display: none;
+  }
+  .goal-banner.show { display: block; }
+  .goal-banner .goal-emoji { font-size: 28px; margin-bottom: 4px; }
+  .goal-banner .goal-text { font-size: 14px; font-weight: 700; color: #6ee7a0; }
+  .goal-banner .goal-sub { font-size: 11px; color: #3a7a4a; margin-top: 3px; }
+
+  /* 週間達成率 */
+  .weekly-wrap {
+    margin: 16px 20px 0;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .weekly-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .weekly-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .weekly-rate {
+    font-size: 13px;
+    font-weight: 900;
+    color: #6ee7a0;
+  }
+  .weekly-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .day-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .day-label {
+    font-size: 9px;
+    color: #444;
+    font-weight: 700;
+  }
+  .day-label.today { color: #a78bfa; }
+  .day-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .day-dot.done    { background: #0d3020; color: #6ee7a0; border: 1.5px solid #2a6a45; }
+  .day-dot.partial { background: #2a1a00; color: #e8b84b; border: 1.5px solid #5a3a00; }
+  .day-dot.empty   { background: #1a1a1a; color: #333;    border: 1.5px solid #2a2a2a; }
+  .day-dot.today-ring { box-shadow: 0 0 0 2px #a78bfa; }
+
+  /* リセット */
+  .reset-row {
+    padding: 20px 20px 0;
+    text-align: center;
+  }
+  .reset-btn {
+    background: transparent;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    color: #444;
+    padding: 8px 20px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .reset-btn:active { background: #1e1e1e; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">💪 食事・サプリ チェックリスト</div>
+  <div class="mode-toggle">
+    <button class="mode-btn" id="btn-gym" onclick="setMode('gym')">🏋️ ジムの日</button>
+    <button class="mode-btn" id="btn-rest" onclick="setMode('rest')">🛌 休日</button>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-nums">
+      <div class="progress-cur" id="p-cur">0<span>g</span></div>
+      <div class="progress-target">目標 140g</div>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="p-bar" style="width:0%"></div>
+    </div>
+  </div>
+</header>
+
+<div class="section" id="checklist"></div>
+
+<div class="goal-banner" id="goal-banner">
+  <div class="goal-emoji">🎉</div>
+  <div class="goal-text">目標達成！タンパク質 140g クリア</div>
+  <div class="goal-sub">今日の筋肥大ルーティン完了</div>
+</div>
+
+<div class="weekly-wrap" id="weekly-wrap"></div>
+
+<div class="reset-row">
+  <button class="reset-btn" onclick="resetToday()">今日をリセット</button>
+</div>
+
+<script>
+const ITEMS = {
+  gym: [
+    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
+    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g<span class="item-warn">※食後すぐ洗う！</span>', protein: 37 },
+    { time: '30分前', desc: '<span class="item-supp">C4</span> 水300ml<span class="item-warn">※レッドブル同日NG</span>', protein: 0 },
+    { time: 'ジム中', desc: '<span class="item-supp">EAA</span> 水500ml', protein: 10 },
+    { time: '直後',  desc: '<span class="item-supp">ホエイ＋マルト</span> 各1スクープ', protein: 25 },
+    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+  ],
+  rest: [
+    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
+    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g', protein: 37 },
+    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+  ]
+};
+
+const TARGET = 140;
+let mode = 'gym';
+let checked = {}; // { 'gym-0': true, ... }
+const TODAY = new Date().toISOString().slice(0, 10);
+
+function storageKey() { return `food_check_${TODAY}`; }
+
+function load() {
+  const s = localStorage.getItem(storageKey());
+  checked = s ? JSON.parse(s) : {};
+  const m = localStorage.getItem('food_check_mode');
+  mode = m || 'gym';
+}
+
+function save() {
+  localStorage.setItem(storageKey(), JSON.stringify(checked));
+  localStorage.setItem('food_check_mode', mode);
+}
+
+function setMode(m) {
+  mode = m;
+  save();
+  render();
+}
+
+function toggle(idx) {
+  const key = `${mode}-${idx}`;
+  checked[key] = !checked[key];
+  save();
+  render();
+  renderWeekly();
+}
+
+function resetToday() {
+  if (!confirm('今日のチェックをリセットしますか？')) return;
+  Object.keys(checked).filter(k => k.startsWith(mode + '-')).forEach(k => delete checked[k]);
+  // ジム・休日両方クリア
+  const allKeys = Object.keys(checked).filter(k => k.startsWith('gym-') || k.startsWith('rest-'));
+  allKeys.forEach(k => delete checked[k]);
+  save();
+  render();
+  renderWeekly();
+}
+
+function render() {
+  // モードボタン
+  document.getElementById('btn-gym').className =
+    'mode-btn' + (mode === 'gym' ? ' active-gym' : '');
+  document.getElementById('btn-rest').className =
+    'mode-btn' + (mode === 'rest' ? ' active-rest' : '');
+
+  const items = ITEMS[mode];
+  let totalP = 0;
+
+  const html = items.map((item, i) => {
+    const key = `${mode}-${i}`;
+    const isChecked = !!checked[key];
+    if (isChecked) totalP += item.protein;
+
+    const proteinHTML = item.protein > 0
+      ? `<div class="item-protein">${item.protein}g</div>`
+      : `<div class="item-protein na">—</div>`;
+
+    return `
+      <div class="item ${isChecked ? 'checked' : ''}" onclick="toggle(${i})">
+        <div class="checkbox"><span class="checkmark">✓</span></div>
+        <div class="item-body">
+          <div class="item-time">${item.time}</div>
+          <div class="item-desc">${item.desc}</div>
+        </div>
+        ${proteinHTML}
+      </div>`;
+  }).join('');
+
+  const section = document.getElementById('checklist');
+  section.className = `section mode-${mode}`;
+  section.innerHTML = html;
+
+  // 進捗
+  const pct = Math.min(100, Math.round(totalP / TARGET * 100));
+  document.getElementById('p-cur').innerHTML = `${totalP}<span>g</span>`;
+  const bar = document.getElementById('p-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'progress-bar-fill' + (totalP >= TARGET ? ' done' : '');
+
+  // ゴールバナー
+  const allDone = items.every((_, i) => !!checked[`${mode}-${i}`]);
+  document.getElementById('goal-banner').className =
+    'goal-banner' + (allDone ? ' show' : '');
+}
+
+function dateStr(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
+
+function calcProteinForDate(date) {
+  const s = localStorage.getItem(`food_check_${date}`);
+  if (!s) return -1; // 未記録
+  const dayChecked = JSON.parse(s);
+  // ジムの日・休日どちらの記録かを判定（protein合計が大きい方を採用）
+  let total = 0;
+  for (const [key, val] of Object.entries(dayChecked)) {
+    if (!val) continue;
+    const [m, i] = key.split('-');
+    const items = ITEMS[m];
+    if (items && items[parseInt(i)]) total += items[parseInt(i)].protein;
+  }
+  return total;
+}
+
+function renderWeekly() {
+  const DAY_LABELS = ['日', '月', '火', '水', '木', '金', '土'];
+  let doneDays = 0;
+  let recordedDays = 0;
+  let cells = '';
+
+  for (let i = -6; i <= 0; i++) {
+    const date = dateStr(i);
+    const d = new Date(date + 'T00:00:00');
+    const label = DAY_LABELS[d.getDay()];
+    const isToday = i === 0;
+    const protein = calcProteinForDate(date);
+
+    let dotClass, dotText;
+    if (protein < 0) {
+      dotClass = 'empty'; dotText = '—';
+    } else if (protein >= TARGET) {
+      dotClass = 'done'; dotText = '✓';
+      doneDays++; recordedDays++;
+    } else if (protein > 0) {
+      dotClass = 'partial'; dotText = Math.round(protein);
+      recordedDays++;
+    } else {
+      dotClass = 'empty'; dotText = '—';
+    }
+
+    if (isToday) dotClass += ' today-ring';
+
+    cells += `
+      <div class="day-cell">
+        <div class="day-label${isToday ? ' today' : ''}">${label}</div>
+        <div class="day-dot ${dotClass}">${dotText}</div>
+      </div>`;
+  }
+
+  const rateText = recordedDays > 0
+    ? `${doneDays}/${recordedDays}日達成`
+    : '記録なし';
+
+  document.getElementById('weekly-wrap').innerHTML = `
+    <div class="weekly-header">
+      <div class="weekly-title">📅 今週の達成率</div>
+      <div class="weekly-rate">${rateText}</div>
+    </div>
+    <div class="weekly-days">${cells}</div>`;
+}
+
+load();
+render();
+renderWeekly();
+</script>
+</body>
+</html>
