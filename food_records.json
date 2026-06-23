@@ -203,6 +203,11 @@
         "name": "カツカレー",
         "protein": 0,
         "kcal": 0
+      },
+      {
+        "name": "卵 1個",
+        "protein": 7.4,
+        "kcal": 91
       }
     ],
     "snack": [
