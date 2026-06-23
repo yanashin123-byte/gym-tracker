@@ -445,16 +445,16 @@
   </div>
   <div class="chk-progress">
     <div class="chk-progress-nums">
-      <div class="chk-progress-cur" id="chk-p-cur">0<span>g</span></div>
-      <div class="chk-progress-target">目標 140g</div>
+      <div class="chk-progress-cur" id="chk-p-cur">0<span>/0</span></div>
+      <div class="chk-progress-target">今日のサプリ</div>
     </div>
     <div class="chk-bar-bg"><div class="chk-bar-fill" id="chk-p-bar" style="width:0%"></div></div>
   </div>
   <div class="chk-list" id="chk-list"></div>
   <div class="chk-goal" id="chk-goal">
-    <div class="goal-emoji">🎉</div>
-    <div class="goal-text">目標達成！タンパク質 140g クリア</div>
-    <div class="goal-sub">今日の筋肥大ルーティン完了</div>
+    <div class="goal-emoji">💊</div>
+    <div class="goal-text">サプリ全部クリア！</div>
+    <div class="goal-sub">今日のサプリルーティン完了</div>
   </div>
   <div class="chk-weekly" id="chk-weekly"></div>
   <div class="chk-reset"><button class="chk-reset-btn" onclick="chkResetToday()">今日をリセット</button></div>
@@ -588,7 +588,7 @@
     <span class="tab-icon">🍽️</span>今日
   </button>
   <button class="tab-btn" id="tabCheck" onclick="showTab('check')">
-    <span class="tab-icon">✅</span>チェック
+    <span class="tab-icon">💊</span>サプリ
   </button>
   <button class="tab-btn" id="tabRecipe" onclick="showTab('recipe')">
     <span class="tab-icon">🍳</span>レシピ
@@ -1465,20 +1465,17 @@ function exportData() {
 // ===== チェックリスト（サプリ表統合） =====
 const CHK_ITEMS = {
   gym: [
-    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
-    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g<span class="item-warn">※食後すぐ洗う！</span>', protein: 37 },
-    { time: '30分前', desc: '<span class="item-supp">C4</span> 水300ml<span class="item-warn">※レッドブル同日NG</span>', protein: 0 },
-    { time: 'ジム中', desc: '<span class="item-supp">EAA</span> 水500ml', protein: 10 },
-    { time: '直後',  desc: '<span class="item-supp">ホエイ＋マルト</span> 各1スクープ', protein: 25 },
-    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+    { time: '起床後',   desc: '<span class="item-supp">マルチビタミン</span>' },
+    { time: '起床後',   desc: '<span class="item-supp">クレアチン 5g</span>' },
+    { time: 'ジム30分前', desc: '<span class="item-supp">C4（プレワークアウト）</span><span class="item-warn">※レッドブル同日NG</span>' },
+    { time: 'ジム中',   desc: '<span class="item-supp">EAA</span> 水500ml' },
+    { time: 'トレ直後',  desc: '<span class="item-supp">ホエイ＋マルト</span> 各1スクープ' },
   ],
   rest: [
-    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
-    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g', protein: 37 },
-    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+    { time: '起床後', desc: '<span class="item-supp">マルチビタミン</span>' },
+    { time: '起床後', desc: '<span class="item-supp">クレアチン 5g</span>' },
   ]
 };
-const CHK_TARGET = 140;
 let chkMode = 'gym';
 let chkChecked = {};
 
@@ -1508,14 +1505,11 @@ function chkRender() {
   document.getElementById('chk-btn-gym').className = 'chk-mode-btn' + (chkMode === 'gym' ? ' active-gym' : '');
   document.getElementById('chk-btn-rest').className = 'chk-mode-btn' + (chkMode === 'rest' ? ' active-rest' : '');
   const items = CHK_ITEMS[chkMode];
-  let totalP = 0;
+  let done = 0;
   const html = items.map((item, i) => {
     const key = `${chkMode}-${i}`;
     const isChecked = !!chkChecked[key];
-    if (isChecked) totalP += item.protein;
-    const proteinHTML = item.protein > 0
-      ? `<div class="chk-protein">${item.protein}g</div>`
-      : `<div class="chk-protein na">—</div>`;
+    if (isChecked) done++;
     return `
       <div class="chk-item ${isChecked ? 'checked' : ''}" onclick="chkToggle(${i})">
         <div class="chk-box"><span class="chk-mark">✓</span></div>
@@ -1523,18 +1517,18 @@ function chkRender() {
           <div class="chk-time">${item.time}</div>
           <div class="chk-desc">${item.desc}</div>
         </div>
-        ${proteinHTML}
       </div>`;
   }).join('');
   const section = document.getElementById('chk-list');
   section.className = `chk-list mode-${chkMode}`;
   section.innerHTML = html;
-  const pct = Math.min(100, Math.round(totalP / CHK_TARGET * 100));
-  document.getElementById('chk-p-cur').innerHTML = `${totalP}<span>g</span>`;
+  const total = items.length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('chk-p-cur').innerHTML = `${done}<span>/${total}</span>`;
   const bar = document.getElementById('chk-p-bar');
   bar.style.width = pct + '%';
-  bar.className = 'chk-bar-fill' + (totalP >= CHK_TARGET ? ' done' : '');
-  const allDone = items.every((_, i) => !!chkChecked[`${chkMode}-${i}`]);
+  bar.className = 'chk-bar-fill' + (done >= total && total > 0 ? ' done' : '');
+  const allDone = total > 0 && items.every((_, i) => !!chkChecked[`${chkMode}-${i}`]);
   document.getElementById('chk-goal').className = 'chk-goal' + (allDone ? ' show' : '');
 }
 function chkDateStr(offset) {
@@ -1542,18 +1536,20 @@ function chkDateStr(offset) {
   d.setDate(d.getDate() + offset);
   return getKey(d);
 }
-function chkProteinForDate(date) {
+// 指定日のサプリ消化率を返す { done, total } / 未記録は null
+function chkDoneForDate(date) {
   const s = localStorage.getItem(`food_check_${date}`);
-  if (!s) return -1;
+  if (!s) return null;
   const dayChecked = JSON.parse(s);
-  let total = 0;
-  for (const [key, val] of Object.entries(dayChecked)) {
-    if (!val) continue;
-    const [m, i] = key.split('-');
+  // その日チェックがあるモードを判定（チェック数が多い方を採用）
+  let best = null;
+  for (const m of ['gym', 'rest']) {
     const items = CHK_ITEMS[m];
-    if (items && items[parseInt(i)]) total += items[parseInt(i)].protein;
+    let done = 0;
+    for (let i = 0; i < items.length; i++) if (dayChecked[`${m}-${i}`]) done++;
+    if (done > 0 && (!best || done > best.done)) best = { done, total: items.length };
   }
-  return total;
+  return best;
 }
 function chkRenderWeekly() {
   const DAY_LABELS = ['日','月','火','水','木','金','土'];
@@ -1563,12 +1559,11 @@ function chkRenderWeekly() {
     const d = new Date(date + 'T00:00:00');
     const label = DAY_LABELS[d.getDay()];
     const isToday = i === 0;
-    const protein = chkProteinForDate(date);
+    const r = chkDoneForDate(date);
     let dotClass, dotText;
-    if (protein < 0) { dotClass = 'empty'; dotText = '—'; }
-    else if (protein >= CHK_TARGET) { dotClass = 'done'; dotText = '✓'; doneDays++; recordedDays++; }
-    else if (protein > 0) { dotClass = 'partial'; dotText = Math.round(protein); recordedDays++; }
-    else { dotClass = 'empty'; dotText = '—'; }
+    if (!r) { dotClass = 'empty'; dotText = '—'; }
+    else if (r.done >= r.total) { dotClass = 'done'; dotText = '✓'; doneDays++; recordedDays++; }
+    else { dotClass = 'partial'; dotText = r.done; recordedDays++; }
     if (isToday) dotClass += ' today-ring';
     cells += `
       <div class="chk-day-cell">
@@ -1576,7 +1571,7 @@ function chkRenderWeekly() {
         <div class="chk-day-dot ${dotClass}">${dotText}</div>
       </div>`;
   }
-  const rateText = recordedDays > 0 ? `${doneDays}/${recordedDays}日達成` : '記録なし';
+  const rateText = recordedDays > 0 ? `${doneDays}/${recordedDays}日 完了` : '記録なし';
   document.getElementById('chk-weekly').innerHTML = `
     <div class="chk-weekly-header">
       <div class="chk-weekly-title">📅 今週の達成率</div>
