@@ -121,6 +121,50 @@
     border: 1px solid #2a2a2a;
   }
 
+  /* 種目選択パネル */
+  .slot-picker {
+    background: #161616;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .slot-picker-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 13px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ccc;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .slot-list { padding: 0 14px 10px; }
+  .slot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid #222;
+  }
+  .slot-name {
+    font-size: 12px;
+    color: #888;
+    width: 84px;
+    flex-shrink: 0;
+  }
+  .slot-select {
+    flex: 1;
+    min-width: 0;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #eee;
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+
   .exercise-header {
     padding: 12px 14px 10px;
     display: flex;
@@ -432,16 +476,98 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const DAYS = {
-  A: ["ベンチプレス", "インクラインダンベルプレス", "ダンベルショルダープレス", "サイドレイズ", "ケーブルプッシュダウン"],
-  B: ["ラットプルダウン", "ワンハンドダンベルロウ", "ダンベルカール", "ケーブルカール"],
-  C: ["スクワット", "レッグプレス", "レッグエクステンション", "レッグカール"]
+// 種目プール（FITPLACE24綾瀬店の設備ベース）
+// 各枠(slot)の先頭が初期選択。代替種目を枠内で選べる。
+const MENU = {
+  A: { name: 'Push', slots: [
+    { slot: '胸 メイン',  options: ['ベンチプレス', 'スミスマシンベンチプレス', 'チェストプレス', 'インクラインチェストプレス', 'インクラインダンベルプレス', 'ダンベルプレス'] },
+    { slot: '胸 補助',    options: ['ペックフライ', 'ケーブルフライ', 'ディップス'] },
+    { slot: '肩 プレス',  options: ['ダンベルショルダープレス', 'ショルダープレスマシン', 'スミスマシンショルダープレス'] },
+    { slot: '肩 サイド',  options: ['サイドレイズ', 'マシンサイドレイズ', 'ケーブルサイドレイズ'] },
+    { slot: '三頭',       options: ['ケーブルプッシュダウン', 'スカルクラッシャー', 'ディップス'] },
+  ]},
+  B: { name: 'Pull', slots: [
+    { slot: '背中 縦引き', options: ['ラットプルダウン', 'ワイドプルダウン', '懸垂'] },
+    { slot: '背中 横引き', options: ['ローロウ', 'フロントロウ', 'ワンハンドダンベルロウ'] },
+    { slot: '背中 補助',   options: ['プルオーバー', 'デッドリフト', 'ケーブルプルオーバー'] },
+    { slot: '二頭',        options: ['ダンベルカール', 'インクラインダンベルカール', 'ケーブルカール', 'マシンアームカール'] },
+    { slot: '後肩・僧帽',  options: ['リバースフライ', 'シュラッグ'] },
+  ]},
+  C: { name: 'Legs', slots: [
+    { slot: '脚 メイン',  options: ['スクワット', 'ハックスクワット', 'レッグプレス', 'スミスマシンスクワット'] },
+    { slot: '大腿四頭',   options: ['レッグエクステンション'] },
+    { slot: 'ハム・尻',   options: ['レッグカール', 'ヒップスラスト'] },
+    { slot: '内/外もも',  options: ['アダクション', 'アブダクション'] },
+    { slot: 'カーフ・腹', options: ['カーフレイズ', 'アブドミナルクランチ', 'ロータリートーソー'] },
+  ]},
 };
+
+const SKIP = '__skip__';
+const ADD  = '__add__';
 
 const REPS = Array.from({length: 21}, (_, i) => i);
 
 let currentDay = 'A';
 let records = [];
+
+// 枠ごとの選択（{ A: {0:'ベンチプレス', 1:'__skip__', ...}, ... }）
+let selection = JSON.parse(localStorage.getItem('gym_selection') || '{}');
+// 自分で追加した種目（{ 'A:0': ['自作種目'] }）
+let customOptions = JSON.parse(localStorage.getItem('gym_custom') || '{}');
+// 種目選択パネルの開閉
+let pickerOpen = false;
+
+function saveSelection() { localStorage.setItem('gym_selection', JSON.stringify(selection)); }
+function saveCustom() { localStorage.setItem('gym_custom', JSON.stringify(customOptions)); }
+
+function slotOptions(day, si) {
+  const base = MENU[day].slots[si].options;
+  const cust = customOptions[`${day}:${si}`] || [];
+  return [...base, ...cust];
+}
+
+function chosenFor(day, si) {
+  const sel = selection[day] && selection[day][si];
+  if (sel !== undefined) return sel;
+  return MENU[day].slots[si].options[0]; // 初期選択＝先頭
+}
+
+// その日の有効な種目（選択済み・スキップ除外・重複除外）
+function activeExercises(day) {
+  const out = [];
+  MENU[day].slots.forEach((_, si) => {
+    const c = chosenFor(day, si);
+    if (c && c !== SKIP && !out.includes(c)) out.push(c);
+  });
+  return out;
+}
+
+function onSlotChange(day, si, val) {
+  if (val === ADD) {
+    const name = (prompt('追加する種目名を入力') || '').trim();
+    if (name) {
+      const key = `${day}:${si}`;
+      customOptions[key] = customOptions[key] || [];
+      if (!slotOptions(day, si).includes(name)) customOptions[key].push(name);
+      saveCustom();
+      selection[day] = selection[day] || {};
+      selection[day][si] = name;
+      saveSelection();
+    }
+  } else {
+    selection[day] = selection[day] || {};
+    selection[day][si] = val;
+    saveSelection();
+  }
+  renderExercises();
+  loadDraft();
+}
+
+function togglePicker() {
+  pickerOpen = !pickerOpen;
+  renderExercises();
+  loadDraft();
+}
 
 init();
 
@@ -485,7 +611,7 @@ function saveDraft() {
   const draft = {
     day: currentDay,
     date,
-    exercises: DAYS[currentDay].map(name => ({
+    exercises: activeExercises(currentDay).map(name => ({
       name,
       weight: document.getElementById(`${name}-weight`).value,
       sets: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}`).value),
@@ -579,9 +705,37 @@ function getRecommendation(name) {
   return null;
 }
 
+function renderPicker() {
+  const day = currentDay;
+  const rows = MENU[day].slots.map((slot, si) => {
+    const chosen = chosenFor(day, si);
+    const opts = slotOptions(day, si).map(o =>
+      `<option value="${o}"${o === chosen ? ' selected' : ''}>${o}</option>`).join('');
+    const skipSel = chosen === SKIP ? ' selected' : '';
+    return `
+      <div class="slot-row">
+        <span class="slot-name">${slot.slot}</span>
+        <select class="slot-select" onchange="onSlotChange('${day}',${si},this.value)">
+          ${opts}
+          <option value="${SKIP}"${skipSel}>― やらない</option>
+          <option value="${ADD}">＋ 自分で追加</option>
+        </select>
+      </div>`;
+  }).join('');
+  const count = activeExercises(day).length;
+  return `
+    <div class="slot-picker">
+      <div class="slot-picker-head" onclick="togglePicker()">
+        <span>🎯 今日の種目を選ぶ（${count}種目）</span>
+        <span>${pickerOpen ? '▲' : '▼'}</span>
+      </div>
+      <div class="slot-list" style="display:${pickerOpen ? 'block' : 'none'}">${rows}</div>
+    </div>`;
+}
+
 function renderExercises() {
   const container = document.getElementById('exercise-cards');
-  container.innerHTML = DAYS[currentDay].map(name => {
+  const cards = activeExercises(currentDay).map(name => {
     const prev = getPrev(name);
     const prevHTML = prev
       ? `<div class="prev-box">
@@ -630,13 +784,17 @@ function renderExercises() {
         <div class="sets-grid">${sets}</div>
       </div>`;
   }).join('');
+  const emptyMsg = activeExercises(currentDay).length === 0
+    ? '<div class="empty">種目が選ばれていません。上の「種目を選ぶ」から選択してください。</div>'
+    : '';
+  container.innerHTML = renderPicker() + cards + emptyMsg;
 }
 
 async function saveRecord() {
   const date = document.getElementById('date-input').value;
   if (!date) { showToast('日付を入力してください'); return; }
 
-  const exercises = DAYS[currentDay].map(name => ({
+  const exercises = activeExercises(currentDay).map(name => ({
     name,
     weight: parseFloat(document.getElementById(`${name}-weight`).value) || 0,
     sets: [1,2,3,4].map(s => parseInt(document.getElementById(`${name}-set${s}`).value)),
