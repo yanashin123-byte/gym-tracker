@@ -977,29 +977,71 @@ async function loadData() {
     }
   } catch(e) { loadFromLocalStorage(); showSyncStatus('📵 オフライン'); }
 }
+let foodPendingSync = false;
+
+// 進行中の最新SHAを取得（保存前・409時に呼ぶ）
+async function fetchFoodSHA() {
+  const token = localStorage.getItem('github_token') || '';
+  if (!token) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (res.ok) { const d = await res.json(); foodSHA = d.sha; }
+    else if (res.status === 404) { foodSHA = null; }
+  } catch(e) {}
+}
+
 async function saveData() {
   saveToLocalStorage();
   const token = localStorage.getItem('github_token') || '';
-  if (!token) { showSyncStatus('🔑 未設定'); return; }
-  try {
-    showSyncStatus('⏳ 保存中');
-    const content = toBase64UTF8(JSON.stringify(data, null, 2));
-    const body = { message: `food records ${new Date().toISOString()}`, content };
-    if (foodSHA) body.sha = foodSHA;
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (res.ok) {
-      const d = await res.json();
-      foodSHA = d.content.sha;
-      showSyncStatus('✅ 同期済み');
-    } else {
-      showSyncStatus('⚠️ 同期失敗');
+  if (!token) { showSyncStatus('🔑 未設定'); foodPendingSync = true; return; }
+  // SHA未取得なら先に取りに行く（422防止）
+  if (!foodSHA) await fetchFoodSHA();
+  showSyncStatus('⏳ 保存中');
+  const content = toBase64UTF8(JSON.stringify(data, null, 2));
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const body = { message: `food records ${new Date().toISOString()}`, content };
+      if (foodSHA) body.sha = foodSHA;
+      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (res.ok) {
+        const d = await res.json();
+        foodSHA = d.content.sha;
+        foodPendingSync = false;
+        showSyncStatus('✅ 同期済み');
+        return;
+      } else if (res.status === 409 || res.status === 422) {
+        // SHA競合 → 最新を取り直して再試行
+        await fetchFoodSHA();
+        continue;
+      } else {
+        showSyncStatus(`⚠️ 同期失敗 (${res.status})`);
+        foodPendingSync = true;
+        return;
+      }
+    } catch(e) {
+      // 通信エラー → バックオフして再試行
+      if (attempt < 3) { await new Promise(r => setTimeout(r, 2000 * attempt)); continue; }
+      showSyncStatus('📵 オフライン保存');
+      foodPendingSync = true;
+      return;
     }
-  } catch(e) { showSyncStatus('📵 オフライン保存'); }
+  }
+  showSyncStatus('⚠️ 同期失敗');
+  foodPendingSync = true;
 }
+
+// アプリ復帰時に未同期があれば再同期を試みる
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && foodPendingSync && localStorage.getItem('github_token')) {
+    saveData();
+  }
+});
 function saveGitHubToken() {
   const val = document.getElementById('tokenInput').value.trim();
   if (!val) return;
