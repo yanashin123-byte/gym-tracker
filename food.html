@@ -511,16 +511,15 @@
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin:-8px 0 8px">
       <div id="nutritionStatus" style="font-size:12px;color:#888;flex:1;min-height:18px;"></div>
-      <button id="claudeBtn" onclick="manualLookup()" style="display:none;background:#2a2a2a;border:none;border-radius:8px;color:#a78bfa;padding:4px 10px;font-size:12px;cursor:pointer;white-space:nowrap">🤖 調べる</button>
     </div>
     <div class="form-row">
       <div class="form-group">
         <label>タンパク質 (g)</label>
-        <input type="number" id="foodProtein" placeholder="自動入力" min="0" step="0.5" />
+        <input type="number" id="foodProtein" placeholder="手入力" min="0" step="0.5" />
       </div>
       <div class="form-group">
         <label>カロリー (kcal)</label>
-        <input type="number" id="foodKcal" placeholder="自動入力" min="0" />
+        <input type="number" id="foodKcal" placeholder="手入力" min="0" />
       </div>
     </div>
     <div class="modal-btns">
@@ -531,16 +530,6 @@
 </div>
 
 <div id="settingsView" style="display:none;padding:16px">
-  <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
-    <div style="font-size:14px;font-weight:600;margin-bottom:12px">🤖 Claude API設定</div>
-    <div style="font-size:12px;color:#888;margin-bottom:8px">APIキーを設定すると、DBにない食品も自動で栄養素を調べます</div>
-    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button onclick="saveApiKey()" style="flex:1;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">保存</button>
-      <button onclick="testApiKey()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#aaa;padding:12px;font-size:14px;cursor:pointer">🔬 テスト</button>
-    </div>
-    <div id="apiTestResult" style="font-size:12px;min-height:16px;text-align:center"></div>
-  </div>
   <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
     <div style="font-size:14px;font-weight:600;margin-bottom:8px">🔗 GitHub同期</div>
     <div style="font-size:12px;color:#888;margin-bottom:8px">Personal Access Tokenを設定するとMac・iPhone間でデータが同期されます</div>
@@ -758,90 +747,11 @@ const FOOD_DB = [
   { name: 'クレアチン', unit: '5g', protein: 0, kcal: 0 },
 ];
 
-// Anthropic API キー（ローカル保存）
-function getApiKey() {
-  return localStorage.getItem('anthropic_api_key') || '';
-}
-
 // 食品名からDBを検索
 function searchFoodDB(query) {
   if (!query || query.length < 1) return [];
   const q = query.toLowerCase();
   return FOOD_DB.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8);
-}
-
-// Claude APIで栄養素を推定
-let claudeTimer = null;
-let claudeAbortController = null;  // 進行中リクエストのキャンセル用
-
-async function lookupWithClaude(name) {
-  // 前のリクエストをキャンセル
-  if (claudeAbortController) {
-    claudeAbortController.abort();
-    claudeAbortController = null;
-  }
-
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    setNutritionStatus('⚠️ Claude APIキーが未設定です（設定タブから追加）', '#F44336');
-    return;
-  }
-
-  claudeAbortController = new AbortController();
-  const signal = claudeAbortController.signal;
-
-  setNutritionStatus('🤖 Claudeが調べています...', '#888');
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      signal,
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 100,
-        messages: [{
-          role: 'user',
-          content: `食品「${name}」について、具体的な材料・量をもとに栄養素を推定してください。
-例：
-- オムライス大盛り：卵2個＋ライス300g＋鶏肉80g → タンパク質約22g、580kcal
-- カレー大盛り：ライス300g＋豚肉60g＋ルー → タンパク質約17g、750kcal
-このように実際の材料から計算し、JSON形式のみで返してください：
-{"protein": 数値, "kcal": 数値, "unit": "1人前の量の説明"}`
-        }]
-      })
-    });
-
-    // HTTPエラーを明示的に表示
-    if (!res.ok) {
-      const errJson = await res.json().catch(() => ({}));
-      const errMsg = errJson.error?.message || `HTTP ${res.status}`;
-      setNutritionStatus(`❌ APIエラー: ${errMsg}`, '#F44336');
-      return;
-    }
-
-    const json = await res.json();
-    const text = json.content?.[0]?.text || '';
-    const match = text.match(/\{[^}]+\}/);
-    if (match) {
-      const parsed = JSON.parse(match[0]);
-      document.getElementById('foodProtein').value = parsed.protein || '';
-      document.getElementById('foodKcal').value = parsed.kcal || '';
-      setNutritionStatus(`✅ ${parsed.unit || '1人前'}: タンパク質${parsed.protein}g / ${parsed.kcal}kcal`, '#4CAF50');
-    } else {
-      // レスポンスをそのまま表示してデバッグしやすくする
-      setNutritionStatus(`⚠️ 解析失敗（手動入力）: ${text.slice(0, 50)}`, '#F0A000');
-    }
-  } catch(e) {
-    if (e.name === 'AbortError') return; // キャンセルは無視
-    setNutritionStatus(`❌ 通信エラー: ${e.message}`, '#F44336');
-  } finally {
-    claudeAbortController = null;
-  }
 }
 
 function setNutritionStatus(msg, color) {
@@ -858,15 +768,8 @@ function onFoodInput() {
   const box = document.getElementById('suggestions');
   selectedSuggestion = -1;
 
-  // 「調べる」ボタンの表示制御
-  const claudeBtn = document.getElementById('claudeBtn');
-  if (claudeBtn) claudeBtn.style.display = val.length >= 1 ? 'block' : 'none';
-
   // DB候補を表示
   if (results.length > 0) {
-    // 前のClaude検索をキャンセル
-    clearTimeout(claudeTimer);
-    if (claudeAbortController) { claudeAbortController.abort(); claudeAbortController = null; }
     box.style.display = 'block';
     box.innerHTML = results.map((f, i) => `
       <div onclick="selectFood(${i})" style="padding:10px 14px;border-bottom:1px solid #333;cursor:pointer;font-size:14px;"
@@ -880,19 +783,10 @@ function onFoodInput() {
   } else {
     box.style.display = 'none';
     window._suggestions = [];
-    // DBにない場合 → Claude に聞く（800ms待機）
-    if (val.length >= 2) {
-      clearTimeout(claudeTimer);
-      // lookup中でなければステータスをリセット
-      if (!claudeAbortController) {
-        setNutritionStatus('', '#888');
-        document.getElementById('foodProtein').value = '';
-        document.getElementById('foodKcal').value = '';
-      }
-      claudeTimer = setTimeout(() => lookupWithClaude(val), 800);
+    // DBにない食品は手入力（タンパク質・kcalを直接入力）
+    if (val.length >= 1) {
+      setNutritionStatus('DBにない食品は下に手入力してください', '#888');
     } else {
-      clearTimeout(claudeTimer);
-      if (claudeAbortController) { claudeAbortController.abort(); claudeAbortController = null; }
       setNutritionStatus('', '#888');
     }
   }
@@ -1145,12 +1039,7 @@ function openModal(mealId) {
   document.getElementById('foodProtein').value = '';
   document.getElementById('foodKcal').value = '';
   document.getElementById('suggestions').style.display = 'none';
-  const claudeBtn = document.getElementById('claudeBtn');
-  if (claudeBtn) claudeBtn.style.display = 'none';
   setNutritionStatus('', '#888');
-  // 前のClaude検索をキャンセル
-  clearTimeout(claudeTimer);
-  if (claudeAbortController) { claudeAbortController.abort(); claudeAbortController = null; }
   document.getElementById('addModal').classList.add('active');
   setTimeout(() => document.getElementById('foodName').focus(), 100);
 }
@@ -1250,10 +1139,6 @@ function showTab(tab) {
   if (tab === 'history') renderHistory();
   if (tab === 'check') { chkLoad(); chkRender(); chkRenderWeekly(); }
   if (tab === 'recipe') initRecipeTab();
-  if (tab === 'settings') {
-    const key = getApiKey();
-    document.getElementById('apiKeyInput').value = key ? key.substring(0, 20) + '...' : '';
-  }
 }
 
 // ===== レシピ計算 =====
@@ -1414,61 +1299,6 @@ function deleteRecipe(i) {
   list.splice(i, 1);
   saveRecipes(list);
   renderSavedRecipes();
-}
-
-function saveApiKey() {
-  const val = document.getElementById('apiKeyInput').value.trim();
-  if (val && !val.endsWith('...')) {
-    localStorage.setItem('anthropic_api_key', val);
-    alert('APIキーを保存しました');
-  }
-}
-
-async function testApiKey() {
-  const el = document.getElementById('apiTestResult');
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    el.textContent = '❌ APIキーが未設定です';
-    el.style.color = '#F44336';
-    return;
-  }
-  el.textContent = '🔄 テスト中...';
-  el.style.color = '#888';
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5',
-        max_tokens: 10,
-        messages: [{ role: 'user', content: 'hi' }]
-      })
-    });
-    if (res.ok) {
-      el.textContent = '✅ APIキー正常！Claude使用可能';
-      el.style.color = '#4CAF50';
-    } else {
-      const j = await res.json().catch(() => ({}));
-      el.textContent = `❌ HTTP ${res.status}: ${j.error?.message || '認証エラー'}`;
-      el.style.color = '#F44336';
-    }
-  } catch(e) {
-    el.textContent = `❌ 通信エラー: ${e.message}`;
-    el.style.color = '#F44336';
-  }
-}
-
-function manualLookup() {
-  const name = document.getElementById('foodName').value.trim();
-  if (name.length >= 1) {
-    clearTimeout(claudeTimer);
-    lookupWithClaude(name);
-  }
 }
 
 function renderHistory() {
