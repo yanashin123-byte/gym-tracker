@@ -365,6 +365,7 @@
   #checkView .item-supp { color:#a78bfa; font-weight:700; }
   #checkView .mode-rest .item-supp { color:#6ee7a0; }
   #checkView .item-warn { font-size:11px; color:#ef4444; font-weight:700; display:block; margin-top:2px; }
+  #checkView .item-note { font-size:11px; color:#777; display:block; margin-top:2px; }
   #checkView .chk-protein { font-size:14px; font-weight:900; color:#ef4444; min-width:36px; text-align:right; padding-top:2px; flex-shrink:0; }
   #checkView .chk-protein.na { color:#333; font-size:12px; font-weight:400; }
 
@@ -1469,7 +1470,7 @@ const CHK_ITEMS = {
     { time: '起床後',   desc: '<span class="item-supp">クレアチン 5g</span>' },
     { time: 'ジム30分前', desc: '<span class="item-supp">C4（プレワークアウト）</span><span class="item-warn">※レッドブル同日NG</span>' },
     { time: 'ジム中',   desc: '<span class="item-supp">EAA</span> 水500ml' },
-    { time: 'トレ直後',  desc: '<span class="item-supp">ホエイ</span> 1スクープ' },
+    { time: 'トレ直後',  desc: '<span class="item-supp">ホエイ</span> 1スクープ<span class="item-note">※空腹トレの日だけマルト1スクープ追加</span>' },
   ],
   rest: [
     { time: '起床後', desc: '<span class="item-supp">マルチビタミン</span>' },
