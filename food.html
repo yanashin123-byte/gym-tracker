@@ -334,6 +334,62 @@
 
   .tab-btn.active { color: #4CAF50; }
   .tab-btn .tab-icon { font-size: 20px; }
+
+  /* ===== チェックリスト（サプリ表統合） ===== */
+  #checkView .chk-mode-toggle { display:flex; background:#2a2a2a; border-radius:10px; padding:3px; margin:16px 16px 12px; }
+  #checkView .chk-mode-btn { flex:1; padding:8px 0; border:none; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; background:transparent; color:#555; transition:all .2s; }
+  #checkView .chk-mode-btn.active-gym  { background:#2a1060; color:#a78bfa; }
+  #checkView .chk-mode-btn.active-rest { background:#0a2a10; color:#6ee7a0; }
+
+  #checkView .chk-progress { margin:0 16px 4px; }
+  #checkView .chk-progress-nums { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+  #checkView .chk-progress-cur { font-size:26px; font-weight:900; color:#fff; line-height:1; }
+  #checkView .chk-progress-cur span { font-size:13px; font-weight:400; color:#666; margin-left:2px; }
+  #checkView .chk-progress-target { font-size:12px; color:#555; }
+  #checkView .chk-bar-bg { height:6px; background:#2a2a2a; border-radius:99px; overflow:hidden; }
+  #checkView .chk-bar-fill { height:100%; border-radius:99px; background:#a78bfa; transition:width .4s ease; }
+  #checkView .chk-bar-fill.done { background:#6ee7a0; }
+
+  #checkView .chk-list { padding:14px 16px 0; }
+  #checkView .chk-item { display:flex; align-items:flex-start; gap:12px; padding:13px 0; border-bottom:1px solid #1e1e1e; cursor:pointer; -webkit-tap-highlight-color:transparent; transition:opacity .2s; }
+  #checkView .chk-item:last-child { border-bottom:none; }
+  #checkView .chk-item.checked { opacity:.45; }
+  #checkView .chk-box { width:24px; height:24px; border-radius:50%; border:2px solid #333; flex-shrink:0; margin-top:1px; display:flex; align-items:center; justify-content:center; transition:all .2s; background:transparent; }
+  #checkView .chk-item.checked .chk-box { border-color:#a78bfa; background:#a78bfa; }
+  #checkView .mode-rest .chk-item.checked .chk-box { border-color:#6ee7a0; background:#6ee7a0; }
+  #checkView .chk-mark { font-size:13px; display:none; color:#0f0f0f; }
+  #checkView .chk-item.checked .chk-mark { display:block; }
+  #checkView .chk-body { flex:1; }
+  #checkView .chk-time { font-size:10px; font-weight:700; color:#555; letter-spacing:.5px; margin-bottom:3px; text-transform:uppercase; }
+  #checkView .chk-desc { font-size:14px; color:#ccc; line-height:1.5; }
+  #checkView .item-supp { color:#a78bfa; font-weight:700; }
+  #checkView .mode-rest .item-supp { color:#6ee7a0; }
+  #checkView .item-warn { font-size:11px; color:#ef4444; font-weight:700; display:block; margin-top:2px; }
+  #checkView .chk-protein { font-size:14px; font-weight:900; color:#ef4444; min-width:36px; text-align:right; padding-top:2px; flex-shrink:0; }
+  #checkView .chk-protein.na { color:#333; font-size:12px; font-weight:400; }
+
+  #checkView .chk-goal { margin:16px 16px 0; padding:14px; background:#0a2010; border:1px solid #1a4a25; border-radius:14px; text-align:center; display:none; }
+  #checkView .chk-goal.show { display:block; }
+  #checkView .chk-goal .goal-emoji { font-size:28px; margin-bottom:4px; }
+  #checkView .chk-goal .goal-text { font-size:14px; font-weight:700; color:#6ee7a0; }
+  #checkView .chk-goal .goal-sub { font-size:11px; color:#3a7a4a; margin-top:3px; }
+
+  #checkView .chk-weekly { margin:16px 16px 0; background:#1a1a1a; border:1px solid #2a2a2a; border-radius:14px; padding:12px 14px; }
+  #checkView .chk-weekly-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  #checkView .chk-weekly-title { font-size:11px; font-weight:700; color:#555; letter-spacing:1px; text-transform:uppercase; }
+  #checkView .chk-weekly-rate { font-size:13px; font-weight:900; color:#6ee7a0; }
+  #checkView .chk-weekly-days { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  #checkView .chk-day-cell { display:flex; flex-direction:column; align-items:center; gap:4px; }
+  #checkView .chk-day-label { font-size:9px; color:#444; font-weight:700; }
+  #checkView .chk-day-label.today { color:#a78bfa; }
+  #checkView .chk-day-dot { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; }
+  #checkView .chk-day-dot.done    { background:#0d3020; color:#6ee7a0; border:1.5px solid #2a6a45; }
+  #checkView .chk-day-dot.partial { background:#2a1a00; color:#e8b84b; border:1.5px solid #5a3a00; }
+  #checkView .chk-day-dot.empty   { background:#1a1a1a; color:#333; border:1.5px solid #2a2a2a; }
+  #checkView .chk-day-dot.today-ring { box-shadow:0 0 0 2px #a78bfa; }
+
+  #checkView .chk-reset { padding:20px 16px 0; text-align:center; }
+  #checkView .chk-reset-btn { background:transparent; border:1px solid #2a2a2a; border-radius:8px; color:#444; padding:8px 20px; font-size:12px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -380,6 +436,28 @@
 <div id="historyView" style="display:none">
   <div style="padding:16px 16px 8px; font-size:13px; color:#888;">過去の記録</div>
   <div class="history-list" id="historyList"></div>
+</div>
+
+<div id="checkView" style="display:none">
+  <div class="chk-mode-toggle">
+    <button class="chk-mode-btn" id="chk-btn-gym" onclick="chkSetMode('gym')">🏋️ ジムの日</button>
+    <button class="chk-mode-btn" id="chk-btn-rest" onclick="chkSetMode('rest')">🛌 休日</button>
+  </div>
+  <div class="chk-progress">
+    <div class="chk-progress-nums">
+      <div class="chk-progress-cur" id="chk-p-cur">0<span>g</span></div>
+      <div class="chk-progress-target">目標 140g</div>
+    </div>
+    <div class="chk-bar-bg"><div class="chk-bar-fill" id="chk-p-bar" style="width:0%"></div></div>
+  </div>
+  <div class="chk-list" id="chk-list"></div>
+  <div class="chk-goal" id="chk-goal">
+    <div class="goal-emoji">🎉</div>
+    <div class="goal-text">目標達成！タンパク質 140g クリア</div>
+    <div class="goal-sub">今日の筋肥大ルーティン完了</div>
+  </div>
+  <div class="chk-weekly" id="chk-weekly"></div>
+  <div class="chk-reset"><button class="chk-reset-btn" onclick="chkResetToday()">今日をリセット</button></div>
 </div>
 
 <div id="recipeView" style="display:none;padding:16px">
@@ -508,6 +586,9 @@
 <div class="tab-bar">
   <button class="tab-btn active" id="tabToday" onclick="showTab('today')">
     <span class="tab-icon">🍽️</span>今日
+  </button>
+  <button class="tab-btn" id="tabCheck" onclick="showTab('check')">
+    <span class="tab-icon">✅</span>チェック
   </button>
   <button class="tab-btn" id="tabRecipe" onclick="showTab('recipe')">
     <span class="tab-icon">🍳</span>レシピ
@@ -1114,14 +1195,17 @@ function deleteFood(mealId, index) {
 
 function showTab(tab) {
   document.getElementById('todayView').style.display = tab === 'today' ? 'block' : 'none';
+  document.getElementById('checkView').style.display = tab === 'check' ? 'block' : 'none';
   document.getElementById('recipeView').style.display = tab === 'recipe' ? 'block' : 'none';
   document.getElementById('historyView').style.display = tab === 'history' ? 'block' : 'none';
   document.getElementById('settingsView').style.display = tab === 'settings' ? 'block' : 'none';
   document.getElementById('tabToday').className = 'tab-btn' + (tab === 'today' ? ' active' : '');
+  document.getElementById('tabCheck').className = 'tab-btn' + (tab === 'check' ? ' active' : '');
   document.getElementById('tabRecipe').className = 'tab-btn' + (tab === 'recipe' ? ' active' : '');
   document.getElementById('tabHistory').className = 'tab-btn' + (tab === 'history' ? ' active' : '');
   document.getElementById('tabSettings').className = 'tab-btn' + (tab === 'settings' ? ' active' : '');
   if (tab === 'history') renderHistory();
+  if (tab === 'check') { chkLoad(); chkRender(); chkRenderWeekly(); }
   if (tab === 'recipe') initRecipeTab();
   if (tab === 'settings') {
     const key = getApiKey();
@@ -1376,6 +1460,129 @@ function exportData() {
   a.href = URL.createObjectURL(blob);
   a.download = `食事記録_${getKey(new Date())}.json`;
   a.click();
+}
+
+// ===== チェックリスト（サプリ表統合） =====
+const CHK_ITEMS = {
+  gym: [
+    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
+    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g<span class="item-warn">※食後すぐ洗う！</span>', protein: 37 },
+    { time: '30分前', desc: '<span class="item-supp">C4</span> 水300ml<span class="item-warn">※レッドブル同日NG</span>', protein: 0 },
+    { time: 'ジム中', desc: '<span class="item-supp">EAA</span> 水500ml', protein: 10 },
+    { time: '直後',  desc: '<span class="item-supp">ホエイ＋マルト</span> 各1スクープ', protein: 25 },
+    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+  ],
+  rest: [
+    { time: '起床後', desc: '<span class="item-supp">マルチビタミン＋クレアチン5g</span><br>ホエイ 1.5スクープ＋ヨーグルト100g', protein: 42 },
+    { time: '昼',    desc: 'チキン120g＋味玉1個＋飯250g', protein: 37 },
+    { time: '夜',    desc: 'チキン120g＋味玉2個＋飯250g<br>無糖ヨーグルト100g', protein: 44 },
+  ]
+};
+const CHK_TARGET = 140;
+let chkMode = 'gym';
+let chkChecked = {};
+
+function chkStorageKey() { return `food_check_${getKey(currentDate)}`; }
+
+function chkLoad() {
+  const s = localStorage.getItem(chkStorageKey());
+  chkChecked = s ? JSON.parse(s) : {};
+  chkMode = localStorage.getItem('food_check_mode') || 'gym';
+}
+function chkSave() {
+  localStorage.setItem(chkStorageKey(), JSON.stringify(chkChecked));
+  localStorage.setItem('food_check_mode', chkMode);
+}
+function chkSetMode(m) { chkMode = m; chkSave(); chkRender(); }
+function chkToggle(idx) {
+  const key = `${chkMode}-${idx}`;
+  chkChecked[key] = !chkChecked[key];
+  chkSave(); chkRender(); chkRenderWeekly();
+}
+function chkResetToday() {
+  if (!confirm('今日のチェックをリセットしますか？')) return;
+  Object.keys(chkChecked).filter(k => k.startsWith('gym-') || k.startsWith('rest-')).forEach(k => delete chkChecked[k]);
+  chkSave(); chkRender(); chkRenderWeekly();
+}
+function chkRender() {
+  document.getElementById('chk-btn-gym').className = 'chk-mode-btn' + (chkMode === 'gym' ? ' active-gym' : '');
+  document.getElementById('chk-btn-rest').className = 'chk-mode-btn' + (chkMode === 'rest' ? ' active-rest' : '');
+  const items = CHK_ITEMS[chkMode];
+  let totalP = 0;
+  const html = items.map((item, i) => {
+    const key = `${chkMode}-${i}`;
+    const isChecked = !!chkChecked[key];
+    if (isChecked) totalP += item.protein;
+    const proteinHTML = item.protein > 0
+      ? `<div class="chk-protein">${item.protein}g</div>`
+      : `<div class="chk-protein na">—</div>`;
+    return `
+      <div class="chk-item ${isChecked ? 'checked' : ''}" onclick="chkToggle(${i})">
+        <div class="chk-box"><span class="chk-mark">✓</span></div>
+        <div class="chk-body">
+          <div class="chk-time">${item.time}</div>
+          <div class="chk-desc">${item.desc}</div>
+        </div>
+        ${proteinHTML}
+      </div>`;
+  }).join('');
+  const section = document.getElementById('chk-list');
+  section.className = `chk-list mode-${chkMode}`;
+  section.innerHTML = html;
+  const pct = Math.min(100, Math.round(totalP / CHK_TARGET * 100));
+  document.getElementById('chk-p-cur').innerHTML = `${totalP}<span>g</span>`;
+  const bar = document.getElementById('chk-p-bar');
+  bar.style.width = pct + '%';
+  bar.className = 'chk-bar-fill' + (totalP >= CHK_TARGET ? ' done' : '');
+  const allDone = items.every((_, i) => !!chkChecked[`${chkMode}-${i}`]);
+  document.getElementById('chk-goal').className = 'chk-goal' + (allDone ? ' show' : '');
+}
+function chkDateStr(offset) {
+  const d = new Date(currentDate);
+  d.setDate(d.getDate() + offset);
+  return getKey(d);
+}
+function chkProteinForDate(date) {
+  const s = localStorage.getItem(`food_check_${date}`);
+  if (!s) return -1;
+  const dayChecked = JSON.parse(s);
+  let total = 0;
+  for (const [key, val] of Object.entries(dayChecked)) {
+    if (!val) continue;
+    const [m, i] = key.split('-');
+    const items = CHK_ITEMS[m];
+    if (items && items[parseInt(i)]) total += items[parseInt(i)].protein;
+  }
+  return total;
+}
+function chkRenderWeekly() {
+  const DAY_LABELS = ['日','月','火','水','木','金','土'];
+  let doneDays = 0, recordedDays = 0, cells = '';
+  for (let i = -6; i <= 0; i++) {
+    const date = chkDateStr(i);
+    const d = new Date(date + 'T00:00:00');
+    const label = DAY_LABELS[d.getDay()];
+    const isToday = i === 0;
+    const protein = chkProteinForDate(date);
+    let dotClass, dotText;
+    if (protein < 0) { dotClass = 'empty'; dotText = '—'; }
+    else if (protein >= CHK_TARGET) { dotClass = 'done'; dotText = '✓'; doneDays++; recordedDays++; }
+    else if (protein > 0) { dotClass = 'partial'; dotText = Math.round(protein); recordedDays++; }
+    else { dotClass = 'empty'; dotText = '—'; }
+    if (isToday) dotClass += ' today-ring';
+    cells += `
+      <div class="chk-day-cell">
+        <div class="chk-day-label${isToday ? ' today' : ''}">${label}</div>
+        <div class="chk-day-dot ${dotClass}">${dotText}</div>
+      </div>`;
+  }
+  const rateText = recordedDays > 0 ? `${doneDays}/${recordedDays}日達成` : '記録なし';
+  document.getElementById('chk-weekly').innerHTML = `
+    <div class="chk-weekly-header">
+      <div class="chk-weekly-title">📅 今週の達成率</div>
+      <div class="chk-weekly-rate">${rateText}</div>
+    </div>
+    <div class="chk-weekly-days">${cells}</div>`;
 }
 
 // 初期化
