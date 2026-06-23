@@ -165,6 +165,29 @@
     font-size: 13px;
   }
 
+  /* RIR（限界までの距離）入力 */
+  .rir-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 14px;
+  }
+  .rir-label { font-size: 11px; color: #777; flex-shrink: 0; }
+  .rir-btns { display: flex; gap: 6px; flex: 1; }
+  .rir-btn {
+    flex: 1;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: #aaa;
+    padding: 8px 0;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .rir-btn.active { background: #1b5e20; border-color: #2e7d32; color: #fff; }
+
   .exercise-header {
     padding: 12px 14px 10px;
     display: flex;
@@ -569,6 +592,19 @@ function togglePicker() {
   loadDraft();
 }
 
+function setRir(name, v) {
+  const hidden = document.getElementById(`${name}-rir`);
+  if (!hidden) return;
+  // 同じ値を再タップで解除
+  if (hidden.value === String(v)) { hidden.value = ''; }
+  else { hidden.value = String(v); }
+  [0,1,2,3,4].forEach(x => {
+    const b = document.getElementById(`${name}-rir-${x}`);
+    if (b) b.className = 'rir-btn' + (hidden.value === String(x) ? ' active' : '');
+  });
+  scheduleDraftSave();
+}
+
 init();
 
 function init() {
@@ -615,7 +651,8 @@ function saveDraft() {
       name,
       weight: document.getElementById(`${name}-weight`).value,
       sets: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}`).value),
-      cheating: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}-cheat`).value)
+      cheating: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}-cheat`).value),
+      rir: document.getElementById(`${name}-rir`).value
     }))
   };
   localStorage.setItem('gym_draft', JSON.stringify(draft));
@@ -640,6 +677,7 @@ function loadDraft() {
         const el = document.getElementById(`${ex.name}-set${i+1}-cheat`);
         if (el && v) el.value = v;
       });
+      if (ex.rir !== undefined && ex.rir !== '') setRir(ex.name, parseInt(ex.rir));
     });
   } catch(e) {}
 }
@@ -658,9 +696,9 @@ function getPrev(name) {
 }
 
 function getRecommendation(name) {
-  // ダブルプログレッション法（筋肥大エビデンスに基づく）
-  // 目標ゾーン: 8-12rep（ACSM筋肥大ガイドライン）
-  // 全セットが上限(12rep)に達したら約5%重量アップ → 下限(8rep)から再スタート
+  // ダブルプログレッション × RIR（限界までの距離）
+  // 筋肥大の最大駆動因子は「限界への近さ(RIR)」。rep数だけでなくRIRで判定する。
+  // 目標: 8-12repを RIR 0-2（あと0〜2回が限界）で。全セット上限到達かつ余裕ありなら重量アップ。
   const ZONE_MIN = 8;
   const ZONE_MAX = 12;
 
@@ -675,29 +713,54 @@ function getRecommendation(name) {
     const minReps = Math.min(...activeSets);
     const setCount = activeSets.length;
     const inc = weight < 20 ? 1 : 2.5; // 約5%刻み
+    const rir = (typeof ex.rir === 'number') ? ex.rir : null; // 限界まであと何回
+    // チート開始rep（最も早く崩れたセット）→ フォーム破綻の早さ
+    const cheatStarts = (ex.cheating || []).filter(c => typeof c === 'number' && c > 0);
+    const earliestCheat = cheatStarts.length ? Math.min(...cheatStarts) : null;
+    const formBreaking = earliestCheat !== null && earliestCheat <= Math.ceil(minReps * 0.6);
 
     let recWeight, targetReps, note;
 
     if (minReps >= ZONE_MAX) {
-      // 全セット12rep以上 → 重量アップのサイン（ダブルプログレッション）
+      // 全セット上限到達 → 重量アップ。RIRに余裕があれば確信度UP
       recWeight = weight + inc;
       targetReps = `${ZONE_MIN}`;
-      note = '重量アップ ▲';
+      note = (rir !== null && rir >= 2) ? '重量アップ ▲（まだ余裕あり）' : '重量アップ ▲';
     } else if (minReps >= ZONE_MIN) {
-      // ゾーン内（8-11rep）→ 同重量で全セット12repを目指す
-      recWeight = weight;
-      targetReps = `${ZONE_MAX}`;
-      note = '全セット12rep目標';
+      // ゾーン内（8-11rep）
+      if (rir !== null && rir >= 4) {
+        // 余裕を残しすぎ＝刺激不足。追い込みを優先
+        recWeight = weight;
+        targetReps = `${ZONE_MAX}`;
+        note = 'あと1-2repまで追い込む';
+      } else {
+        recWeight = weight;
+        targetReps = `${ZONE_MAX}`;
+        note = '全セット12rep目標';
+      }
     } else if (minReps >= 6) {
-      // 下限割れ（6-7rep）→ 重量が少し重い。同重量でフォーム安定を優先
-      recWeight = weight;
-      targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
-      note = 'フォーム安定優先';
+      // 6-7rep
+      if (rir !== null && rir >= 3) {
+        // repは低いが余力あり＝早く止めすぎ。同重量で追い込む
+        recWeight = weight;
+        targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
+        note = '止めが早い。あと数repいける';
+      } else {
+        recWeight = weight;
+        targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
+        note = 'フォーム安定優先';
+      }
     } else {
-      // 5rep以下 → 重量過多。軽くして正しい刺激を入れる
+      // 5rep以下＝重量過多
       recWeight = Math.max(0, weight - inc);
       targetReps = `${ZONE_MIN}-${ZONE_MAX}`;
       note = '重量を下げる ▼';
+    }
+
+    // フォーム破綻が早い場合、重量アップは保留してフォーム優先
+    if (formBreaking && recWeight > weight) {
+      recWeight = weight;
+      note = 'フォーム崩れ早め→重量据え置き';
     }
 
     return { weight: recWeight, reps: targetReps, sets: setCount, note };
@@ -768,6 +831,10 @@ function renderExercises() {
          </div>`
       : '';
 
+    const rirBtns = [0,1,2,3,4].map(v =>
+      `<button type="button" class="rir-btn" id="${name}-rir-${v}"
+        onclick="setRir('${name}',${v})">${v === 4 ? '4+' : v}</button>`).join('');
+
     return `
       <div class="exercise-card">
         <div class="exercise-header">
@@ -782,6 +849,11 @@ function renderExercises() {
             value="${prevWeight}" placeholder="kg" oninput="scheduleDraftSave()">
         </div>
         <div class="sets-grid">${sets}</div>
+        <div class="rir-row">
+          <span class="rir-label">限界まであと（RIR）</span>
+          <div class="rir-btns" id="${name}-rir-btns">${rirBtns}</div>
+          <input type="hidden" id="${name}-rir" value="">
+        </div>
       </div>`;
   }).join('');
   const emptyMsg = activeExercises(currentDay).length === 0
@@ -801,7 +873,8 @@ async function saveRecord() {
     cheating: [1,2,3,4].map(s => {
       const v = document.getElementById(`${name}-set${s}-cheat`).value;
       return v ? parseInt(v) : null;
-    })
+    }),
+    rir: (() => { const v = document.getElementById(`${name}-rir`).value; return v === '' ? null : parseInt(v); })()
   }));
 
   const idx = records.findIndex(r => r.date === date && r.day === currentDay);
@@ -835,7 +908,7 @@ function renderHistory() {
           <div class="h-sets">${ex.sets.map((r, i) => {
             const cheat = ex.cheating && ex.cheating[i];
             return cheat ? `${r}(チ:${cheat}〜)` : r;
-          }).join(', ')}回</div>
+          }).join(', ')}回${(typeof ex.rir === 'number') ? ` <span style="color:#777">RIR${ex.rir === 4 ? '4+' : ex.rir}</span>` : ''}</div>
         </div>`).join('')}
     </div>`).join('');
 }
