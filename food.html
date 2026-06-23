@@ -431,6 +431,26 @@
   </div>
 </div>
 
+<!-- グラムピッカー -->
+<div class="modal-overlay" id="gramPicker" onclick="if(event.target===this)closeGramPicker()">
+  <div class="modal" style="padding:20px">
+    <div style="font-size:13px;color:#888;margin-bottom:4px">何g食べた？</div>
+    <div id="gramPickerLabel" style="font-size:16px;font-weight:700;margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button onclick="document.getElementById('gramInput').value=50;updateGramPreview()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px 0;font-size:14px;cursor:pointer">50g</button>
+      <button onclick="document.getElementById('gramInput').value=100;updateGramPreview()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px 0;font-size:14px;cursor:pointer">100g</button>
+      <button onclick="document.getElementById('gramInput').value=150;updateGramPreview()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px 0;font-size:14px;cursor:pointer">150g</button>
+      <button onclick="document.getElementById('gramInput').value=200;updateGramPreview()" style="flex:1;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px 0;font-size:14px;cursor:pointer">200g</button>
+    </div>
+    <input id="gramInput" type="number" min="1" max="1000" inputmode="numeric"
+      oninput="updateGramPreview()"
+      style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #333;border-radius:10px;color:#eee;padding:12px;font-size:16px;text-align:center;margin-bottom:8px">
+    <div id="gramPreview" style="text-align:center;color:#aaa;font-size:13px;margin-bottom:14px"></div>
+    <button onclick="confirmGram()" style="width:100%;background:#4caf50;border:none;border-radius:12px;color:#fff;padding:14px;font-size:16px;font-weight:700;cursor:pointer">次へ →</button>
+    <button onclick="closeGramPicker()" style="width:100%;margin-top:8px;background:transparent;border:none;color:#555;padding:10px;font-size:14px;cursor:pointer">キャンセル</button>
+  </div>
+</div>
+
 <!-- クイック追加 食事ピッカー -->
 <div class="modal-overlay" id="quickMealPicker" onclick="if(event.target===this)closeQuickPicker()">
   <div class="modal" style="padding:20px">
@@ -471,14 +491,11 @@ const FOOD_FILE = 'food_records.json';
 let foodSHA = null;
 
 const QUICK_FOODS = [
-  { name: '豆乳 200ml', protein: 7, kcal: 92 },
-  { name: 'ザバスソイプロテイン 1杯', protein: 15, kcal: 90 },
-  { name: '納豆 1パック', protein: 8, kcal: 100 },
-  { name: '豆腐 150g', protein: 8, kcal: 88 },
-  { name: '鶏むね肉 100g', protein: 23, kcal: 108 },
-  { name: 'ゆで卵 1個', protein: 6, kcal: 78 },
-  { name: 'ギリシャヨーグルト 100g', protein: 10, kcal: 73 },
-  { name: 'ツナ缶 1缶', protein: 16, kcal: 70 },
+  { name: 'VITASホエイプロテイン', label: 'VITASホエイ 1杯', protein: 22, kcal: 120 },
+  { name: '鶏むね肉', label: '鶏むね肉', per100g: true, protein100: 23.3, kcal100: 108 },
+  { name: 'ゆで卵', label: 'ゆで卵 1個', protein: 7.4, kcal: 91 },
+  { name: 'ギリシャヨーグルト', label: 'ギリシャヨーグルト', per100g: true, protein100: 10.0, kcal100: 73 },
+  { name: 'ツナ缶', label: 'ツナ缶 1缶', protein: 16.5, kcal: 71 },
 ];
 
 // 内蔵食品DB
@@ -944,7 +961,7 @@ function render() {
   const grid = document.getElementById('quickGrid');
   grid.innerHTML = QUICK_FOODS.map(f => `
     <button class="quick-item" onclick="quickAdd(${JSON.stringify(f).replace(/"/g, '&quot;')})">
-      ${f.name}<span>${f.protein}g P</span>
+      ${f.label}${f.per100g ? '<span style="color:#888;font-size:10px">g選択</span>' : `<span>${f.protein}g P</span>`}
     </button>
   `).join('');
 }
@@ -993,10 +1010,42 @@ let _quickPendingFood = null;
 
 function quickAdd(food) {
   _quickPendingFood = food;
-  const picker = document.getElementById('quickMealPicker');
-  const label = document.getElementById('quickPickerLabel');
-  label.textContent = food.name;
-  picker.classList.add('active');
+  if (food.per100g) {
+    document.getElementById('gramPickerLabel').textContent = food.label;
+    document.getElementById('gramInput').value = '100';
+    updateGramPreview();
+    document.getElementById('gramPicker').classList.add('active');
+  } else {
+    document.getElementById('quickPickerLabel').textContent = food.label;
+    document.getElementById('quickMealPicker').classList.add('active');
+  }
+}
+
+function updateGramPreview() {
+  const g = parseInt(document.getElementById('gramInput').value) || 0;
+  const f = _quickPendingFood;
+  const p = Math.round(f.protein100 * g / 100 * 10) / 10;
+  const k = Math.round(f.kcal100 * g / 100);
+  document.getElementById('gramPreview').textContent = `タンパク質 ${p}g・${k}kcal`;
+}
+
+function confirmGram() {
+  const g = parseInt(document.getElementById('gramInput').value) || 0;
+  if (g <= 0) return;
+  const f = _quickPendingFood;
+  _quickPendingFood = {
+    name: `${f.label} ${g}g`,
+    protein: Math.round(f.protein100 * g / 100 * 10) / 10,
+    kcal: Math.round(f.kcal100 * g / 100),
+  };
+  document.getElementById('gramPicker').classList.remove('active');
+  document.getElementById('quickPickerLabel').textContent = _quickPendingFood.name;
+  document.getElementById('quickMealPicker').classList.add('active');
+}
+
+function closeGramPicker() {
+  document.getElementById('gramPicker').classList.remove('active');
+  _quickPendingFood = null;
 }
 
 function quickAddToMeal(mealId) {
