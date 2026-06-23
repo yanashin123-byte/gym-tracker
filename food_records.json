@@ -183,5 +183,17 @@
     "lunch": [],
     "dinner": [],
     "snack": []
+  },
+  "2026-06-23": {
+    "breakfast": [],
+    "lunch": [
+      {
+        "name": "味噌ラーメン",
+        "protein": 16,
+        "kcal": 570
+      }
+    ],
+    "dinner": [],
+    "snack": []
   }
 }
