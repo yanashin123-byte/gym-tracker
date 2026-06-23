@@ -198,7 +198,13 @@
         "kcal": 248
       }
     ],
-    "dinner": [],
+    "dinner": [
+      {
+        "name": "カツカレー",
+        "protein": 0,
+        "kcal": 0
+      }
+    ],
     "snack": [
       {
         "name": "アイスクリーム",
