@@ -382,6 +382,45 @@
   <div class="history-list" id="historyList"></div>
 </div>
 
+<div id="recipeView" style="display:none;padding:16px">
+  <!-- レシピ計算機 -->
+  <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px">🍳 レシピ計算（作り置き）</div>
+    <input type="text" id="recipeName" placeholder="レシピ名（例: だれうま 鶏むねチャーシュー）"
+      style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:14px;margin-bottom:12px" />
+
+    <div style="font-size:12px;color:#888;margin-bottom:6px">材料</div>
+    <div id="ingredientList"></div>
+    <button onclick="addIngredientRow()" style="width:100%;background:#2a2a2a;border:1px dashed #444;border-radius:10px;color:#aaa;padding:10px;font-size:13px;cursor:pointer;margin-bottom:14px">＋ 材料を追加</button>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:13px;color:#aaa">何食分作る？</span>
+      <input type="number" id="recipeServings" value="4" min="1" max="20" inputmode="numeric"
+        oninput="updateRecipeCalc()"
+        style="width:64px;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:8px;font-size:15px;text-align:center" />
+      <span style="font-size:13px;color:#aaa">食分</span>
+    </div>
+
+    <div style="background:#0d2018;border:1px solid #1a3a2a;border-radius:12px;padding:14px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#888;margin-bottom:6px">
+        <span>合計</span><span id="recipeTotal">タンパク質 0g・0kcal</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;color:#4caf50">
+        <span>1食あたり</span><span id="recipePerServing">0g P</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px">
+      <button onclick="recordRecipeServing()" style="flex:1;background:#4caf50;border:none;border-radius:12px;color:#fff;padding:14px;font-size:15px;font-weight:700;cursor:pointer">1食分を記録</button>
+      <button onclick="saveRecipe()" style="flex:1;background:#2a2a2a;border:none;border-radius:12px;color:#a78bfa;padding:14px;font-size:15px;font-weight:700;cursor:pointer">レシピを保存</button>
+    </div>
+  </div>
+
+  <!-- 保存済みレシピ -->
+  <div style="font-size:13px;color:#888;margin-bottom:8px">📚 保存したレシピ</div>
+  <div id="savedRecipeList"></div>
+</div>
+
 <!-- 追加モーダル -->
 <div class="modal-overlay" id="addModal">
   <div class="modal">
@@ -469,6 +508,9 @@
 <div class="tab-bar">
   <button class="tab-btn active" id="tabToday" onclick="showTab('today')">
     <span class="tab-icon">🍽️</span>今日
+  </button>
+  <button class="tab-btn" id="tabRecipe" onclick="showTab('recipe')">
+    <span class="tab-icon">🍳</span>レシピ
   </button>
   <button class="tab-btn" id="tabHistory" onclick="showTab('history')">
     <span class="tab-icon">📊</span>履歴
@@ -1072,16 +1114,179 @@ function deleteFood(mealId, index) {
 
 function showTab(tab) {
   document.getElementById('todayView').style.display = tab === 'today' ? 'block' : 'none';
+  document.getElementById('recipeView').style.display = tab === 'recipe' ? 'block' : 'none';
   document.getElementById('historyView').style.display = tab === 'history' ? 'block' : 'none';
   document.getElementById('settingsView').style.display = tab === 'settings' ? 'block' : 'none';
   document.getElementById('tabToday').className = 'tab-btn' + (tab === 'today' ? ' active' : '');
+  document.getElementById('tabRecipe').className = 'tab-btn' + (tab === 'recipe' ? ' active' : '');
   document.getElementById('tabHistory').className = 'tab-btn' + (tab === 'history' ? ' active' : '');
   document.getElementById('tabSettings').className = 'tab-btn' + (tab === 'settings' ? ' active' : '');
   if (tab === 'history') renderHistory();
+  if (tab === 'recipe') initRecipeTab();
   if (tab === 'settings') {
     const key = getApiKey();
     document.getElementById('apiKeyInput').value = key ? key.substring(0, 20) + '...' : '';
   }
+}
+
+// ===== レシピ計算 =====
+let _ingredients = []; // {name, protein, kcal}
+
+function initRecipeTab() {
+  if (_ingredients.length === 0) { addIngredientRow(); }
+  renderSavedRecipes();
+}
+
+function addIngredientRow(preset) {
+  _ingredients.push(preset || { name: '', protein: 0, kcal: 0 });
+  renderIngredients();
+}
+
+function renderIngredients() {
+  const box = document.getElementById('ingredientList');
+  box.innerHTML = _ingredients.map((ing, i) => `
+    <div style="display:flex;gap:6px;margin-bottom:6px;align-items:center;position:relative">
+      <input type="text" value="${(ing.name||'').replace(/"/g,'&quot;')}" placeholder="材料名" autocomplete="off"
+        oninput="onIngredientName(${i}, this.value)" onfocus="window._ingActive=${i}"
+        style="flex:2;min-width:0;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:13px" />
+      <input type="number" value="${ing.protein||''}" placeholder="P" min="0" step="0.1" inputmode="decimal"
+        oninput="_ingredients[${i}].protein=parseFloat(this.value)||0;updateRecipeCalc()"
+        style="width:54px;background:#2a2a2a;border:none;border-radius:8px;color:#4caf50;padding:10px 4px;font-size:13px;text-align:center" />
+      <input type="number" value="${ing.kcal||''}" placeholder="kcal" min="0" inputmode="numeric"
+        oninput="_ingredients[${i}].kcal=parseFloat(this.value)||0;updateRecipeCalc()"
+        style="width:60px;background:#2a2a2a;border:none;border-radius:8px;color:#aaa;padding:10px 4px;font-size:13px;text-align:center" />
+      <button onclick="removeIngredient(${i})" style="background:none;border:none;color:#666;font-size:18px;cursor:pointer;padding:0 4px">×</button>
+      <div id="ingSug${i}" style="position:absolute;left:0;top:42px;right:80px;background:#2a2a2a;border-radius:0 0 10px 10px;z-index:20;display:none;max-height:180px;overflow-y:auto"></div>
+    </div>
+  `).join('');
+  updateRecipeCalc();
+}
+
+function onIngredientName(i, val) {
+  _ingredients[i].name = val;
+  const sug = document.getElementById('ingSug' + i);
+  const results = searchFoodDB(val);
+  if (results.length > 0 && val.length >= 1) {
+    sug.style.display = 'block';
+    sug.innerHTML = results.map((f, j) => `
+      <div onclick="pickIngredient(${i}, ${j})" style="padding:9px 12px;border-bottom:1px solid #333;cursor:pointer;font-size:13px">
+        ${f.name} <span style="color:#4caf50;float:right">${f.protein}g</span>
+        <span style="color:#666;font-size:11px;display:block">${f.unit} / ${f.kcal}kcal</span>
+      </div>`).join('');
+    window['_ingResults' + i] = results;
+  } else {
+    sug.style.display = 'none';
+  }
+}
+
+function pickIngredient(i, j) {
+  const f = window['_ingResults' + i][j];
+  _ingredients[i] = { name: `${f.name}（${f.unit}）`, protein: f.protein, kcal: f.kcal };
+  document.getElementById('ingSug' + i).style.display = 'none';
+  renderIngredients();
+}
+
+function removeIngredient(i) {
+  _ingredients.splice(i, 1);
+  if (_ingredients.length === 0) _ingredients.push({ name: '', protein: 0, kcal: 0 });
+  renderIngredients();
+}
+
+function recipeTotals() {
+  const p = _ingredients.reduce((s, x) => s + (x.protein || 0), 0);
+  const k = _ingredients.reduce((s, x) => s + (x.kcal || 0), 0);
+  const servings = Math.max(1, parseInt(document.getElementById('recipeServings').value) || 1);
+  return { p, k, servings, perP: p / servings, perK: k / servings };
+}
+
+function updateRecipeCalc() {
+  const t = recipeTotals();
+  document.getElementById('recipeTotal').textContent = `タンパク質 ${Math.round(t.p*10)/10}g・${Math.round(t.k)}kcal`;
+  document.getElementById('recipePerServing').textContent = `${Math.round(t.perP*10)/10}g P・${Math.round(t.perK)}kcal`;
+}
+
+function recordRecipeServing() {
+  const t = recipeTotals();
+  if (t.p <= 0) { alert('材料を入力してください'); return; }
+  const name = (document.getElementById('recipeName').value.trim() || 'レシピ') + ' 1食分';
+  _quickPendingFood = {
+    name,
+    protein: Math.round(t.perP * 10) / 10,
+    kcal: Math.round(t.perK),
+  };
+  document.getElementById('quickPickerLabel').textContent = `${name}（${Math.round(t.perP*10)/10}g P）`;
+  document.getElementById('quickMealPicker').classList.add('active');
+}
+
+function getRecipes() {
+  try { return JSON.parse(localStorage.getItem('shokuji_recipes') || '[]'); } catch(e) { return []; }
+}
+function saveRecipes(list) {
+  localStorage.setItem('shokuji_recipes', JSON.stringify(list));
+}
+
+function saveRecipe() {
+  const name = document.getElementById('recipeName').value.trim();
+  if (!name) { alert('レシピ名を入力してください'); return; }
+  const t = recipeTotals();
+  if (t.p <= 0) { alert('材料を入力してください'); return; }
+  const list = getRecipes();
+  const recipe = {
+    name,
+    servings: t.servings,
+    ingredients: _ingredients.filter(x => x.name || x.protein),
+    perP: Math.round(t.perP * 10) / 10,
+    perK: Math.round(t.perK),
+  };
+  const idx = list.findIndex(r => r.name === name);
+  if (idx >= 0) list[idx] = recipe; else list.push(recipe);
+  saveRecipes(list);
+  renderSavedRecipes();
+  alert(`「${name}」を保存しました（1食 ${recipe.perP}g P）`);
+}
+
+function renderSavedRecipes() {
+  const box = document.getElementById('savedRecipeList');
+  const list = getRecipes();
+  if (list.length === 0) {
+    box.innerHTML = '<div style="color:#555;font-size:13px;padding:8px">まだ保存したレシピはありません</div>';
+    return;
+  }
+  box.innerHTML = list.map((r, i) => `
+    <div style="background:#1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div>
+        <div style="font-size:12px;color:#4caf50">1食 ${r.perP}g P・${r.perK}kcal（${r.servings}食分）</div>
+      </div>
+      <button onclick="quickRecordRecipe(${i})" style="background:#4caf50;border:none;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer">記録</button>
+      <button onclick="editRecipe(${i})" style="background:#2a2a2a;border:none;border-radius:8px;color:#aaa;padding:8px 10px;font-size:13px;cursor:pointer">編集</button>
+      <button onclick="deleteRecipe(${i})" style="background:none;border:none;color:#666;font-size:18px;cursor:pointer">×</button>
+    </div>`).join('');
+}
+
+function quickRecordRecipe(i) {
+  const r = getRecipes()[i];
+  _quickPendingFood = { name: r.name + ' 1食分', protein: r.perP, kcal: r.perK };
+  document.getElementById('quickPickerLabel').textContent = `${r.name} 1食分（${r.perP}g P）`;
+  document.getElementById('quickMealPicker').classList.add('active');
+}
+
+function editRecipe(i) {
+  const r = getRecipes()[i];
+  document.getElementById('recipeName').value = r.name;
+  document.getElementById('recipeServings').value = r.servings;
+  _ingredients = r.ingredients.map(x => ({ ...x }));
+  if (_ingredients.length === 0) _ingredients.push({ name: '', protein: 0, kcal: 0 });
+  renderIngredients();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deleteRecipe(i) {
+  const list = getRecipes();
+  if (!confirm(`「${list[i].name}」を削除しますか？`)) return;
+  list.splice(i, 1);
+  saveRecipes(list);
+  renderSavedRecipes();
 }
 
 function saveApiKey() {
