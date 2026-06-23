@@ -188,6 +188,38 @@
   }
   .rir-btn.active { background: #1b5e20; border-color: #2e7d32; color: #fff; }
 
+  /* 週間ボリュームパネル */
+  .vol-card {
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .vol-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+  }
+  .vol-muscle { font-size: 12px; color: #ccc; width: 70px; flex-shrink: 0; }
+  .vol-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #2a2a2a;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .vol-bar { height: 100%; border-radius: 99px; }
+  .vol-bar.vol-under { background: #c0392b; }
+  .vol-bar.vol-ok    { background: #2ecc71; }
+  .vol-bar.vol-over  { background: #e08e0b; }
+  .vol-num { font-size: 12px; font-weight: 700; width: 64px; text-align: right; flex-shrink: 0; }
+  .vol-num.vol-under { color: #e07b6b; }
+  .vol-num.vol-ok    { color: #2ecc71; }
+  .vol-num.vol-over  { color: #e8a93b; }
+  .vol-target { color: #555; font-weight: 400; font-size: 10px; }
+  .vol-note { font-size: 10px; color: #555; margin-top: 8px; line-height: 1.5; }
+
   .exercise-header {
     padding: 12px 14px 10px;
     display: flex;
@@ -463,6 +495,12 @@
 <div class="divider"></div>
 
 <div class="section-wrap">
+  <div id="volume-panel"></div>
+</div>
+
+<div class="divider"></div>
+
+<div class="section-wrap">
   <div class="section-title">過去の記録</div>
   <div id="history-list"></div>
 </div>
@@ -501,28 +539,36 @@
 <script>
 // 種目プール（FITPLACE24綾瀬店の設備ベース）
 // 各枠(slot)の先頭が初期選択。代替種目を枠内で選べる。
+// muscle=部位（週間ボリューム集計の単位）/ sets=推奨セット数
 const MENU = {
   A: { name: 'Push', slots: [
-    { slot: '胸 メイン',  options: ['ベンチプレス', 'スミスマシンベンチプレス', 'チェストプレス', 'インクラインチェストプレス', 'インクラインダンベルプレス', 'ダンベルプレス'] },
-    { slot: '胸 補助',    options: ['ペックフライ', 'ケーブルフライ', 'ディップス'] },
-    { slot: '肩 プレス',  options: ['ダンベルショルダープレス', 'ショルダープレスマシン', 'スミスマシンショルダープレス'] },
-    { slot: '肩 サイド',  options: ['サイドレイズ', 'マシンサイドレイズ', 'ケーブルサイドレイズ'] },
-    { slot: '三頭',       options: ['ケーブルプッシュダウン', 'スカルクラッシャー', 'ディップス'] },
+    { slot: '胸 メイン',  muscle: '胸',   sets: 4, options: ['ベンチプレス', 'スミスマシンベンチプレス', 'チェストプレス', 'インクラインチェストプレス', 'インクラインダンベルプレス', 'ダンベルプレス'] },
+    { slot: '胸 補助',    muscle: '胸',   sets: 3, options: ['ペックフライ', 'ケーブルフライ', 'ディップス'] },
+    { slot: '肩 プレス',  muscle: '肩',   sets: 3, options: ['ダンベルショルダープレス', 'ショルダープレスマシン', 'スミスマシンショルダープレス'] },
+    { slot: '肩 サイド',  muscle: '肩',   sets: 3, options: ['サイドレイズ', 'マシンサイドレイズ', 'ケーブルサイドレイズ'] },
+    { slot: '三頭',       muscle: '三頭', sets: 3, options: ['ケーブルプッシュダウン', 'スカルクラッシャー', 'ディップス'] },
   ]},
   B: { name: 'Pull', slots: [
-    { slot: '背中 縦引き', options: ['ラットプルダウン', 'ワイドプルダウン', '懸垂'] },
-    { slot: '背中 横引き', options: ['ローロウ', 'フロントロウ', 'ワンハンドダンベルロウ'] },
-    { slot: '背中 補助',   options: ['プルオーバー', 'デッドリフト', 'ケーブルプルオーバー'] },
-    { slot: '二頭',        options: ['ダンベルカール', 'インクラインダンベルカール', 'ケーブルカール', 'マシンアームカール'] },
-    { slot: '後肩・僧帽',  options: ['リバースフライ', 'シュラッグ'] },
+    { slot: '背中 縦引き', muscle: '背中', sets: 4, options: ['ラットプルダウン', 'ワイドプルダウン', '懸垂'] },
+    { slot: '背中 横引き', muscle: '背中', sets: 4, options: ['ローロウ', 'フロントロウ', 'ワンハンドダンベルロウ'] },
+    { slot: '背中 補助',   muscle: '背中', sets: 3, options: ['プルオーバー', 'デッドリフト', 'ケーブルプルオーバー'] },
+    { slot: '二頭',        muscle: '二頭', sets: 3, options: ['ダンベルカール', 'インクラインダンベルカール', 'ケーブルカール', 'マシンアームカール'] },
+    { slot: '後肩・僧帽',  muscle: '後肩', sets: 3, options: ['リバースフライ', 'シュラッグ'] },
   ]},
   C: { name: 'Legs', slots: [
-    { slot: '脚 メイン',  options: ['スクワット', 'ハックスクワット', 'レッグプレス', 'スミスマシンスクワット'] },
-    { slot: '大腿四頭',   options: ['レッグエクステンション'] },
-    { slot: 'ハム・尻',   options: ['レッグカール', 'ヒップスラスト'] },
-    { slot: '内/外もも',  options: ['アダクション', 'アブダクション'] },
-    { slot: 'カーフ・腹', options: ['カーフレイズ', 'アブドミナルクランチ', 'ロータリートーソー'] },
+    { slot: '脚 メイン',  muscle: '脚',       sets: 4, options: ['スクワット', 'ハックスクワット', 'レッグプレス', 'スミスマシンスクワット'] },
+    { slot: '大腿四頭',   muscle: '脚',       sets: 3, options: ['レッグエクステンション'] },
+    { slot: 'ハム・尻',   muscle: 'ハム・尻', sets: 3, options: ['レッグカール', 'ヒップスラスト'] },
+    { slot: '内/外もも',  muscle: '内/外',    sets: 3, options: ['アダクション', 'アブダクション'] },
+    { slot: 'カーフ・腹', muscle: 'カーフ・腹', sets: 3, options: ['カーフレイズ', 'アブドミナルクランチ', 'ロータリートーソー'] },
   ]},
+};
+
+// 週間ボリューム目標（セット/週・部位別。筋肥大の用量反応に基づく10-20set/部位ベース）
+const VOLUME_TARGET = {
+  '胸': [10,20], '肩': [10,18], '三頭': [6,12],
+  '背中': [10,20], '二頭': [6,12], '後肩': [6,12],
+  '脚': [10,20], 'ハム・尻': [8,16], '内/外': [4,10], 'カーフ・腹': [6,15],
 };
 
 const SKIP = '__skip__';
@@ -563,6 +609,61 @@ function activeExercises(day) {
     if (c && c !== SKIP && !out.includes(c)) out.push(c);
   });
   return out;
+}
+
+// 種目名 → 所属slot（部位・推奨セット数の参照用）
+function slotForExercise(name) {
+  for (const day of ['A','B','C']) {
+    const slots = MENU[day].slots;
+    for (let si = 0; si < slots.length; si++) {
+      if (slotOptions(day, si).includes(name)) return slots[si];
+    }
+  }
+  return null;
+}
+function muscleFor(name) { const s = slotForExercise(name); return s ? s.muscle : 'その他'; }
+function recSetsFor(name) { const s = slotForExercise(name); return s ? s.sets : 3; }
+
+// 直近7日の部位別ボリューム（実施セット数を集計）
+function weeklyVolume() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
+  const vol = {};
+  records.forEach(r => {
+    const d = new Date(r.date + 'T00:00:00');
+    if (d < cutoff || d > today) return;
+    r.exercises.forEach(ex => {
+      const m = muscleFor(ex.name);
+      const doneSets = (ex.sets || []).filter(s => s > 0).length;
+      vol[m] = (vol[m] || 0) + doneSets;
+    });
+  });
+  return vol;
+}
+
+function renderVolume() {
+  const el = document.getElementById('volume-panel');
+  if (!el) return;
+  const vol = weeklyVolume();
+  const order = ['胸','肩','三頭','背中','二頭','後肩','脚','ハム・尻','内/外','カーフ・腹'];
+  const rows = order.map(m => {
+    const done = vol[m] || 0;
+    const [min, max] = VOLUME_TARGET[m] || [0,0];
+    let cls = 'vol-under', mark = '不足';
+    if (done >= min && done <= max) { cls = 'vol-ok'; mark = 'OK'; }
+    else if (done > max) { cls = 'vol-over'; mark = '過剰'; }
+    const pct = max ? Math.min(100, Math.round(done / max * 100)) : 0;
+    return `
+      <div class="vol-row">
+        <span class="vol-muscle">${m}</span>
+        <div class="vol-bar-bg"><div class="vol-bar ${cls}" style="width:${pct}%"></div></div>
+        <span class="vol-num ${cls}">${done}<span class="vol-target">/${min}-${max}</span></span>
+      </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="section-title">直近7日のボリューム（部位別セット数）</div>
+    <div class="vol-card">${rows}</div>
+    <div class="vol-note">目標：各部位 週${'10-20'}set（小さい筋は6-12）／緑=適正・赤=不足・橙=過剰</div>`;
 }
 
 function onSlotChange(day, si, val) {
@@ -631,6 +732,7 @@ function switchDay(day) {
   renderExercises();
   loadDraft();
   renderHistory();
+  renderVolume();
 }
 
 // --- 下書き自動保存（誤閉じ対策） ---
@@ -763,7 +865,7 @@ function getRecommendation(name) {
       note = 'フォーム崩れ早め→重量据え置き';
     }
 
-    return { weight: recWeight, reps: targetReps, sets: setCount, note };
+    return { weight: recWeight, reps: targetReps, sets: recSetsFor(name), note };
   }
   return null;
 }
@@ -887,6 +989,7 @@ async function saveRecord() {
   renderExercises();
   loadDraft();
   renderHistory();
+  renderVolume();
   showToast('✅ 保存しました');
 }
 
@@ -972,6 +1075,7 @@ async function loadFromGitHub() {
       renderExercises();
       loadDraft();
       renderHistory();
+  renderVolume();
       showSyncStatus('✅ 同期済み');
     } else if (res.status === 404) {
       // ファイルがまだない → ローカルから読んでそのまま使う
@@ -1119,6 +1223,7 @@ function deleteRecord(date, day) {
   saveToGitHub();
   renderExercises();
   renderHistory();
+  renderVolume();
   showToast('🗑️ 削除しました');
 }
 
@@ -1172,6 +1277,7 @@ function importJSON() {
     saveToLocalStorage();
     renderExercises();
     renderHistory();
+  renderVolume();
     closeModal();
     showToast('✅ 読込完了');
     document.getElementById('modal-text').setAttribute('readonly', '');
