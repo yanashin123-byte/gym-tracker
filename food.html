@@ -431,6 +431,21 @@
   </div>
 </div>
 
+<!-- クイック追加 食事ピッカー -->
+<div class="modal-overlay" id="quickMealPicker" onclick="if(event.target===this)closeQuickPicker()">
+  <div class="modal" style="padding:20px">
+    <div style="font-size:13px;color:#888;margin-bottom:4px">どの食事に追加？</div>
+    <div id="quickPickerLabel" style="font-size:16px;font-weight:700;margin-bottom:16px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button onclick="quickAddToMeal('breakfast')" style="background:#2a2a2a;border:none;border-radius:12px;color:#eee;padding:14px;font-size:15px;cursor:pointer">🌅 朝食</button>
+      <button onclick="quickAddToMeal('lunch')"     style="background:#2a2a2a;border:none;border-radius:12px;color:#eee;padding:14px;font-size:15px;cursor:pointer">☀️ 昼食</button>
+      <button onclick="quickAddToMeal('dinner')"    style="background:#2a2a2a;border:none;border-radius:12px;color:#eee;padding:14px;font-size:15px;cursor:pointer">🌙 夕食</button>
+      <button onclick="quickAddToMeal('snack')"     style="background:#2a2a2a;border:none;border-radius:12px;color:#eee;padding:14px;font-size:15px;cursor:pointer">🍎 間食</button>
+    </div>
+    <button onclick="closeQuickPicker()" style="width:100%;margin-top:10px;background:transparent;border:none;color:#555;padding:12px;font-size:14px;cursor:pointer">キャンセル</button>
+  </div>
+</div>
+
 <div class="tab-bar">
   <button class="tab-btn active" id="tabToday" onclick="showTab('today')">
     <span class="tab-icon">🍽️</span>今日
@@ -466,15 +481,21 @@ const QUICK_FOODS = [
   { name: 'ツナ缶 1缶', protein: 16, kcal: 70 },
 ];
 
-// 内蔵食品DB（100gあたりの栄養素）
+// 内蔵食品DB
 const FOOD_DB = [
-  // タンパク質源
+  // 肉
   { name: '鶏むね肉', unit: '100g', protein: 23.3, kcal: 108 },
   { name: '鶏もも肉', unit: '100g', protein: 17.3, kcal: 190 },
   { name: '鶏ささみ', unit: '100g', protein: 24.6, kcal: 98 },
   { name: '豚ロース', unit: '100g', protein: 19.3, kcal: 263 },
   { name: '豚バラ', unit: '100g', protein: 14.4, kcal: 395 },
+  { name: '豚こま', unit: '100g', protein: 17.4, kcal: 209 },
   { name: '牛もも肉', unit: '100g', protein: 21.9, kcal: 182 },
+  { name: '牛バラ', unit: '100g', protein: 14.0, kcal: 381 },
+  { name: 'ひき肉（合挽き）', unit: '100g', protein: 17.5, kcal: 224 },
+  { name: '豚ひき肉', unit: '100g', protein: 17.7, kcal: 209 },
+  { name: '鶏ひき肉', unit: '100g', protein: 17.5, kcal: 186 },
+  // 魚介
   { name: 'サーモン', unit: '100g', protein: 20.1, kcal: 208 },
   { name: 'マグロ赤身', unit: '100g', protein: 26.4, kcal: 125 },
   { name: 'ぶり', unit: '100g', protein: 21.4, kcal: 257 },
@@ -482,40 +503,118 @@ const FOOD_DB = [
   { name: 'エビ', unit: '100g', protein: 21.7, kcal: 97 },
   { name: 'ツナ缶（水煮）', unit: '1缶70g', protein: 16.5, kcal: 71 },
   { name: 'ツナ缶', unit: '1缶70g', protein: 16.5, kcal: 71 },
+  { name: 'さば缶', unit: '1缶190g', protein: 38.0, kcal: 286 },
+  { name: 'さば缶（水煮）', unit: '1缶190g', protein: 38.0, kcal: 286 },
+  { name: 'いわし缶', unit: '1缶100g', protein: 19.2, kcal: 190 },
+  { name: 'タコ', unit: '100g', protein: 16.4, kcal: 76 },
+  { name: 'イカ', unit: '100g', protein: 17.9, kcal: 83 },
+  // 卵・大豆
   { name: '卵', unit: '1個60g', protein: 7.4, kcal: 91 },
   { name: 'ゆで卵', unit: '1個60g', protein: 7.4, kcal: 91 },
+  { name: '卵2個', unit: '120g', protein: 14.8, kcal: 182 },
+  { name: '卵3個', unit: '180g', protein: 22.2, kcal: 273 },
   { name: '納豆', unit: '1パック45g', protein: 7.4, kcal: 90 },
   { name: '豆腐（木綿）', unit: '150g', protein: 10.5, kcal: 108 },
   { name: '豆腐（絹）', unit: '150g', protein: 7.5, kcal: 84 },
   { name: '豆腐', unit: '150g', protein: 9.0, kcal: 96 },
   { name: '豆乳', unit: '200ml', protein: 7.2, kcal: 92 },
+  { name: '枝豆', unit: '100g', protein: 11.5, kcal: 135 },
+  // 乳製品
   { name: 'ギリシャヨーグルト', unit: '100g', protein: 10.0, kcal: 73 },
   { name: 'プレーンヨーグルト', unit: '100g', protein: 3.6, kcal: 62 },
+  { name: '無糖ヨーグルト', unit: '100g', protein: 3.6, kcal: 62 },
   { name: 'カッテージチーズ', unit: '100g', protein: 13.3, kcal: 99 },
+  { name: '牛乳', unit: '200ml', protein: 6.6, kcal: 134 },
+  { name: 'チーズ', unit: '1枚18g', protein: 4.1, kcal: 61 },
+  // プロテイン
   { name: 'プロテイン', unit: '1杯30g', protein: 21, kcal: 120 },
+  { name: 'ホエイプロテイン', unit: '1杯30g', protein: 22, kcal: 120 },
   { name: 'ザバスソイプロテイン', unit: '1杯28g', protein: 15, kcal: 90 },
+  { name: 'EAA', unit: '10g', protein: 10, kcal: 40 },
+  { name: 'プロテインバー', unit: '1本45g', protein: 15, kcal: 190 },
   // 主食
   { name: '白米', unit: '1膳150g', protein: 3.8, kcal: 252 },
   { name: 'ごはん', unit: '1膳150g', protein: 3.8, kcal: 252 },
+  { name: '白米大盛り', unit: '220g', protein: 5.5, kcal: 370 },
   { name: '玄米', unit: '1膳150g', protein: 4.2, kcal: 248 },
   { name: '食パン', unit: '1枚60g', protein: 5.3, kcal: 158 },
   { name: 'パスタ', unit: '100g（乾）', protein: 12.9, kcal: 378 },
   { name: 'オートミール', unit: '40g', protein: 5.5, kcal: 152 },
-  { name: 'そば', unit: '1人前200g茹', protein: 9.6, kcal: 264 },
+  { name: 'そば', unit: '1人前200g', protein: 9.6, kcal: 264 },
   { name: 'うどん', unit: '1玉200g', protein: 5.2, kcal: 210 },
+  { name: 'おにぎり', unit: '1個100g', protein: 4.0, kcal: 180 },
+  { name: 'おにぎり（ツナマヨ）', unit: '1個110g', protein: 8.5, kcal: 220 },
+  { name: 'おにぎり（鮭）', unit: '1個110g', protein: 7.0, kcal: 190 },
+  { name: 'おにぎり（梅）', unit: '1個100g', protein: 3.5, kcal: 170 },
+  // ラーメン・麺
+  { name: 'ラーメン', unit: '1杯', protein: 18, kcal: 550 },
+  { name: '醤油ラーメン', unit: '1杯', protein: 17, kcal: 500 },
+  { name: '味噌ラーメン', unit: '1杯', protein: 16, kcal: 570 },
+  { name: '豚骨ラーメン', unit: '1杯', protein: 19, kcal: 620 },
+  { name: '塩ラーメン', unit: '1杯', protein: 16, kcal: 460 },
+  { name: 'つけ麺', unit: '1杯', protein: 22, kcal: 620 },
+  { name: '焼きそば', unit: '1皿', protein: 13, kcal: 510 },
+  // 丼・定食
+  { name: 'カレーライス', unit: '1皿', protein: 16, kcal: 720 },
+  { name: 'オムライス', unit: '1皿', protein: 18, kcal: 620 },
+  { name: 'チャーハン', unit: '1皿', protein: 14, kcal: 620 },
+  { name: '親子丼', unit: '1杯', protein: 25, kcal: 680 },
+  { name: 'かつ丼', unit: '1杯', protein: 28, kcal: 880 },
+  { name: '天丼', unit: '1杯', protein: 20, kcal: 850 },
+  { name: '海鮮丼', unit: '1杯', protein: 30, kcal: 620 },
+  { name: '唐揚げ定食', unit: '1食', protein: 30, kcal: 800 },
+  { name: '生姜焼き定食', unit: '1食', protein: 28, kcal: 750 },
+  { name: '焼き魚定食', unit: '1食', protein: 30, kcal: 620 },
+  { name: 'ハンバーグ定食', unit: '1食', protein: 24, kcal: 750 },
   // 野菜
   { name: 'ブロッコリー', unit: '100g', protein: 4.3, kcal: 33 },
   { name: 'ほうれん草', unit: '100g', protein: 2.2, kcal: 20 },
   { name: 'アボカド', unit: '1個150g', protein: 3.0, kcal: 263 },
-  // 乳製品
-  { name: '牛乳', unit: '200ml', protein: 6.6, kcal: 134 },
-  { name: 'チーズ', unit: '1枚18g', protein: 4.1, kcal: 61 },
-  // 外食
+  { name: 'キャベツ', unit: '100g', protein: 1.3, kcal: 23 },
+  { name: 'キムチ', unit: '50g', protein: 1.5, kcal: 16 },
+  // マクドナルド
   { name: 'マクドナルド ビッグマック', unit: '1個', protein: 26, kcal: 525 },
+  { name: 'マクドナルド メガマック', unit: '1個', protein: 43, kcal: 754 },
+  { name: 'マクドナルド チキンフィレオ', unit: '1個', protein: 23, kcal: 487 },
+  { name: 'マクドナルド てりやきマックバーガー', unit: '1個', protein: 16, kcal: 465 },
+  { name: 'マクドナルド ダブルチーズバーガー', unit: '1個', protein: 27, kcal: 444 },
+  { name: 'マクドナルド ハンバーガー', unit: '1個', protein: 13, kcal: 258 },
+  { name: 'マクドナルド チーズバーガー', unit: '1個', protein: 16, kcal: 305 },
+  { name: 'マクドナルド マックナゲット5個', unit: '5個', protein: 14, kcal: 272 },
+  { name: 'マクドナルド マックナゲット15個', unit: '15個', protein: 41, kcal: 816 },
+  { name: 'マクドナルド メガマフィン', unit: '1個', protein: 26, kcal: 480 },
+  { name: 'マクドナルド マックフライポテトM', unit: '1つ', protein: 4, kcal: 410 },
+  // 牛丼チェーン
   { name: '吉野家 牛丼並', unit: '1杯', protein: 19, kcal: 652 },
+  { name: '吉野家 牛丼大盛り', unit: '1杯', protein: 27, kcal: 905 },
+  { name: '吉野家 から揚げ定食', unit: '1食', protein: 35, kcal: 860 },
   { name: 'すき家 牛丼並', unit: '1杯', protein: 20, kcal: 669 },
-  { name: 'セブンイレブン サラダチキン', unit: '1個115g', protein: 26, kcal: 115 },
+  { name: 'すき家 牛丼大盛り', unit: '1杯', protein: 28, kcal: 929 },
+  { name: 'すき家 牛丼メガ', unit: '1杯', protein: 43, kcal: 1374 },
+  { name: '松屋 牛めし並', unit: '1杯', protein: 22, kcal: 638 },
+  { name: '松屋 牛めし大盛り', unit: '1杯', protein: 31, kcal: 891 },
+  { name: '松屋 から揚げ定食', unit: '1食', protein: 38, kcal: 820 },
+  // その他チェーン
+  { name: 'ケンタッキー オリジナルチキン', unit: '1個', protein: 17, kcal: 237 },
+  { name: 'ケンタッキー ツイスター', unit: '1個', protein: 22, kcal: 480 },
+  { name: 'モスバーガー', unit: '1個', protein: 14, kcal: 354 },
+  { name: 'サイゼリヤ ミラノ風ドリア', unit: '1皿', protein: 18, kcal: 660 },
+  { name: 'サイゼリヤ ハンバーグ', unit: '1皿', protein: 21, kcal: 380 },
+  // コンビニ
   { name: 'サラダチキン', unit: '1個115g', protein: 26, kcal: 115 },
+  { name: 'セブンイレブン サラダチキン', unit: '1個115g', protein: 26, kcal: 115 },
+  { name: 'ファミマ ファミチキ', unit: '1個', protein: 14, kcal: 260 },
+  { name: 'ローソン からあげクン', unit: '5個', protein: 12, kcal: 248 },
+  { name: 'コンビニ 唐揚げ弁当', unit: '1個', protein: 22, kcal: 750 },
+  { name: 'コンビニ 幕の内弁当', unit: '1個', protein: 18, kcal: 650 },
+  // 菓子・飲み物
+  { name: 'プリン', unit: '1個', protein: 5, kcal: 185 },
+  { name: 'アイス', unit: '1個', protein: 3, kcal: 200 },
+  { name: 'コーラ', unit: '500ml', protein: 0, kcal: 215 },
+  { name: 'ビール', unit: '500ml', protein: 1.5, kcal: 215 },
+  { name: 'チョコレート', unit: '50g', protein: 3.5, kcal: 278 },
+  { name: 'マルトデキストリン', unit: '30g', protein: 0, kcal: 116 },
+  { name: 'クレアチン', unit: '5g', protein: 0, kcal: 0 },
 ];
 
 // Anthropic API キー（ローカル保存）
@@ -890,14 +989,29 @@ function addFood() {
   render();
 }
 
+let _quickPendingFood = null;
+
 function quickAdd(food) {
-  // どの食事かを選ぶ（簡易：時刻で判定）
-  const h = new Date().getHours();
-  let mealId = h < 10 ? 'breakfast' : h < 14 ? 'lunch' : h < 20 ? 'dinner' : 'snack';
+  _quickPendingFood = food;
+  const picker = document.getElementById('quickMealPicker');
+  const label = document.getElementById('quickPickerLabel');
+  label.textContent = food.name;
+  picker.classList.add('active');
+}
+
+function quickAddToMeal(mealId) {
+  if (!_quickPendingFood) return;
   const dayData = getDayData(currentDate);
-  dayData[mealId].push({ name: food.name, protein: food.protein, kcal: food.kcal });
+  dayData[mealId].push({ name: _quickPendingFood.name, protein: _quickPendingFood.protein, kcal: _quickPendingFood.kcal });
   saveData();
   render();
+  document.getElementById('quickMealPicker').classList.remove('active');
+  _quickPendingFood = null;
+}
+
+function closeQuickPicker() {
+  document.getElementById('quickMealPicker').classList.remove('active');
+  _quickPendingFood = null;
 }
 
 function deleteFood(mealId, index) {
