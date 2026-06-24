@@ -217,5 +217,17 @@
         "kcal": 200
       }
     ]
+  },
+  "2026-06-24": {
+    "breakfast": [],
+    "lunch": [],
+    "dinner": [
+      {
+        "name": "巻き寿司",
+        "protein": 8,
+        "kcal": 230
+      }
+    ],
+    "snack": []
   }
 }
