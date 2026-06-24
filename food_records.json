@@ -246,6 +246,11 @@
         "name": "ピザ 1切れ",
         "protein": 9,
         "kcal": 220
+      },
+      {
+        "name": "ピザ 1切れ",
+        "protein": 9,
+        "kcal": 220
       }
     ],
     "snack": []
