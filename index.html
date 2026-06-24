@@ -13,7 +13,7 @@
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 16px;
     min-height: 100vh;
-    padding-bottom: 40px;
+    padding-bottom: 76px;
   }
 
   header {
@@ -187,6 +187,31 @@
     -webkit-tap-highlight-color: transparent;
   }
   .rir-btn.active { background: #1b5e20; border-color: #2e7d32; color: #fff; }
+
+  .rir-select {
+    background: #14241c; border: 1px solid #25402f; border-radius: 6px;
+    color: #7dd8a8; padding: 4px 2px; font-size: 13px; width: 100%;
+    text-align: center; -webkit-appearance: none; appearance: none;
+  }
+  .rir-hint { font-size: 10px; color: #555; padding: 0 14px 12px; }
+
+  .tab-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    display: flex; background: #161616; border-top: 1px solid #2a2a2a; z-index: 200;
+  }
+  .tab-btn { flex: 1; background: none; border: none; color: #666; padding: 9px 0 13px; font-size: 11px; font-weight: 700; cursor: pointer; }
+  .tab-btn.active { color: #fff; }
+  .tab-btn .ic { display: block; font-size: 19px; margin-bottom: 1px; }
+
+  .week-counter { margin: 12px 20px 0; padding: 12px 14px; background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 14px; }
+  .wc-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+  .wc-title { font-size: 12px; color: #aaa; font-weight: 700; }
+  .wc-count { font-size: 14px; font-weight: 700; }
+  .wc-count.hit { color: #2ecc71; }
+  .wc-count.miss { color: #e8a93b; }
+  .wc-dots { display: flex; gap: 6px; }
+  .wc-dot { flex: 1; height: 8px; border-radius: 99px; background: #2a2a2a; }
+  .wc-dot.on { background: #2ecc71; }
 
   /* 週間ボリュームパネル */
   .vol-card {
@@ -478,31 +503,37 @@
   </div>
 </header>
 
-<div class="date-bar">
-  <label>日付</label>
-  <input type="date" id="date-input">
-  <button class="today-btn" onclick="setToday()">今日</button>
+<div id="view-log">
+  <div class="date-bar">
+    <label>日付</label>
+    <input type="date" id="date-input">
+    <button class="today-btn" onclick="setToday()">今日</button>
+  </div>
+
+  <div class="week-counter" id="week-counter"></div>
+
+  <div class="section-wrap">
+    <div class="section-title">今日の記録</div>
+    <div id="exercise-cards"></div>
+  </div>
+
+  <button class="save-btn save-A" id="save-btn" onclick="saveRecord()">✅ 保存</button>
 </div>
 
-<div class="section-wrap">
-  <div class="section-title">今日の記録</div>
-  <div id="exercise-cards"></div>
+<div id="view-history" style="display:none">
+  <div class="section-wrap">
+    <div id="volume-panel"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-wrap">
+    <div class="section-title">過去の記録</div>
+    <div id="history-list"></div>
+  </div>
 </div>
 
-<button class="save-btn save-A" id="save-btn" onclick="saveRecord()">✅ 保存</button>
-
-
-<div class="divider"></div>
-
-<div class="section-wrap">
-  <div id="volume-panel"></div>
-</div>
-
-<div class="divider"></div>
-
-<div class="section-wrap">
-  <div class="section-title">過去の記録</div>
-  <div id="history-list"></div>
+<div class="tab-bar">
+  <button class="tab-btn active" id="vtab-log" onclick="showView('log')"><span class="ic">📝</span>記録</button>
+  <button class="tab-btn" id="vtab-history" onclick="showView('history')"><span class="ic">📊</span>履歴</button>
 </div>
 
 <!-- 設定モーダル -->
@@ -693,19 +724,6 @@ function togglePicker() {
   loadDraft();
 }
 
-function setRir(name, v) {
-  const hidden = document.getElementById(`${name}-rir`);
-  if (!hidden) return;
-  // 同じ値を再タップで解除
-  if (hidden.value === String(v)) { hidden.value = ''; }
-  else { hidden.value = String(v); }
-  [0,1,2,3,4].forEach(x => {
-    const b = document.getElementById(`${name}-rir-${x}`);
-    if (b) b.className = 'rir-btn' + (hidden.value === String(x) ? ' active' : '');
-  });
-  scheduleDraftSave();
-}
-
 init();
 
 function init() {
@@ -733,6 +751,40 @@ function switchDay(day) {
   loadDraft();
   renderHistory();
   renderVolume();
+  renderWeekCounter();
+}
+
+let currentView = 'log';
+function showView(view) {
+  currentView = view;
+  document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
+  document.getElementById('view-history').style.display = view === 'history' ? 'block' : 'none';
+  document.getElementById('vtab-log').className = 'tab-btn' + (view === 'log' ? ' active' : '');
+  document.getElementById('vtab-history').className = 'tab-btn' + (view === 'history' ? ' active' : '');
+  if (view === 'history') { renderHistory(); renderVolume(); }
+}
+
+function renderWeekCounter() {
+  const el = document.getElementById('week-counter');
+  if (!el) return;
+  const TARGET = 4;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
+  const dates = new Set();
+  records.forEach(r => {
+    const d = new Date(r.date + 'T00:00:00');
+    if (d >= cutoff && d <= today) dates.add(r.date);
+  });
+  const n = dates.size;
+  const hit = n >= TARGET;
+  const dots = Array.from({length: TARGET}, (_, i) => `<div class="wc-dot${i < n ? ' on' : ''}"></div>`).join('');
+  const extra = n > TARGET ? ` <span style="color:#2ecc71">+${n - TARGET}</span>` : '';
+  el.innerHTML = `
+    <div class="wc-top">
+      <span class="wc-title">今週のトレ（直近7日）</span>
+      <span class="wc-count ${hit ? 'hit' : 'miss'}">${n}/${TARGET}回${hit ? ' ✓' : ''}${extra}</span>
+    </div>
+    <div class="wc-dots">${dots}</div>`;
 }
 
 // --- 下書き自動保存（誤閉じ対策） ---
@@ -754,7 +806,7 @@ function saveDraft() {
       weight: document.getElementById(`${name}-weight`).value,
       sets: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}`).value),
       cheating: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}-cheat`).value),
-      rir: document.getElementById(`${name}-rir`).value
+      rirs: [1,2,3,4].map(s => document.getElementById(`${name}-set${s}-rir`).value)
     }))
   };
   localStorage.setItem('gym_draft', JSON.stringify(draft));
@@ -779,7 +831,10 @@ function loadDraft() {
         const el = document.getElementById(`${ex.name}-set${i+1}-cheat`);
         if (el && v) el.value = v;
       });
-      if (ex.rir !== undefined && ex.rir !== '') setRir(ex.name, parseInt(ex.rir));
+      (ex.rirs || []).forEach((v, i) => {
+        const el = document.getElementById(`${ex.name}-set${i+1}-rir`);
+        if (el && v !== undefined && v !== '') el.value = v;
+      });
     });
   } catch(e) {}
 }
@@ -815,7 +870,15 @@ function getRecommendation(name) {
     const minReps = Math.min(...activeSets);
     const setCount = activeSets.length;
     const inc = weight < 20 ? 1 : 2.5; // 約5%刻み
-    const rir = (typeof ex.rir === 'number') ? ex.rir : null; // 限界まであと何回
+    // RIR: セット別なら最後の有効セットの値（最も疲労＝追い込み度）。旧データは単一rirにフォールバック
+    let rir = null;
+    if (Array.isArray(ex.rirs)) {
+      for (let s = ex.sets.length - 1; s >= 0; s--) {
+        if (ex.sets[s] > 0 && typeof ex.rirs[s] === 'number') { rir = ex.rirs[s]; break; }
+      }
+    } else if (typeof ex.rir === 'number') {
+      rir = ex.rir;
+    }
     // チート開始rep（最も早く崩れたセット）→ フォーム破綻の早さ
     const cheatStarts = (ex.cheating || []).filter(c => typeof c === 'number' && c > 0);
     const earliestCheat = cheatStarts.length ? Math.min(...cheatStarts) : null;
@@ -914,6 +977,7 @@ function renderExercises() {
 
     const rOpts = REPS.map(r => `<option value="${r}">${r}</option>`).join('');
 
+    const rirOpts = '<option value="">-</option>' + [0,1,2,3,4].map(v => `<option value="${v}">${v === 4 ? '4+' : v}</option>`).join('');
     const sets = [1,2,3,4].map(s => `
       <div class="set-col">
         <div class="set-label">Set${s}</div>
@@ -922,6 +986,8 @@ function renderExercises() {
         <input type="number" inputmode="numeric" min="1" max="20"
           class="cheat-input" id="${name}-set${s}-cheat"
           placeholder="--" oninput="scheduleDraftSave()">
+        <div class="cheat-label">RIR</div>
+        <select class="rir-select" id="${name}-set${s}-rir" oninput="scheduleDraftSave()">${rirOpts}</select>
       </div>`).join('');
 
     const rec = getRecommendation(name);
@@ -932,10 +998,6 @@ function renderExercises() {
            <span class="rec-note">${rec.note}</span>
          </div>`
       : '';
-
-    const rirBtns = [0,1,2,3,4].map(v =>
-      `<button type="button" class="rir-btn" id="${name}-rir-${v}"
-        onclick="setRir('${name}',${v})">${v === 4 ? '4+' : v}</button>`).join('');
 
     return `
       <div class="exercise-card">
@@ -951,11 +1013,7 @@ function renderExercises() {
             value="${prevWeight}" placeholder="kg" oninput="scheduleDraftSave()">
         </div>
         <div class="sets-grid">${sets}</div>
-        <div class="rir-row">
-          <span class="rir-label">限界まであと（RIR）</span>
-          <div class="rir-btns" id="${name}-rir-btns">${rirBtns}</div>
-          <input type="hidden" id="${name}-rir" value="">
-        </div>
+        <div class="rir-hint">RIR = 限界まであと何回（0＝限界・追い込めた / 3以上＝余裕あり）</div>
       </div>`;
   }).join('');
   const emptyMsg = activeExercises(currentDay).length === 0
@@ -976,7 +1034,10 @@ async function saveRecord() {
       const v = document.getElementById(`${name}-set${s}-cheat`).value;
       return v ? parseInt(v) : null;
     }),
-    rir: (() => { const v = document.getElementById(`${name}-rir`).value; return v === '' ? null : parseInt(v); })()
+    rirs: [1,2,3,4].map(s => {
+      const v = document.getElementById(`${name}-set${s}-rir`).value;
+      return v === '' ? null : parseInt(v);
+    })
   }));
 
   const idx = records.findIndex(r => r.date === date && r.day === currentDay);
@@ -990,6 +1051,7 @@ async function saveRecord() {
   loadDraft();
   renderHistory();
   renderVolume();
+  renderWeekCounter();
   showToast('✅ 保存しました');
 }
 
@@ -1010,8 +1072,12 @@ function renderHistory() {
           <div class="h-weight">${ex.weight}kg</div>
           <div class="h-sets">${ex.sets.map((r, i) => {
             const cheat = ex.cheating && ex.cheating[i];
-            return cheat ? `${r}(チ:${cheat}〜)` : r;
-          }).join(', ')}回${(typeof ex.rir === 'number') ? ` <span style="color:#777">RIR${ex.rir === 4 ? '4+' : ex.rir}</span>` : ''}</div>
+            const rv = Array.isArray(ex.rirs) ? ex.rirs[i] : (i === 0 && typeof ex.rir === 'number' ? ex.rir : null);
+            let cell = String(r);
+            if (cheat) cell += `(チ:${cheat}〜)`;
+            if (typeof rv === 'number') cell += `<span style="color:#5a8">[R${rv === 4 ? '4+' : rv}]</span>`;
+            return cell;
+          }).join(', ')}回</div>
         </div>`).join('')}
     </div>`).join('');
 }
@@ -1076,6 +1142,7 @@ async function loadFromGitHub() {
       loadDraft();
       renderHistory();
   renderVolume();
+      renderWeekCounter();
       showSyncStatus('✅ 同期済み');
     } else if (res.status === 404) {
       // ファイルがまだない → ローカルから読んでそのまま使う
@@ -1224,6 +1291,7 @@ function deleteRecord(date, day) {
   renderExercises();
   renderHistory();
   renderVolume();
+  renderWeekCounter();
   showToast('🗑️ 削除しました');
 }
 
@@ -1278,6 +1346,7 @@ function importJSON() {
     renderExercises();
     renderHistory();
   renderVolume();
+    renderWeekCounter();
     closeModal();
     showToast('✅ 読込完了');
     document.getElementById('modal-text').setAttribute('readonly', '');
