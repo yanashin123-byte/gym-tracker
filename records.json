@@ -381,6 +381,46 @@
           ]
         }
       ]
+    },
+    {
+      "date": "2026-06-19",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェストプレス",
+          "weight": 30,
+          "sets": [
+            12,
+            12,
+            12,
+            7
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rir": null
+        },
+        {
+          "name": "デクラインチェストプレス",
+          "weight": 20,
+          "sets": [
+            12,
+            10,
+            12,
+            12
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rir": null
+        }
+      ]
     }
   ]
 }
