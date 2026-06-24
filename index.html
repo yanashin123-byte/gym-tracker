@@ -769,11 +769,13 @@ function renderWeekCounter() {
   if (!el) return;
   const TARGET = 4;
   const today = new Date(); today.setHours(0,0,0,0);
-  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
+  // 月曜始まりの今週（月〜日）
+  const offsetToMonday = (today.getDay() + 6) % 7; // 月=0..日=6
+  const monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
   const dates = new Set();
   records.forEach(r => {
     const d = new Date(r.date + 'T00:00:00');
-    if (d >= cutoff && d <= today) dates.add(r.date);
+    if (d >= monday && d <= today) dates.add(r.date);
   });
   const n = dates.size;
   const hit = n >= TARGET;
@@ -781,7 +783,7 @@ function renderWeekCounter() {
   const extra = n > TARGET ? ` <span style="color:#2ecc71">+${n - TARGET}</span>` : '';
   el.innerHTML = `
     <div class="wc-top">
-      <span class="wc-title">今週のトレ（直近7日）</span>
+      <span class="wc-title">今週のトレ（月〜日）</span>
       <span class="wc-count ${hit ? 'hit' : 'miss'}">${n}/${TARGET}回${hit ? ' ✓' : ''}${extra}</span>
     </div>
     <div class="wc-dots">${dots}</div>`;
