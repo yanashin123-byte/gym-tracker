@@ -231,6 +231,11 @@
         "name": "巻き寿司",
         "protein": 8,
         "kcal": 230
+      },
+      {
+        "name": "巻き寿司",
+        "protein": 8,
+        "kcal": 230
       }
     ],
     "snack": []
