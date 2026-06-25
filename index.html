@@ -715,13 +715,13 @@ function onSlotChange(day, si, val) {
     saveSelection();
   }
   renderExercises();
-  loadDraft();
+  loadForm();
 }
 
 function togglePicker() {
   pickerOpen = !pickerOpen;
   renderExercises();
-  loadDraft();
+  loadForm();
 }
 
 init();
@@ -748,7 +748,7 @@ function switchDay(day) {
   });
   document.getElementById('save-btn').className = `save-btn save-${day}`;
   renderExercises();
-  loadDraft();
+  loadForm();
   renderHistory();
   renderVolume();
   renderWeekCounter();
@@ -772,12 +772,11 @@ function renderWeekCounter() {
   // 月曜始まりの今週（月〜日）
   const offsetToMonday = (today.getDay() + 6) % 7; // 月=0..日=6
   const monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
-  const dates = new Set();
-  records.forEach(r => {
+  // 今週のセッション数（date+day の記録ごとに1回。Day A+Day Bを同日でも2回）
+  const n = records.filter(r => {
     const d = new Date(r.date + 'T00:00:00');
-    if (d >= monday && d <= today) dates.add(r.date);
-  });
-  const n = dates.size;
+    return d >= monday && d <= today;
+  }).length;
   const hit = n >= TARGET;
   const dots = Array.from({length: TARGET}, (_, i) => `<div class="wc-dot${i < n ? ' on' : ''}"></div>`).join('');
   const extra = n > TARGET ? ` <span style="color:#2ecc71">+${n - TARGET}</span>` : '';
@@ -814,14 +813,19 @@ function saveDraft() {
   localStorage.setItem('gym_draft', JSON.stringify(draft));
 }
 
+// フォーム復元：未保存の下書きを優先、無ければ保存済み記録を読み込む（再保存での消失を防ぐ）
+function loadForm() {
+  if (!loadDraft()) loadSavedRecord();
+}
+
 function loadDraft() {
   const s = localStorage.getItem('gym_draft');
-  if (!s) return;
+  if (!s) return false;
   try {
     const draft = JSON.parse(s);
-    if (draft.day !== currentDay) return;
+    if (draft.day !== currentDay) return false;
     const date = document.getElementById('date-input').value;
-    if (draft.date !== date) return;
+    if (draft.date !== date) return false;
     draft.exercises.forEach(ex => {
       const wEl = document.getElementById(`${ex.name}-weight`);
       if (wEl) wEl.value = ex.weight;
@@ -838,7 +842,32 @@ function loadDraft() {
         if (el && v !== undefined && v !== '') el.value = v;
       });
     });
-  } catch(e) {}
+    return true;
+  } catch(e) { return false; }
+}
+
+// 現在の日付・Dayに保存済み記録があればフォームへ反映（上書き消失の防止）
+function loadSavedRecord() {
+  const date = document.getElementById('date-input').value;
+  const rec = records.find(r => r.date === date && r.day === currentDay);
+  if (!rec) return false;
+  rec.exercises.forEach(ex => {
+    const wEl = document.getElementById(`${ex.name}-weight`);
+    if (wEl && ex.weight) wEl.value = ex.weight;
+    (ex.sets || []).forEach((v, i) => {
+      const el = document.getElementById(`${ex.name}-set${i+1}`);
+      if (el && v > 0) el.value = v;
+    });
+    (ex.cheating || []).forEach((v, i) => {
+      const el = document.getElementById(`${ex.name}-set${i+1}-cheat`);
+      if (el && v) el.value = v;
+    });
+    (ex.rirs || []).forEach((v, i) => {
+      const el = document.getElementById(`${ex.name}-set${i+1}-rir`);
+      if (el && typeof v === 'number') el.value = v;
+    });
+  });
+  return true;
 }
 
 function clearDraft() {
@@ -1050,7 +1079,7 @@ async function saveRecord() {
   clearDraft();
   await saveToGitHub();
   renderExercises();
-  loadDraft();
+  loadForm();
   renderHistory();
   renderVolume();
   renderWeekCounter();
@@ -1141,7 +1170,7 @@ async function loadFromGitHub() {
       await saveToGitHub();
 
       renderExercises();
-      loadDraft();
+      loadForm();
       renderHistory();
   renderVolume();
       renderWeekCounter();
