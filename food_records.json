@@ -292,7 +292,13 @@
         "kcal": 239
       }
     ],
-    "snack": []
+    "snack": [
+      {
+        "name": "Reys",
+        "protein": 17,
+        "kcal": 0
+      }
+    ]
   },
   "2026-06-26": {
     "breakfast": [],
