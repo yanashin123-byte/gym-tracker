@@ -635,6 +635,18 @@ let pickerOpen = false;
 
 function saveSelection() { localStorage.setItem('gym_selection', JSON.stringify(selection)); }
 function saveCustom() { localStorage.setItem('gym_custom', JSON.stringify(customOptions)); }
+// その日に追加した種目（型の枠を超えて足す分）。{ A: ['インクラインチェストプレス', ...] }
+let extras = JSON.parse(localStorage.getItem('gym_extras') || '{}');
+function saveExtras() { localStorage.setItem('gym_extras', JSON.stringify(extras)); }
+// 既知の全種目（全Dayのメニュー＋自作＋過去記録）を名前一致のために集約
+function allKnownExercises() {
+  const set = new Set();
+  for (const day of ['A','B','C']) {
+    MENU[day].slots.forEach((_, si) => slotOptions(day, si).forEach(o => set.add(o)));
+  }
+  records.forEach(r => (r.exercises || []).forEach(ex => set.add(ex.name)));
+  return Array.from(set).sort();
+}
 
 function slotOptions(day, si) {
   const base = MENU[day].slots[si].options;
@@ -655,6 +667,7 @@ function activeExercises(day) {
     const c = chosenFor(day, si);
     if (c && c !== SKIP && !out.includes(c)) out.push(c);
   });
+  (extras[day] || []).forEach(name => { if (name && !out.includes(name)) out.push(name); });
   return out;
 }
 
@@ -737,6 +750,28 @@ function onSlotChange(day, si, val) {
 
 function togglePicker() {
   pickerOpen = !pickerOpen;
+  renderExercises();
+  loadForm();
+}
+
+function onAddExtra(day, val) {
+  if (!val) return;
+  let name = val;
+  if (val === ADD) {
+    name = (prompt('追加する種目名を入力（履歴を引き継ぐには既存と同じ名前で）') || '').trim();
+    if (!name) { renderExercises(); loadForm(); return; }
+  }
+  extras[day] = extras[day] || [];
+  // すでに枠で選択中 or 追加済みなら重複させない
+  if (!activeExercises(day).includes(name)) extras[day].push(name);
+  saveExtras();
+  renderExercises();
+  loadForm();
+}
+
+function removeExtra(day, name) {
+  extras[day] = (extras[day] || []).filter(n => n !== name);
+  saveExtras();
   renderExercises();
   loadForm();
 }
@@ -1101,13 +1136,33 @@ function renderPicker() {
       </div>`;
   }).join('');
   const count = activeExercises(day).length;
+  // 追加した種目（型の枠外）
+  const exList = (extras[day] || []);
+  const extraRows = exList.map(name => `
+      <div class="slot-row">
+        <span class="slot-name" style="color:#7dd8a8">＋追加</span>
+        <span style="flex:1;min-width:0;font-size:13px">${name}</span>
+        <button type="button" onclick="removeExtra('${day}','${name.replace(/'/g, "\\'")}')" style="background:none;border:none;color:#888;font-size:16px;cursor:pointer;padding:0 4px;">×</button>
+      </div>`).join('');
+  const addOpts = allKnownExercises()
+    .filter(n => !activeExercises(day).includes(n))
+    .map(n => `<option value="${n}">${n}</option>`).join('');
+  const addControl = `
+      <div class="slot-row">
+        <span class="slot-name">種目を追加</span>
+        <select class="slot-select" onchange="onAddExtra('${day}',this.value); this.value='';">
+          <option value="">＋ 追加する種目を選ぶ…</option>
+          ${addOpts}
+          <option value="${ADD}">＋ 自分で入力</option>
+        </select>
+      </div>`;
   return `
     <div class="slot-picker">
       <div class="slot-picker-head" onclick="togglePicker()">
         <span>🎯 今日の種目を選ぶ（${count}種目）</span>
         <span>${pickerOpen ? '▲' : '▼'}</span>
       </div>
-      <div class="slot-list" style="display:${pickerOpen ? 'block' : 'none'}">${rows}</div>
+      <div class="slot-list" style="display:${pickerOpen ? 'block' : 'none'}">${rows}${extraRows}${addControl}</div>
     </div>`;
 }
 
