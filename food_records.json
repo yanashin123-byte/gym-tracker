@@ -297,6 +297,11 @@
         "name": "Reys",
         "protein": 17,
         "kcal": 0
+      },
+      {
+        "name": "EAA",
+        "protein": 10,
+        "kcal": 40
       }
     ]
   },
