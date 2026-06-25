@@ -369,6 +369,7 @@
   .save-A { background: #dc5050; color: #fff; }
   .save-B { background: #34a89a; color: #fff; }
   .save-C { background: #4285f4; color: #fff; }
+  .new-session-btn { display:block; width: calc(100% - 40px); margin: 8px 20px 0; padding: 11px; border: 1px solid #333; border-radius: 12px; background: #1e1e1e; color: #aaa; font-size: 13px; font-weight: 600; cursor: pointer; }
 
   .export-row {
     display: flex;
@@ -531,6 +532,7 @@
   </div>
 
   <button class="save-btn save-A" id="save-btn" onclick="saveRecord()">✅ 保存</button>
+  <button class="new-session-btn" onclick="newSession()">＋ 別のセッションを記録（新規）</button>
 </div>
 
 <div id="view-history" style="display:none">
@@ -622,6 +624,7 @@ const REPS = Array.from({length: 21}, (_, i) => i);
 
 let currentDay = 'A';
 let records = [];
+let editingId = null;
 
 // 枠ごとの選択（{ A: {0:'ベンチプレス', 1:'__skip__', ...}, ... }）
 let selection = JSON.parse(localStorage.getItem('gym_selection') || '{}');
@@ -778,6 +781,38 @@ function showView(view) {
   if (view === 'history') { renderHistory(); renderVolume(); }
 }
 
+function updateSaveBtnLabel() {
+  const b = document.getElementById('save-btn');
+  if (b) b.textContent = editingId ? '✅ 上書き保存' : '✅ 保存';
+}
+
+function editRecord(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  clearDraft();
+  editingId = id;
+  document.getElementById('date-input').value = rec.date;
+  currentDay = rec.day;
+  ['A','B','C'].forEach(d => { const t = document.getElementById(`tab-${d}`); if (t) t.className = `day-tab${d === rec.day ? ` active-${rec.day}` : ''}`; });
+  document.getElementById('save-btn').className = `save-btn save-${rec.day}`;
+  renderExercises();
+  fillFormFromRecord(rec);
+  updateSaveBtnLabel();
+  showView('log');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function newSession() {
+  editingId = null;
+  clearDraft();
+  setToday();
+  renderExercises();
+  updateSaveBtnLabel();
+  showView('log');
+  showToast('🆕 新規セッション');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Set1のrep・チート・RIRを全セットにコピー（入力時短）
 function copySetsDown(name) {
   const r1 = document.getElementById(`${name}-set1`).value;
@@ -850,11 +885,13 @@ function renderWeekCounter() {
   // 月曜始まりの今週（月〜日）
   const offsetToMonday = (today.getDay() + 6) % 7; // 月=0..日=6
   const monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
-  // 今週のセッション数（date+day の記録ごとに1回。Day A+Day Bを同日でも2回）
-  const n = records.filter(r => {
+  // 今週のトレ日数（記録のある日付の数。同日に複数セッションでも1日換算）
+  const trainDates = new Set();
+  records.forEach(r => {
     const d = new Date(r.date + 'T00:00:00');
-    return d >= monday && d <= today;
-  }).length;
+    if (d >= monday && d <= today) trainDates.add(r.date);
+  });
+  const n = trainDates.size;
   const hit = n >= TARGET;
   const dots = Array.from({length: TARGET}, (_, i) => `<div class="wc-dot${i < n ? ' on' : ''}"></div>`).join('');
   const extra = n > TARGET ? ` <span style="color:#2ecc71">+${n - TARGET}</span>` : '';
@@ -881,6 +918,7 @@ function saveDraft() {
   const draft = {
     day: currentDay,
     date,
+    editingId,
     exercises: activeExercises(currentDay).map(name => ({
       name,
       weight: document.getElementById(`${name}-weight`).value,
@@ -894,7 +932,8 @@ function saveDraft() {
 
 // フォーム復元：未保存の下書きを優先、無ければ保存済み記録を読み込む（再保存での消失を防ぐ）
 function loadForm() {
-  if (!loadDraft()) loadSavedRecord();
+  // 新規セッションが既定。未保存の下書きがあれば復元（編集中の記録もここで復元）
+  if (!loadDraft()) { editingId = null; updateSaveBtnLabel(); }
 }
 
 function loadDraft() {
@@ -905,6 +944,8 @@ function loadDraft() {
     if (draft.day !== currentDay) return false;
     const date = document.getElementById('date-input').value;
     if (draft.date !== date) return false;
+    editingId = draft.editingId || null;
+    updateSaveBtnLabel();
     draft.exercises.forEach(ex => {
       const wEl = document.getElementById(`${ex.name}-weight`);
       if (wEl) wEl.value = ex.weight;
@@ -925,11 +966,9 @@ function loadDraft() {
   } catch(e) { return false; }
 }
 
-// 現在の日付・Dayに保存済み記録があればフォームへ反映（上書き消失の防止）
-function loadSavedRecord() {
-  const date = document.getElementById('date-input').value;
-  const rec = records.find(r => r.date === date && r.day === currentDay);
-  if (!rec) return false;
+// 指定レコードをフォームへ反映（編集用）
+function fillFormFromRecord(rec) {
+  if (!rec) return;
   rec.exercises.forEach(ex => {
     const wEl = document.getElementById(`${ex.name}-weight`);
     if (wEl && ex.weight) wEl.value = ex.weight;
@@ -946,7 +985,6 @@ function loadSavedRecord() {
       if (el && typeof v === 'number') el.value = v;
     });
   });
-  return true;
 }
 
 function clearDraft() {
@@ -956,6 +994,7 @@ function clearDraft() {
 function getPrev(name) {
   for (let i = records.length - 1; i >= 0; i--) {
     if (records[i].day !== currentDay) continue;
+    if (records[i].id === editingId) continue;
     const ex = records[i].exercises.find(e => e.name === name);
     if (ex) return { weight: ex.weight, date: records[i].date };
   }
@@ -971,6 +1010,7 @@ function getRecommendation(name) {
 
   for (let i = records.length - 1; i >= 0; i--) {
     if (records[i].day !== currentDay) continue;
+    if (records[i].id === editingId) continue;
     const ex = records[i].exercises.find(e => e.name === name);
     if (!ex) continue;
     const activeSets = ex.sets.filter(s => s > 0);
@@ -1155,12 +1195,23 @@ async function saveRecord() {
     })
   }));
 
-  const idx = records.findIndex(r => r.date === date && r.day === currentDay);
-  if (idx >= 0) records[idx] = { date, day: currentDay, exercises };
-  else records.push({ date, day: currentDay, exercises });
+  const now = Date.now();
+  if (editingId) {
+    const idx = records.findIndex(r => r.id === editingId);
+    if (idx >= 0) {
+      records[idx] = { ...records[idx], date, day: currentDay, exercises, updatedAt: now };
+    } else {
+      editingId = genId();
+      records.push({ id: editingId, date, day: currentDay, exercises, updatedAt: now });
+    }
+  } else {
+    editingId = genId();
+    records.push({ id: editingId, date, day: currentDay, exercises, updatedAt: now });
+  }
 
   records.sort((a,b) => a.date.localeCompare(b.date));
   clearDraft();
+  updateSaveBtnLabel();
   await saveToGitHub();
   renderExercises();
   loadForm();
@@ -1179,7 +1230,10 @@ function renderHistory() {
     <div class="history-card">
       <div class="history-date-bar day-${r.day}">
         <span>Day ${r.day} — ${fmt(r.date)}</span>
-        <button onclick="deleteRecord('${r.date}','${r.day}')" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:0 4px;">🗑️</button>
+        <span>
+          <button onclick="editRecord('${r.id}')" style="background:none;border:none;color:#8ab;font-size:13px;cursor:pointer;padding:0 6px;">✎ 編集</button>
+          <button onclick="deleteRecord('${r.id}')" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:0 4px;">🗑️</button>
+        </span>
       </div>
       ${r.exercises.map(ex => `
         <div class="history-row">
@@ -1233,18 +1287,18 @@ async function loadFromGitHub() {
       const decoded = JSON.parse(fromBase64UTF8(data.content));
       const githubRecords = decoded.records || [];
 
-      // ローカルのレコードを取得（上書き前に保存）
       const localStr = localStorage.getItem('gym_records');
       const localRecords = localStr ? JSON.parse(localStr) : [];
 
-      // マージ: GitHub + ローカル（date+dayをキーに重複排除、両方残す）
+      // 旧データ互換: id/updatedAt を付与
+      const norm = r => ({ ...r, id: r.id || `${r.date}-${r.day}`, updatedAt: typeof r.updatedAt === 'number' ? r.updatedAt : 0 });
+
+      // マージ: id をキーに、updatedAt が新しい方を採用（ローカル編集を消さない）
       const merged = new Map();
-      // まずGitHubのデータを入れる（ベース）
-      githubRecords.forEach(r => merged.set(`${r.date}-${r.day}`, r));
-      // ローカルにしかないレコードを追加（GitHubにないものだけ）
-      localRecords.forEach(r => {
-        const key = `${r.date}-${r.day}`;
-        if (!merged.has(key)) merged.set(key, r);
+      githubRecords.map(norm).forEach(r => merged.set(r.id, r));
+      localRecords.map(norm).forEach(r => {
+        const ex = merged.get(r.id);
+        if (!ex || (r.updatedAt || 0) >= (ex.updatedAt || 0)) merged.set(r.id, r);
       });
 
       records = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
@@ -1399,14 +1453,18 @@ function showSyncStatus(msg) {
   if (el) el.textContent = msg;
 }
 
-function deleteRecord(date, day) {
-  if (!confirm(`${fmt(date)} Day ${day} の記録を削除しますか？`)) return;
-  records = records.filter(r => !(r.date === date && r.day === day));
+function deleteRecord(id) {
+  const rec = records.find(r => r.id === id);
+  if (!rec) return;
+  if (!confirm(`${fmt(rec.date)} Day ${rec.day} の記録を削除しますか？`)) return;
+  records = records.filter(r => r.id !== id);
+  if (editingId === id) { editingId = null; clearDraft(); }
   saveToGitHub();
   renderExercises();
   renderHistory();
   renderVolume();
   renderWeekCounter();
+  updateSaveBtnLabel();
   showToast('🗑️ 削除しました');
 }
 
@@ -1414,9 +1472,20 @@ function saveToLocalStorage() {
   localStorage.setItem('gym_records', JSON.stringify(records));
 }
 
+function genId() {
+  return 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+}
+// 旧データ（id/updatedAt無し）に互換キーを付与
+function normalizeRecords() {
+  records.forEach(r => {
+    if (!r.id) r.id = `${r.date}-${r.day}`;
+    if (typeof r.updatedAt !== 'number') r.updatedAt = 0;
+  });
+}
 function loadFromLocalStorage() {
   const s = localStorage.getItem('gym_records');
   if (s) records = JSON.parse(s);
+  normalizeRecords();
 }
 
 function getJSON() {
