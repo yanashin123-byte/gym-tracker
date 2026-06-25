@@ -421,6 +421,100 @@
           "rir": null
         }
       ]
+    },
+    {
+      "date": "2026-06-25",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェストプレス",
+          "weight": 35,
+          "sets": [
+            9,
+            9,
+            8,
+            8
+          ],
+          "cheating": [
+            null,
+            null,
+            8,
+            8
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "インクラインチェストプレス",
+          "weight": 15,
+          "sets": [
+            4,
+            7,
+            5,
+            4
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            1,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "ショルダープレスマシン",
+          "weight": 10,
+          "sets": [
+            8,
+            10,
+            11,
+            9
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            1,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 13.6,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ]
+        }
+      ]
     }
   ]
 }
