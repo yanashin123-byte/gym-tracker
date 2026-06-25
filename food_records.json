@@ -256,7 +256,13 @@
     "snack": []
   },
   "2026-06-25": {
-    "breakfast": [],
+    "breakfast": [
+      {
+        "name": "VITASホエイプロテイン",
+        "protein": 22,
+        "kcal": 120
+      }
+    ],
     "lunch": [
       {
         "name": "ローソンのサラダ巻き",
@@ -286,6 +292,12 @@
         "kcal": 239
       }
     ],
+    "snack": []
+  },
+  "2026-06-26": {
+    "breakfast": [],
+    "lunch": [],
+    "dinner": [],
     "snack": []
   }
 }
