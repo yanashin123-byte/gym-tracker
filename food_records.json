@@ -279,6 +279,11 @@
         "name": "チョリソー",
         "protein": 14,
         "kcal": 395
+      },
+      {
+        "name": "ティラミス",
+        "protein": 2.9,
+        "kcal": 239
       }
     ],
     "snack": []
