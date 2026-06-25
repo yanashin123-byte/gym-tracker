@@ -213,6 +213,18 @@
   .wc-dot { flex: 1; height: 8px; border-radius: 99px; background: #2a2a2a; }
   .wc-dot.on { background: #2ecc71; }
 
+  .day-suggest { margin: 8px 20px 0; padding: 10px 14px; background: #15201c; border: 1px solid #244; border-radius: 12px; font-size: 12px; color: #9cc; cursor: pointer; }
+  .day-suggest:empty { display: none; }
+  .day-suggest b { color: #7dd8c8; }
+
+  .card-tools { padding: 0 14px 10px; }
+  .mini-btn { background: #222; border: 1px solid #333; border-radius: 8px; color: #aaa; padding: 7px 10px; font-size: 12px; cursor: pointer; }
+  .mini-btn:active { opacity: 0.7; }
+
+  .trend-box { margin: 0 14px 10px; padding: 8px 10px; background: #161616; border: 1px solid #242424; border-radius: 8px; }
+  .trend-head { display: flex; justify-content: space-between; font-size: 11px; color: #888; margin-bottom: 2px; }
+  .trend-foot { display: flex; justify-content: space-between; font-size: 9px; color: #555; }
+
   /* 週間ボリュームパネル */
   .vol-card {
     background: #1e1e1e;
@@ -511,6 +523,7 @@
   </div>
 
   <div class="week-counter" id="week-counter"></div>
+  <div class="day-suggest" id="day-suggest"></div>
 
   <div class="section-wrap">
     <div class="section-title">今日の記録</div>
@@ -655,14 +668,15 @@ function slotForExercise(name) {
 function muscleFor(name) { const s = slotForExercise(name); return s ? s.muscle : 'その他'; }
 function recSetsFor(name) { const s = slotForExercise(name); return s ? s.sets : 3; }
 
-// 直近7日の部位別ボリューム（実施セット数を集計）
+// 今週（月〜日）の部位別ボリューム（実施セット数を集計）
 function weeklyVolume() {
   const today = new Date(); today.setHours(0,0,0,0);
-  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate() - 6);
+  const offsetToMonday = (today.getDay() + 6) % 7;
+  const monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
   const vol = {};
   records.forEach(r => {
     const d = new Date(r.date + 'T00:00:00');
-    if (d < cutoff || d > today) return;
+    if (d < monday || d > today) return;
     r.exercises.forEach(ex => {
       const m = muscleFor(ex.name);
       const doneSets = (ex.sets || []).filter(s => s > 0).length;
@@ -692,7 +706,7 @@ function renderVolume() {
       </div>`;
   }).join('');
   el.innerHTML = `
-    <div class="section-title">直近7日のボリューム（部位別セット数）</div>
+    <div class="section-title">今週のボリューム（月〜日・部位別セット数）</div>
     <div class="vol-card">${rows}</div>
     <div class="vol-note">目標：各部位 週${'10-20'}set（小さい筋は6-12）／緑=適正・赤=不足・橙=過剰</div>`;
 }
@@ -764,6 +778,70 @@ function showView(view) {
   if (view === 'history') { renderHistory(); renderVolume(); }
 }
 
+// Set1のrep・チート・RIRを全セットにコピー（入力時短）
+function copySetsDown(name) {
+  const r1 = document.getElementById(`${name}-set1`).value;
+  const c1 = document.getElementById(`${name}-set1-cheat`).value;
+  const rir1 = document.getElementById(`${name}-set1-rir`).value;
+  [2,3,4].forEach(s => {
+    document.getElementById(`${name}-set${s}`).value = r1;
+    document.getElementById(`${name}-set${s}-cheat`).value = c1;
+    document.getElementById(`${name}-set${s}-rir`).value = rir1;
+  });
+  scheduleDraftSave();
+}
+
+// 種目の重量推移スパークライン（その日の過去記録から最大8回分）
+function renderTrend(name) {
+  const pts = [];
+  for (let i = 0; i < records.length; i++) {
+    if (records[i].day !== currentDay) continue;
+    const ex = records[i].exercises.find(e => e.name === name);
+    if (ex && ex.weight > 0) pts.push({ date: records[i].date, w: ex.weight });
+  }
+  if (pts.length < 2) return '';
+  const data = pts.slice(-8);
+  const ws = data.map(p => p.w);
+  const min = Math.min(...ws), max = Math.max(...ws);
+  const W = 260, H = 34, pad = 4;
+  const span = (max - min) || 1;
+  const xy = data.map((p, i) => {
+    const x = pad + (W - pad * 2) * (data.length === 1 ? 0.5 : i / (data.length - 1));
+    const y = H - pad - (H - pad * 2) * (p.w - min) / span;
+    return [x, y];
+  });
+  const line = xy.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const dots = xy.map(p => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="#34a89a"/>`).join('');
+  const last = data[data.length - 1].w, first = data[0].w;
+  const diff = last - first;
+  const trendTxt = diff > 0 ? `▲+${(Math.round(diff*10)/10)}kg` : diff < 0 ? `▼${(Math.round(diff*10)/10)}kg` : '→ 横ばい';
+  const trendCol = diff > 0 ? '#2ecc71' : diff < 0 ? '#e07b6b' : '#888';
+  return `
+    <div class="trend-box">
+      <div class="trend-head"><span>推移（直近${data.length}回）</span><span style="color:${trendCol};font-weight:700">${trendTxt}</span></div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none">
+        <path d="${line}" fill="none" stroke="#34a89a" stroke-width="1.5"/>${dots}
+      </svg>
+      <div class="trend-foot"><span>${min}kg</span><span>${max}kg</span></div>
+    </div>`;
+}
+
+// 次にやるDayの提案（直近の記録の逆を提案。Push/Pull交互）
+function renderDaySuggest() {
+  const el = document.getElementById('day-suggest');
+  if (!el) return;
+  let last = null;
+  for (let i = records.length - 1; i >= 0; i--) {
+    if (records[i].day === 'A' || records[i].day === 'B') { last = records[i]; break; }
+  }
+  if (!last) { el.innerHTML = ''; return; }
+  const next = last.day === 'A' ? 'B' : 'A';
+  const nextName = next === 'A' ? 'Push' : 'Pull';
+  const lastName = last.day === 'A' ? 'Push' : 'Pull';
+  el.innerHTML = `前回は ${lastName}（${fmt(last.date)}）→ 今日は <b>${nextName}（Day ${next}）</b> がおすすめ`;
+  el.onclick = () => switchDay(next);
+}
+
 function renderWeekCounter() {
   const el = document.getElementById('week-counter');
   if (!el) return;
@@ -786,6 +864,7 @@ function renderWeekCounter() {
       <span class="wc-count ${hit ? 'hit' : 'miss'}">${n}/${TARGET}回${hit ? ' ✓' : ''}${extra}</span>
     </div>
     <div class="wc-dots">${dots}</div>`;
+  renderDaySuggest();
 }
 
 // --- 下書き自動保存（誤閉じ対策） ---
@@ -1021,6 +1100,7 @@ function renderExercises() {
         <select class="rir-select" id="${name}-set${s}-rir" oninput="scheduleDraftSave()">${rirOpts}</select>
       </div>`).join('');
 
+    const trendHTML = renderTrend(name);
     const rec = getRecommendation(name);
     const recHTML = rec
       ? `<div class="rec-bar">
@@ -1037,6 +1117,7 @@ function renderExercises() {
           ${prevHTML}
         </div>
         ${recHTML}
+        ${trendHTML}
         <div class="weight-row">
           <div class="weight-label">重量</div>
           <input type="number" inputmode="decimal" step="0.5" min="0"
@@ -1044,6 +1125,9 @@ function renderExercises() {
             value="${prevWeight}" placeholder="kg" oninput="scheduleDraftSave()">
         </div>
         <div class="sets-grid">${sets}</div>
+        <div class="card-tools">
+          <button type="button" class="mini-btn" onclick="copySetsDown('${name}')">⤵ Set1を全セットに反映</button>
+        </div>
         <div class="rir-hint">RIR = 限界まであと何回（0＝限界・追い込めた / 3以上＝余裕あり）</div>
       </div>`;
   }).join('');
