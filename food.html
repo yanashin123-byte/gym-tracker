@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>食事記録</title>
+<link rel="manifest" href="manifest-food.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="食事">
+<meta name="theme-color" content="#0f0f0f">
+<link rel="apple-touch-icon" href="icon-food-180.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -423,6 +429,9 @@
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
   </div>
+
+  <!-- 7日タンパク質グラフ -->
+  <div id="proteinTrend" style="padding:0 16px 4px"></div>
 
   <!-- 食事セクション -->
   <div id="mealSections"></div>
@@ -1280,6 +1289,43 @@ function calcProtein(date) {
   return MEALS.reduce((sum, m) => sum + (d[m.id] || []).filter(f => !f.deleted).reduce((s, f) => s + (f.protein || 0), 0), 0);
 }
 
+// 直近7日のタンパク質を棒グラフで（目標140g）
+function renderProteinTrend() {
+  const el = document.getElementById('proteinTrend');
+  if (!el) return;
+  const DAY_LABELS = ['日','月','火','水','木','金','土'];
+  const days = [];
+  for (let i = -6; i <= 0; i++) {
+    const d = new Date(currentDate.getTime() + i * 86400000);
+    days.push({ date: d, p: calcProtein(d) });
+  }
+  const goal = 140;
+  const maxP = Math.max(goal, ...days.map(x => x.p));
+  const W = 320, H = 90, padB = 16, padT = 6;
+  const bw = W / days.length;
+  const goalY = padT + (H - padB - padT) * (1 - goal / maxP);
+  const bars = days.map((x, i) => {
+    const bh = (H - padB - padT) * (x.p / maxP);
+    const bx = i * bw + bw * 0.2;
+    const by = H - padB - bh;
+    const col = x.p >= goal ? '#4caf50' : x.p > 0 ? '#caa23a' : '#333';
+    const isToday = i === days.length - 1;
+    const lbl = DAY_LABELS[x.date.getDay()];
+    return `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" rx="2" fill="${col}"/>
+      <text x="${(i*bw+bw/2).toFixed(1)}" y="${H-4}" font-size="9" fill="${isToday?'#fff':'#777'}" text-anchor="middle">${lbl}</text>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="background:#1a1a1a;border-radius:12px;padding:10px 12px">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
+        <span>📈 直近7日のタンパク質</span><span style="color:#4caf50">目標 ${goal}g</span>
+      </div>
+      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none">
+        <line x1="0" y1="${goalY.toFixed(1)}" x2="${W}" y2="${goalY.toFixed(1)}" stroke="#4caf50" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
+        ${bars}
+      </svg>
+    </div>`;
+}
+
 function render() {
   const key = getKey(currentDate);
   const today = new Date();
@@ -1299,6 +1345,7 @@ function render() {
   const pct = Math.min(total / 140 * 100, 100);
 
   document.getElementById('totalProtein').textContent = total.toFixed(1);
+  renderProteinTrend();
   const fill = document.getElementById('progressFill');
   fill.style.width = pct + '%';
   fill.className = 'progress-fill' + (total > 140 ? ' over' : '');
