@@ -400,6 +400,32 @@
       "lunch": [],
       "dinner": [],
       "snack": []
+    },
+    "2026-06-28": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "id": "fmqxqb5odfpe6",
+          "name": "カレーライス 並",
+          "protein": 16,
+          "kcal": 720,
+          "updatedAt": 1782647525245
+        }
+      ],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-06-22": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-06-27": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
