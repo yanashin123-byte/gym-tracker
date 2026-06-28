@@ -462,6 +462,20 @@
       "lunch": [],
       "dinner": [],
       "snack": []
+    },
+    "2026-06-29": {
+      "breakfast": [
+        {
+          "id": "fmqybdu0sjyda",
+          "name": "鶏むね肉 100g",
+          "protein": 23.3,
+          "kcal": 108,
+          "updatedAt": 1782682922044
+        }
+      ],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
