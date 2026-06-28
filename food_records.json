@@ -1,314 +1,411 @@
 {
-  "2026-05-18": {
-    "breakfast": [],
-    "lunch": [],
-    "dinner": [],
-    "snack": []
+  "v": 2,
+  "meals": {
+    "2026-05-18": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-05-20": {
+      "breakfast": [
+        {
+          "name": "HULX-FACTOR ホエイプロテイン",
+          "protein": 21,
+          "kcal": 134,
+          "id": "2026-05-20-breakfast-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "クレアチン",
+          "protein": 5,
+          "kcal": 20,
+          "id": "2026-05-20-breakfast-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "マルトデキストリン",
+          "protein": 0,
+          "kcal": 76,
+          "id": "2026-05-20-breakfast-2-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "モンスターエナジー",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-05-20-breakfast-3-leg",
+          "updatedAt": 0
+        }
+      ],
+      "lunch": [
+        {
+          "name": "オムライス（卵一個、白米120g）",
+          "protein": 10.5,
+          "kcal": 320,
+          "id": "2026-05-20-lunch-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "プリン",
+          "protein": 5.2,
+          "kcal": 185,
+          "id": "2026-05-20-lunch-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ザバスソイプロテイン",
+          "protein": 15,
+          "kcal": 90,
+          "id": "2026-05-20-lunch-2-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [
+        {
+          "name": "サラダチキン120g、白米150g、ゆで卵1個",
+          "protein": 38,
+          "kcal": 420,
+          "id": "2026-05-20-dinner-0-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": []
+    },
+    "2026-05-19": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-05-21": {
+      "breakfast": [
+        {
+          "name": "鶏胸肉120.ご飯150.ゆで卵3",
+          "protein": 51,
+          "kcal": 565,
+          "id": "2026-05-21-breakfast-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "クレアチン5g",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-05-21-breakfast-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "プロテイン",
+          "protein": 21,
+          "kcal": 120,
+          "id": "2026-05-21-breakfast-2-leg",
+          "updatedAt": 0
+        }
+      ],
+      "lunch": [],
+      "dinner": [
+        {
+          "name": "鶏むね肉１２０g、ご飯１５０g、ゆで卵　３個",
+          "protein": 54,
+          "kcal": 535,
+          "id": "2026-05-21-dinner-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "キムチ５０g",
+          "protein": 1.5,
+          "kcal": 16,
+          "id": "2026-05-21-dinner-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ビール５００",
+          "protein": 0,
+          "kcal": 215,
+          "id": "2026-05-21-dinner-2-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": []
+    },
+    "2026-05-22": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "name": "ラーメン大盛り",
+          "protein": 28,
+          "kcal": 1050,
+          "id": "2026-05-22-lunch-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "練乳アイス",
+          "protein": 3.5,
+          "kcal": 180,
+          "id": "2026-05-22-lunch-1-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [
+        {
+          "name": "鶏胸肉150.白米220.ケチャップ、マヨ",
+          "protein": 38,
+          "kcal": 580,
+          "id": "2026-05-22-dinner-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ブラックチョコレートアイスバー",
+          "protein": 4.5,
+          "kcal": 180,
+          "id": "2026-05-22-dinner-1-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": []
+    },
+    "2026-05-23": {
+      "breakfast": [
+        {
+          "name": "ザバスソイプロテイン",
+          "protein": 15,
+          "kcal": 90,
+          "id": "2026-05-23-breakfast-0-leg",
+          "updatedAt": 0
+        }
+      ],
+      "lunch": [
+        {
+          "name": "メガマフィンセット",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-05-23-lunch-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "コーラ",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-05-23-lunch-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "マックナゲット",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-05-23-lunch-2-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-05-24": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "name": "鶏胸肉150，ご飯150.ケチャップ、マヨネーズ",
+          "protein": 36,
+          "kcal": 520,
+          "id": "2026-05-24-lunch-0-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [],
+      "snack": [
+        {
+          "name": "食パン1枚",
+          "protein": 5.5,
+          "kcal": 158,
+          "id": "2026-05-24-snack-0-leg",
+          "updatedAt": 0
+        }
+      ]
+    },
+    "2026-06-04": {
+      "breakfast": [
+        {
+          "name": "ハンバーガー",
+          "protein": 0,
+          "kcal": 0,
+          "id": "2026-06-04-breakfast-0-leg",
+          "updatedAt": 0
+        }
+      ],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-06-23": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "name": "味噌ラーメン",
+          "protein": 16,
+          "kcal": 570,
+          "id": "2026-06-23-lunch-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ローソン からあげクン",
+          "protein": 12,
+          "kcal": 248,
+          "id": "2026-06-23-lunch-1-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [
+        {
+          "name": "卵 1個",
+          "protein": 7.4,
+          "kcal": 91,
+          "id": "2026-06-23-dinner-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "カツカレー",
+          "protein": 30,
+          "kcal": 1100,
+          "id": "2026-06-23-dinner-1-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": [
+        {
+          "name": "アイスクリーム",
+          "protein": 3,
+          "kcal": 200,
+          "id": "2026-06-23-snack-0-leg",
+          "updatedAt": 0
+        }
+      ]
+    },
+    "2026-06-24": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [
+        {
+          "name": "巻き寿司",
+          "protein": 8,
+          "kcal": 230,
+          "id": "2026-06-24-dinner-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "巻き寿司",
+          "protein": 8,
+          "kcal": 230,
+          "id": "2026-06-24-dinner-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "巻き寿司",
+          "protein": 8,
+          "kcal": 230,
+          "id": "2026-06-24-dinner-2-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "巻き寿司",
+          "protein": 8,
+          "kcal": 230,
+          "id": "2026-06-24-dinner-3-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ピザ 1切れ",
+          "protein": 9,
+          "kcal": 220,
+          "id": "2026-06-24-dinner-4-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ピザ 1切れ",
+          "protein": 9,
+          "kcal": 220,
+          "id": "2026-06-24-dinner-5-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": []
+    },
+    "2026-06-25": {
+      "breakfast": [
+        {
+          "name": "VITASホエイプロテイン",
+          "protein": 22,
+          "kcal": 120,
+          "id": "2026-06-25-breakfast-0-leg",
+          "updatedAt": 0
+        }
+      ],
+      "lunch": [
+        {
+          "name": "ローソンのサラダ巻き",
+          "protein": 8.7,
+          "kcal": 424,
+          "id": "2026-06-25-lunch-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "チョコクレープ",
+          "protein": 3.6,
+          "kcal": 500,
+          "id": "2026-06-25-lunch-1-leg",
+          "updatedAt": 0
+        }
+      ],
+      "dinner": [
+        {
+          "name": "サイゼリヤ ミラノ風ドリア",
+          "protein": 15,
+          "kcal": 542,
+          "id": "2026-06-25-dinner-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "チョリソー",
+          "protein": 14,
+          "kcal": 395,
+          "id": "2026-06-25-dinner-1-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "ティラミス",
+          "protein": 2.9,
+          "kcal": 239,
+          "id": "2026-06-25-dinner-2-leg",
+          "updatedAt": 0
+        }
+      ],
+      "snack": [
+        {
+          "name": "Reys",
+          "protein": 17,
+          "kcal": 0,
+          "id": "2026-06-25-snack-0-leg",
+          "updatedAt": 0
+        },
+        {
+          "name": "EAA",
+          "protein": 10,
+          "kcal": 40,
+          "id": "2026-06-25-snack-1-leg",
+          "updatedAt": 0
+        }
+      ]
+    },
+    "2026-06-26": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    }
   },
-  "2026-05-20": {
-    "breakfast": [
-      {
-        "name": "HULX-FACTOR ホエイプロテイン",
-        "protein": 21,
-        "kcal": 134
-      },
-      {
-        "name": "クレアチン",
-        "protein": 5,
-        "kcal": 20
-      },
-      {
-        "name": "マルトデキストリン",
-        "protein": 0,
-        "kcal": 76
-      },
-      {
-        "name": "モンスターエナジー",
-        "protein": 0,
-        "kcal": 0
-      }
-    ],
-    "lunch": [
-      {
-        "name": "オムライス（卵一個、白米120g）",
-        "protein": 10.5,
-        "kcal": 320
-      },
-      {
-        "name": "プリン",
-        "protein": 5.2,
-        "kcal": 185
-      },
-      {
-        "name": "ザバスソイプロテイン",
-        "protein": 15,
-        "kcal": 90
-      }
-    ],
-    "dinner": [
-      {
-        "name": "サラダチキン120g、白米150g、ゆで卵1個",
-        "protein": 38,
-        "kcal": 420
-      }
-    ],
-    "snack": []
+  "checks": {},
+  "checkMode": {
+    "value": "gym",
+    "updatedAt": 0
   },
-  "2026-05-19": {
-    "breakfast": [],
-    "lunch": [],
-    "dinner": [],
-    "snack": []
-  },
-  "2026-05-21": {
-    "breakfast": [
-      {
-        "name": "鶏胸肉120.ご飯150.ゆで卵3",
-        "protein": 51,
-        "kcal": 565
-      },
-      {
-        "name": "クレアチン5g",
-        "protein": 0,
-        "kcal": 0
-      },
-      {
-        "name": "プロテイン",
-        "protein": 21,
-        "kcal": 120
-      }
-    ],
-    "lunch": [],
-    "dinner": [
-      {
-        "name": "鶏むね肉１２０g、ご飯１５０g、ゆで卵　３個",
-        "protein": 54,
-        "kcal": 535
-      },
-      {
-        "name": "キムチ５０g",
-        "protein": 1.5,
-        "kcal": 16
-      },
-      {
-        "name": "ビール５００",
-        "protein": 0,
-        "kcal": 215
-      }
-    ],
-    "snack": []
-  },
-  "2026-05-22": {
-    "breakfast": [],
-    "lunch": [
-      {
-        "name": "ラーメン大盛り",
-        "protein": 28,
-        "kcal": 1050
-      },
-      {
-        "name": "練乳アイス",
-        "protein": 3.5,
-        "kcal": 180
-      }
-    ],
-    "dinner": [
-      {
-        "name": "鶏胸肉150.白米220.ケチャップ、マヨ",
-        "protein": 38,
-        "kcal": 580
-      },
-      {
-        "name": "ブラックチョコレートアイスバー",
-        "protein": 4.5,
-        "kcal": 180
-      }
-    ],
-    "snack": []
-  },
-  "2026-05-23": {
-    "breakfast": [
-      {
-        "name": "ザバスソイプロテイン",
-        "protein": 15,
-        "kcal": 90
-      }
-    ],
-    "lunch": [
-      {
-        "name": "メガマフィンセット",
-        "protein": 0,
-        "kcal": 0
-      },
-      {
-        "name": "コーラ",
-        "protein": 0,
-        "kcal": 0
-      },
-      {
-        "name": "マックナゲット",
-        "protein": 0,
-        "kcal": 0
-      }
-    ],
-    "dinner": [],
-    "snack": []
-  },
-  "2026-05-24": {
-    "breakfast": [],
-    "lunch": [
-      {
-        "name": "鶏胸肉150，ご飯150.ケチャップ、マヨネーズ",
-        "protein": 36,
-        "kcal": 520
-      }
-    ],
-    "dinner": [],
-    "snack": [
-      {
-        "name": "食パン1枚",
-        "protein": 5.5,
-        "kcal": 158
-      }
-    ]
-  },
-  "2026-06-04": {
-    "breakfast": [
-      {
-        "name": "ハンバーガー",
-        "protein": 0,
-        "kcal": 0
-      }
-    ],
-    "lunch": [],
-    "dinner": [],
-    "snack": []
-  },
-  "2026-06-23": {
-    "breakfast": [],
-    "lunch": [
-      {
-        "name": "味噌ラーメン",
-        "protein": 16,
-        "kcal": 570
-      },
-      {
-        "name": "ローソン からあげクン",
-        "protein": 12,
-        "kcal": 248
-      }
-    ],
-    "dinner": [
-      {
-        "name": "卵 1個",
-        "protein": 7.4,
-        "kcal": 91
-      },
-      {
-        "name": "カツカレー",
-        "protein": 30,
-        "kcal": 1100
-      }
-    ],
-    "snack": [
-      {
-        "name": "アイスクリーム",
-        "protein": 3,
-        "kcal": 200
-      }
-    ]
-  },
-  "2026-06-24": {
-    "breakfast": [],
-    "lunch": [],
-    "dinner": [
-      {
-        "name": "巻き寿司",
-        "protein": 8,
-        "kcal": 230
-      },
-      {
-        "name": "巻き寿司",
-        "protein": 8,
-        "kcal": 230
-      },
-      {
-        "name": "巻き寿司",
-        "protein": 8,
-        "kcal": 230
-      },
-      {
-        "name": "巻き寿司",
-        "protein": 8,
-        "kcal": 230
-      },
-      {
-        "name": "ピザ 1切れ",
-        "protein": 9,
-        "kcal": 220
-      },
-      {
-        "name": "ピザ 1切れ",
-        "protein": 9,
-        "kcal": 220
-      }
-    ],
-    "snack": []
-  },
-  "2026-06-25": {
-    "breakfast": [
-      {
-        "name": "VITASホエイプロテイン",
-        "protein": 22,
-        "kcal": 120
-      }
-    ],
-    "lunch": [
-      {
-        "name": "ローソンのサラダ巻き",
-        "protein": 8.7,
-        "kcal": 424
-      },
-      {
-        "name": "チョコクレープ",
-        "protein": 3.6,
-        "kcal": 500
-      }
-    ],
-    "dinner": [
-      {
-        "name": "サイゼリヤ ミラノ風ドリア",
-        "protein": 15,
-        "kcal": 542
-      },
-      {
-        "name": "チョリソー",
-        "protein": 14,
-        "kcal": 395
-      },
-      {
-        "name": "ティラミス",
-        "protein": 2.9,
-        "kcal": 239
-      }
-    ],
-    "snack": [
-      {
-        "name": "Reys",
-        "protein": 17,
-        "kcal": 0
-      },
-      {
-        "name": "EAA",
-        "protein": 10,
-        "kcal": 40
-      }
-    ]
-  },
-  "2026-06-26": {
-    "breakfast": [],
-    "lunch": [],
-    "dinner": [],
-    "snack": []
-  }
+  "recipes": []
 }
