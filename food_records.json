@@ -419,7 +419,15 @@
           "updatedAt": 1782647536763
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmqxupgtq5ncp",
+          "name": "豚ひき肉",
+          "protein": 17.7,
+          "kcal": 209,
+          "updatedAt": 1782654911342
+        }
+      ],
       "snack": []
     },
     "2026-06-22": {
