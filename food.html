@@ -992,10 +992,30 @@ const FOOD_DB = [
 ];
 
 // 食品名からDBを検索
+// 過去に入力した食品（履歴）を名前ごとに集約。最新の値を採用
+function userFoodHistory() {
+  const map = new Map();
+  const dates = Object.keys(data).sort(); // 古い順 → 後勝ちで最新値
+  dates.forEach(date => {
+    const day = data[date]; if (!day) return;
+    ['breakfast','lunch','dinner','snack'].forEach(mid => {
+      (day[mid] || []).forEach(f => {
+        if (!f || f.deleted || !f.name) return;
+        map.set(f.name, { name: f.name, protein: f.protein || 0, kcal: f.kcal || 0, unit: '前回', _hist: true });
+      });
+    });
+  });
+  return Array.from(map.values());
+}
+
 function searchFoodDB(query) {
   if (!query || query.length < 1) return [];
   const q = query.toLowerCase();
-  return FOOD_DB.filter(f => f.name.toLowerCase().includes(q)).slice(0, 8);
+  // 履歴を優先（自分が入力した REYSプロテイン などを先に出す）
+  const hist = userFoodHistory().filter(f => f.name.toLowerCase().includes(q));
+  const histNames = new Set(hist.map(f => f.name));
+  const db = FOOD_DB.filter(f => f.name.toLowerCase().includes(q) && !histNames.has(f.name));
+  return [...hist, ...db].slice(0, 10);
 }
 
 function setNutritionStatus(msg, color) {
