@@ -536,6 +536,11 @@
     <input type="password" id="tokenInput" placeholder="github_pat_..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
     <button onclick="saveGitHubToken()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">トークンを保存</button>
   </div>
+  <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px">💾 バックアップ</div>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">全データ（食事・サプリ・レシピ）をJSONで書き出します。万一のときの保険に。</div>
+    <button onclick="exportData()" style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:14px;font-weight:700;cursor:pointer">📥 バックアップを書き出す</button>
+  </div>
 </div>
 
 <!-- グラムピッカー -->
@@ -1648,7 +1653,7 @@ function renderHistory() {
 }
 
 function exportData() {
-  const json = JSON.stringify(data, null, 2);
+  const json = JSON.stringify(buildSync(), null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
