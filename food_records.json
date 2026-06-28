@@ -432,6 +432,20 @@
       "breakfast": [],
       "lunch": [],
       "dinner": [],
+      "snack": [
+        {
+          "id": "fmqxtqzi5l8v8",
+          "name": "REYS プロテイン",
+          "protein": 17,
+          "kcal": 0,
+          "updatedAt": 1782653302589
+        }
+      ]
+    },
+    "2026-06-21": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
       "snack": []
     }
   },
