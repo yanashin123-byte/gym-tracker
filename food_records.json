@@ -402,7 +402,29 @@
       "snack": []
     }
   },
-  "checks": {},
+  "checks": {
+    "2026-06-24": {
+      "items": {
+        "gym-0": false,
+        "gym-1": false,
+        "rest-0": true,
+        "rest-1": true
+      },
+      "updatedAt": 0
+    },
+    "2026-06-25": {
+      "items": {
+        "gym-0": true
+      },
+      "updatedAt": 0
+    },
+    "2026-06-23": {
+      "items": {
+        "gym-1": false
+      },
+      "updatedAt": 0
+    }
+  },
   "checkMode": {
     "value": "gym",
     "updatedAt": 0
