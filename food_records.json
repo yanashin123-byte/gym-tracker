@@ -426,6 +426,13 @@
           "protein": 17.7,
           "kcal": 209,
           "updatedAt": 1782654911342
+        },
+        {
+          "id": "fmqxupn7div4e",
+          "name": "レタス",
+          "protein": 0.6,
+          "kcal": 12,
+          "updatedAt": 1782654919609
         }
       ],
       "snack": []
