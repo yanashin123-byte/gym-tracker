@@ -1049,6 +1049,11 @@ let currentDate = new Date();
 currentDate.setHours(0,0,0,0);
 let currentMealId = 'breakfast';
 let data = {};
+let checksData = {};                       // date -> { items:{}, updatedAt }
+let checkModeState = { value: 'gym', updatedAt: 0 };
+let recipesData = [];                      // [{id,name,...,updatedAt,deleted}]
+function nowTs() { return Date.now(); }
+function genId() { return 'f' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36); }
 
 function getKey(date) {
   // JST（ローカル時刻）で日付キーを生成（toISOStringはUTCになるため使わない）
@@ -1073,10 +1078,90 @@ function showSyncStatus(msg) {
 }
 function saveToLocalStorage() {
   localStorage.setItem('shokuji_data', JSON.stringify(data));
+  localStorage.setItem('shokuji_checks', JSON.stringify(checksData));
+  localStorage.setItem('shokuji_checkmode', JSON.stringify(checkModeState));
+  localStorage.setItem('shokuji_recipes2', JSON.stringify(recipesData));
+}
+function normalizeMeals() {
+  Object.keys(data).forEach(date => {
+    const day = data[date]; if (!day) return;
+    ['breakfast','lunch','dinner','snack'].forEach(mid => {
+      if (!Array.isArray(day[mid])) { day[mid] = []; return; }
+      day[mid].forEach((e, i) => {
+        if (!e.id) e.id = `${date}-${mid}-${i}-leg`;
+        if (typeof e.updatedAt !== 'number') e.updatedAt = 0;
+      });
+    });
+  });
 }
 function loadFromLocalStorage() {
   const raw = localStorage.getItem('shokuji_data');
   data = raw ? JSON.parse(raw) : {};
+  // チェック：新キーが無ければ旧 food_check_* から移行
+  const c = localStorage.getItem('shokuji_checks');
+  if (c) { checksData = JSON.parse(c); }
+  else {
+    checksData = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.indexOf('food_check_') === 0 && k !== 'food_check_mode') {
+        const date = k.slice('food_check_'.length);
+        try { checksData[date] = { items: JSON.parse(localStorage.getItem(k)) || {}, updatedAt: 0 }; } catch(e) {}
+      }
+    }
+  }
+  const cm = localStorage.getItem('shokuji_checkmode');
+  if (cm) checkModeState = JSON.parse(cm);
+  else checkModeState = { value: localStorage.getItem('food_check_mode') || 'gym', updatedAt: 0 };
+  const r2 = localStorage.getItem('shokuji_recipes2');
+  if (r2) recipesData = JSON.parse(r2);
+  else {
+    try {
+      const old = JSON.parse(localStorage.getItem('shokuji_recipes') || '[]');
+      recipesData = old.map(r => ({ ...r, id: genId(), updatedAt: 0 }));
+    } catch(e) { recipesData = []; }
+  }
+  normalizeMeals();
+}
+function buildSync() {
+  return { v: 2, meals: data, checks: checksData, checkMode: checkModeState, recipes: recipesData };
+}
+function mergeMealEntries(localArr, remoteArr) {
+  const map = new Map();
+  (localArr || []).forEach(e => map.set(e.id, e));
+  (remoteArr || []).forEach(e => {
+    const cur = map.get(e.id);
+    if (!cur || (e.updatedAt || 0) >= (cur.updatedAt || 0)) map.set(e.id, e);
+  });
+  return Array.from(map.values());
+}
+function mergeRemote(remote) {
+  if (!remote) return;
+  const rMeals = remote.meals || (remote.v ? {} : remote);  // v1（meals直書き）対応
+  const rChecks = remote.checks || {};
+  const rMode = remote.checkMode;
+  const rRecipes = remote.recipes || [];
+  Object.keys(rMeals).forEach(date => {
+    if (!data[date]) data[date] = { breakfast: [], lunch: [], dinner: [], snack: [] };
+    ['breakfast','lunch','dinner','snack'].forEach(mid => {
+      const rArr = (rMeals[date] && rMeals[date][mid]) || [];
+      rArr.forEach((e, i) => { if (!e.id) e.id = `${date}-${mid}-${i}-leg`; if (typeof e.updatedAt !== 'number') e.updatedAt = 0; });
+      data[date][mid] = mergeMealEntries(data[date][mid], rArr);
+    });
+  });
+  Object.keys(rChecks).forEach(date => {
+    const cur = checksData[date];
+    if (!cur || (rChecks[date].updatedAt || 0) > (cur.updatedAt || 0)) checksData[date] = rChecks[date];
+  });
+  if (rMode && (rMode.updatedAt || 0) > (checkModeState.updatedAt || 0)) checkModeState = rMode;
+  const rmap = new Map();
+  recipesData.forEach(r => rmap.set(r.id, r));
+  rRecipes.forEach(r => {
+    if (!r.id) r.id = genId();
+    const cur = rmap.get(r.id);
+    if (!cur || (r.updatedAt || 0) >= (cur.updatedAt || 0)) rmap.set(r.id, r);
+  });
+  recipesData = Array.from(rmap.values());
 }
 async function loadData() {
   const token = localStorage.getItem('github_token') || '';
@@ -1089,8 +1174,11 @@ async function loadData() {
     if (res.ok) {
       const d = await res.json();
       foodSHA = d.sha;
-      data = JSON.parse(fromBase64UTF8(d.content));
+      loadFromLocalStorage();                       // ローカルを土台に
+      const remote = JSON.parse(fromBase64UTF8(d.content));
+      mergeRemote(remote);                          // 項目ごとにマージ（消さない）
       saveToLocalStorage();
+      saveData();                                   // マージ結果を書き戻し（全デバイス統一）
       showSyncStatus('✅ 同期済み');
     } else if (res.status === 404) {
       loadFromLocalStorage(); showSyncStatus('📱 新規');
@@ -1123,7 +1211,7 @@ async function saveData() {
   // SHA未取得なら先に取りに行く（422防止）
   if (!foodSHA) await fetchFoodSHA();
   showSyncStatus('⏳ 保存中');
-  const content = toBase64UTF8(JSON.stringify(data, null, 2));
+  const content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const body = { message: `food records ${new Date().toISOString()}`, content };
@@ -1184,7 +1272,7 @@ function getDayData(date) {
 
 function calcProtein(date) {
   const d = getDayData(date);
-  return MEALS.reduce((sum, m) => sum + d[m.id].reduce((s, f) => s + (f.protein || 0), 0), 0);
+  return MEALS.reduce((sum, m) => sum + (d[m.id] || []).filter(f => !f.deleted).reduce((s, f) => s + (f.protein || 0), 0), 0);
 }
 
 function render() {
@@ -1214,7 +1302,7 @@ function render() {
   const container = document.getElementById('mealSections');
   container.innerHTML = '';
   MEALS.forEach(meal => {
-    const items = dayData[meal.id] || [];
+    const items = (dayData[meal.id] || []).filter(f => !f.deleted);
     const mealProtein = items.reduce((s, f) => s + (f.protein || 0), 0);
 
     const sec = document.createElement('div');
@@ -1237,7 +1325,7 @@ function render() {
               <div class="food-detail">
                 <span class="food-protein">${f.protein}g</span>
                 ${f.kcal ? `<span class="food-kcal">${f.kcal}kcal</span>` : ''}
-                <button class="delete-btn" onclick="deleteFood('${meal.id}', ${i})">×</button>
+                <button class="delete-btn" onclick="deleteFood('${meal.id}', '${f.id}')">×</button>
               </div>
             </div>
           `).join('')
@@ -1285,7 +1373,7 @@ function addFood() {
   if (!name) return;
 
   const dayData = getDayData(currentDate);
-  dayData[currentMealId].push({ name, protein, kcal });
+  dayData[currentMealId].push({ id: genId(), name, protein, kcal, updatedAt: nowTs() });
   saveData();
   closeModal();
   render();
@@ -1336,7 +1424,7 @@ function closeGramPicker() {
 function quickAddToMeal(mealId) {
   if (!_quickPendingFood) return;
   const dayData = getDayData(currentDate);
-  dayData[mealId].push({ name: _quickPendingFood.name, protein: _quickPendingFood.protein, kcal: _quickPendingFood.kcal });
+  dayData[mealId].push({ id: genId(), name: _quickPendingFood.name, protein: _quickPendingFood.protein, kcal: _quickPendingFood.kcal, updatedAt: nowTs() });
   saveData();
   render();
   document.getElementById('quickMealPicker').classList.remove('active');
@@ -1348,9 +1436,10 @@ function closeQuickPicker() {
   _quickPendingFood = null;
 }
 
-function deleteFood(mealId, index) {
+function deleteFood(mealId, id) {
   const dayData = getDayData(currentDate);
-  dayData[mealId].splice(index, 1);
+  const e = (dayData[mealId] || []).find(x => x.id === id);
+  if (e) { e.deleted = true; e.updatedAt = nowTs(); }
   saveData();
   render();
 }
@@ -1461,10 +1550,7 @@ function recordRecipeServing() {
 }
 
 function getRecipes() {
-  try { return JSON.parse(localStorage.getItem('shokuji_recipes') || '[]'); } catch(e) { return []; }
-}
-function saveRecipes(list) {
-  localStorage.setItem('shokuji_recipes', JSON.stringify(list));
+  return recipesData.filter(r => !r.deleted);
 }
 
 function saveRecipe() {
@@ -1472,17 +1558,19 @@ function saveRecipe() {
   if (!name) { alert('レシピ名を入力してください'); return; }
   const t = recipeTotals();
   if (t.p <= 0) { alert('材料を入力してください'); return; }
-  const list = getRecipes();
-  const recipe = {
+  const fields = {
     name,
     servings: t.servings,
     ingredients: _ingredients.filter(x => x.name || x.protein),
     perP: Math.round(t.perP * 10) / 10,
     perK: Math.round(t.perK),
+    updatedAt: nowTs(),
   };
-  const idx = list.findIndex(r => r.name === name);
-  if (idx >= 0) list[idx] = recipe; else list.push(recipe);
-  saveRecipes(list);
+  const existing = recipesData.find(r => !r.deleted && r.name === name);
+  if (existing) { Object.assign(existing, fields); }
+  else { recipesData.push({ id: genId(), ...fields }); }
+  saveToLocalStorage();
+  saveData();
   renderSavedRecipes();
   alert(`「${name}」を保存しました（1食 ${recipe.perP}g P）`);
 }
@@ -1524,10 +1612,13 @@ function editRecipe(i) {
 }
 
 function deleteRecipe(i) {
-  const list = getRecipes();
-  if (!confirm(`「${list[i].name}」を削除しますか？`)) return;
-  list.splice(i, 1);
-  saveRecipes(list);
+  const r = getRecipes()[i];
+  if (!r) return;
+  if (!confirm(`「${r.name}」を削除しますか？`)) return;
+  const target = recipesData.find(x => x.id === r.id);
+  if (target) { target.deleted = true; target.updatedAt = nowTs(); }
+  saveToLocalStorage();
+  saveData();
   renderSavedRecipes();
 }
 
@@ -1540,10 +1631,10 @@ function renderHistory() {
   }
   container.innerHTML = keys.map(key => {
     const d = data[key];
-    const total = MEALS.reduce((s, m) => s + (d[m.id] || []).reduce((ss, f) => ss + (f.protein || 0), 0), 0);
+    const total = MEALS.reduce((s, m) => s + (d[m.id] || []).filter(f => !f.deleted).reduce((ss, f) => ss + (f.protein || 0), 0), 0);
     const date = new Date(key);
     const label = `${date.getMonth()+1}/${date.getDate()}（${['日','月','火','水','木','金','土'][date.getDay()]}）`;
-    const allFoods = MEALS.flatMap(m => (d[m.id] || []).map(f => f.name));
+    const allFoods = MEALS.flatMap(m => (d[m.id] || []).filter(f => !f.deleted).map(f => f.name));
     return `
       <div class="history-day">
         <div class="history-day-header">
@@ -1585,13 +1676,16 @@ let chkChecked = {};
 function chkStorageKey() { return `food_check_${getKey(currentDate)}`; }
 
 function chkLoad() {
-  const s = localStorage.getItem(chkStorageKey());
-  chkChecked = s ? JSON.parse(s) : {};
-  chkMode = localStorage.getItem('food_check_mode') || 'gym';
+  const key = getKey(currentDate);
+  chkChecked = (checksData[key] && checksData[key].items) ? { ...checksData[key].items } : {};
+  chkMode = checkModeState.value || 'gym';
 }
 function chkSave() {
-  localStorage.setItem(chkStorageKey(), JSON.stringify(chkChecked));
-  localStorage.setItem('food_check_mode', chkMode);
+  const key = getKey(currentDate);
+  checksData[key] = { items: { ...chkChecked }, updatedAt: nowTs() };
+  checkModeState = { value: chkMode, updatedAt: nowTs() };
+  saveToLocalStorage();
+  saveData();
 }
 function chkSetMode(m) { chkMode = m; chkSave(); chkRender(); }
 function chkToggle(idx) {
@@ -1641,9 +1735,9 @@ function chkDateStr(offset) {
 }
 // 指定日のサプリ消化率を返す { done, total } / 未記録は null
 function chkDoneForDate(date) {
-  const s = localStorage.getItem(`food_check_${date}`);
-  if (!s) return null;
-  const dayChecked = JSON.parse(s);
+  const entry = checksData[date];
+  if (!entry || !entry.items) return null;
+  const dayChecked = entry.items;
   // その日チェックがあるモードを判定（チェック数が多い方を採用）
   let best = null;
   for (const m of ['gym', 'rest']) {
