@@ -485,11 +485,15 @@
         "gym-1": false
       },
       "updatedAt": 0
+    },
+    "2026-06-28": {
+      "items": {},
+      "updatedAt": 1782654932093
     }
   },
   "checkMode": {
-    "value": "gym",
-    "updatedAt": 0
+    "value": "rest",
+    "updatedAt": 1782654932093
   },
   "recipes": []
 }
