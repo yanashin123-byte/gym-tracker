@@ -410,6 +410,13 @@
           "protein": 16,
           "kcal": 720,
           "updatedAt": 1782647525245
+        },
+        {
+          "id": "fmqxqbekbew5x",
+          "name": "うどん 並",
+          "protein": 6,
+          "kcal": 240,
+          "updatedAt": 1782647536763
         }
       ],
       "dinner": [],
