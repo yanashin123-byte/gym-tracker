@@ -518,11 +518,15 @@
     "2026-06-28": {
       "items": {},
       "updatedAt": 1782654932093
+    },
+    "2026-06-29": {
+      "items": {},
+      "updatedAt": 1782704696466
     }
   },
   "checkMode": {
-    "value": "rest",
-    "updatedAt": 1782654932093
+    "value": "gym",
+    "updatedAt": 1782704696466
   },
   "recipes": []
 }
