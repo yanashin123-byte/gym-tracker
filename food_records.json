@@ -473,7 +473,15 @@
           "updatedAt": 1782682922044
         }
       ],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmqynafybb047",
+          "name": "レイズプロテイン",
+          "protein": 21,
+          "kcal": 0,
+          "updatedAt": 1782702919235
+        }
+      ],
       "dinner": [],
       "snack": []
     }
