@@ -495,7 +495,15 @@
     "2026-06-30": {
       "breakfast": [],
       "lunch": [],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmr0qmxzodbf6",
+          "name": "シーフードトマトクリームパスタ 1食分",
+          "protein": 41,
+          "kcal": 638,
+          "updatedAt": 1782829473684
+        }
+      ],
       "snack": [
         {
           "id": "fmr0qkv4cfzc8",
