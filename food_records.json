@@ -491,6 +491,12 @@
       ],
       "dinner": [],
       "snack": []
+    },
+    "2026-06-30": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
@@ -522,11 +528,17 @@
     "2026-06-29": {
       "items": {},
       "updatedAt": 1782704696466
+    },
+    "2026-06-30": {
+      "items": {
+        "gym-4": true
+      },
+      "updatedAt": 1782829341835
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1782704696466
+    "updatedAt": 1782829341835
   },
   "recipes": []
 }
