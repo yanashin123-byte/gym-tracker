@@ -431,6 +431,7 @@
   </div>
 
   <!-- 7日タンパク質グラフ -->
+  <div id="breakfastWarn" style="padding:0 16px"></div>
   <div id="proteinTrend" style="padding:0 16px 4px"></div>
 
   <!-- 食事セクション -->
@@ -1386,6 +1387,16 @@ function render() {
 
   document.getElementById('totalProtein').textContent = total.toFixed(1);
   renderProteinTrend();
+  // 朝のタンパク質チェック（エビデンス：朝から均等に摂る方が有利）
+  const bf = (dayData.breakfast || []).filter(f => !f.deleted).reduce((s, f) => s + (f.protein || 0), 0);
+  const bw = document.getElementById('breakfastWarn');
+  if (bw) {
+    if (bf < 30) {
+      bw.innerHTML = `<div style="background:#3a2a14;border:1px solid #5a4020;border-radius:10px;padding:8px 12px;font-size:12px;color:#e8b878;margin-bottom:8px">⚠️ 朝のタンパク質 ${bf.toFixed(0)}g（目標30g+）— 朝に厚めに摂ると筋肥大に有利（プロテイン＋卵2個で達成）</div>`;
+    } else {
+      bw.innerHTML = `<div style="background:#16261a;border:1px solid #25402f;border-radius:10px;padding:8px 12px;font-size:12px;color:#7dd8a8;margin-bottom:8px">✅ 朝のタンパク質 ${bf.toFixed(0)}g クリア</div>`;
+    }
+  }
   const fill = document.getElementById('progressFill');
   fill.style.width = pct + '%';
   fill.className = 'progress-fill' + (total > 140 ? ' over' : '');

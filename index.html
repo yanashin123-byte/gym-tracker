@@ -732,8 +732,16 @@ function renderVolume() {
         <span class="vol-num ${cls}">${done}<span class="vol-target">/${min}-${max}</span></span>
       </div>`;
   }).join('');
+  // 背中の不足を強めにアラート（Pull放置防止・最大ボトルネック）
+  const backDone = vol['背中'] || 0;
+  const backMin = (VOLUME_TARGET['背中'] || [10])[0];
+  let alertHTML = '';
+  if (backDone < backMin) {
+    alertHTML = `<div style="background:#3a1414;border:1px solid #6a2424;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:#f08080;font-weight:700">🚨 背中 ${backDone}/${backMin}-${(VOLUME_TARGET['背中']||[,20])[1]}set — Pull（Day B）が不足。次のジムは背中を入れよう（ボリュームが筋肥大の最大ドライバー）</div>`;
+  }
   el.innerHTML = `
     <div class="section-title">今週のボリューム（月〜日・部位別セット数）</div>
+    ${alertHTML}
     <div class="vol-card">${rows}</div>
     <div class="vol-note">目標：各部位 週${'10-20'}set（小さい筋は6-12）／緑=適正・赤=不足・橙=過剰</div>`;
 }
