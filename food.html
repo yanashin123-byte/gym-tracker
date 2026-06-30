@@ -1340,7 +1340,7 @@ function renderProteinTrend() {
   }
   const goal = 140;
   const maxP = Math.max(goal, ...days.map(x => x.p));
-  const W = 320, H = 90, padB = 16, padT = 6;
+  const W = 320, H = 150, padB = 20, padT = 16;
   const bw = W / days.length;
   const goalY = padT + (H - padB - padT) * (1 - goal / maxP);
   const bars = days.map((x, i) => {
@@ -1350,15 +1350,16 @@ function renderProteinTrend() {
     const col = x.p >= goal ? '#4caf50' : x.p > 0 ? '#caa23a' : '#333';
     const isToday = i === days.length - 1;
     const lbl = DAY_LABELS[x.date.getDay()];
-    return `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" rx="2" fill="${col}"/>
-      <text x="${(i*bw+bw/2).toFixed(1)}" y="${H-4}" font-size="9" fill="${isToday?'#fff':'#777'}" text-anchor="middle">${lbl}</text>`;
+    const val = x.p > 0 ? `<text x="${(i*bw+bw/2).toFixed(1)}" y="${(by-3).toFixed(1)}" font-size="9" fill="#aaa" text-anchor="middle">${Math.round(x.p)}</text>` : '';
+    return `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" rx="2" fill="${col}"/>${val}
+      <text x="${(i*bw+bw/2).toFixed(1)}" y="${H-6}" font-size="10" fill="${isToday?'#fff':'#777'}" text-anchor="middle">${lbl}</text>`;
   }).join('');
   el.innerHTML = `
-    <div style="background:#1a1a1a;border-radius:12px;padding:10px 12px">
+    <div style="background:#1a1a1a;border-radius:12px;padding:10px 12px;max-width:460px;margin:0 auto">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
         <span>📈 直近7日のタンパク質</span><span style="color:#4caf50">目標 ${goal}g</span>
       </div>
-      <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none">
+      <svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block">
         <line x1="0" y1="${goalY.toFixed(1)}" x2="${W}" y2="${goalY.toFixed(1)}" stroke="#4caf50" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
         ${bars}
       </svg>
