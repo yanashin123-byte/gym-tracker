@@ -496,7 +496,15 @@
       "breakfast": [],
       "lunch": [],
       "dinner": [],
-      "snack": []
+      "snack": [
+        {
+          "id": "fmr0qkv4cfzc8",
+          "name": "VITASホエイプロテイン",
+          "protein": 30,
+          "kcal": 200,
+          "updatedAt": 1782829376652
+        }
+      ]
     }
   },
   "checks": {
