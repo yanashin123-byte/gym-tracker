@@ -477,9 +477,28 @@
     <input type="text" id="recipeName" placeholder="レシピ名（例: だれうま 鶏むねチャーシュー）"
       style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:14px;margin-bottom:12px" />
 
-    <div style="font-size:12px;color:#888;margin-bottom:6px">材料</div>
-    <div id="ingredientList"></div>
-    <button onclick="addIngredientRow()" style="width:100%;background:#2a2a2a;border:1px dashed #444;border-radius:10px;color:#aaa;padding:10px;font-size:13px;cursor:pointer;margin-bottom:14px">＋ 材料を追加</button>
+    <div style="display:flex;gap:6px;margin-bottom:12px">
+      <button id="rmode-ing" onclick="setRecipeMode('ingredients')" style="flex:1;border:none;border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;cursor:pointer">材料から計算</button>
+      <button id="rmode-direct" onclick="setRecipeMode('direct')" style="flex:1;border:none;border-radius:8px;padding:9px 0;font-size:12px;font-weight:700;cursor:pointer">カロリー・PFC直接</button>
+    </div>
+    <div id="ingredientMode">
+      <div style="font-size:12px;color:#888;margin-bottom:6px">材料</div>
+      <div id="ingredientList"></div>
+      <button onclick="addIngredientRow()" style="width:100%;background:#2a2a2a;border:1px dashed #444;border-radius:10px;color:#aaa;padding:10px;font-size:13px;cursor:pointer;margin-bottom:14px">＋ 材料を追加</button>
+    </div>
+    <div id="directMode" style="display:none;margin-bottom:14px">
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;color:#aaa">入力単位</span>
+        <button id="unit-total" onclick="setDirectUnit('total')" style="border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">全体</button>
+        <button id="unit-serving" onclick="setDirectUnit('serving')" style="border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">1食あたり</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><div style="font-size:11px;color:#888;margin-bottom:3px">カロリー (kcal)</div><input id="directKcal" type="number" min="0" inputmode="numeric" oninput="updateRecipeCalc()" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:14px"></div>
+        <div><div style="font-size:11px;color:#4caf50;margin-bottom:3px">P タンパク質 (g)</div><input id="directP" type="number" min="0" step="0.1" inputmode="decimal" oninput="updateRecipeCalc()" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:14px"></div>
+        <div><div style="font-size:11px;color:#e8a93b;margin-bottom:3px">F 脂質 (g)</div><input id="directF" type="number" min="0" step="0.1" inputmode="decimal" oninput="updateRecipeCalc()" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:14px"></div>
+        <div><div style="font-size:11px;color:#5b9bd5;margin-bottom:3px">C 炭水化物 (g)</div><input id="directC" type="number" min="0" step="0.1" inputmode="decimal" oninput="updateRecipeCalc()" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:14px"></div>
+      </div>
+    </div>
 
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span style="font-size:13px;color:#aaa">何食分作る？</span>
@@ -1534,9 +1553,33 @@ function showTab(tab) {
 
 // ===== レシピ計算 =====
 let _ingredients = []; // {name, protein, kcal}
+let _recipeMode = 'ingredients';
+let _directUnit = 'total';
+function recipeNum(id) { const e = document.getElementById(id); return e ? (parseFloat(e.value) || 0) : 0; }
+function _styleToggle(id, active, onCol) {
+  const e = document.getElementById(id); if (!e) return;
+  e.style.background = active ? (onCol || '#4caf50') : '#2a2a2a';
+  e.style.color = active ? '#fff' : '#aaa';
+}
+function setRecipeMode(m) {
+  _recipeMode = m;
+  const im = document.getElementById('ingredientMode'); if (im) im.style.display = m === 'ingredients' ? 'block' : 'none';
+  const dm = document.getElementById('directMode'); if (dm) dm.style.display = m === 'direct' ? 'block' : 'none';
+  _styleToggle('rmode-ing', m === 'ingredients', '#3a3a5a');
+  _styleToggle('rmode-direct', m === 'direct', '#3a3a5a');
+  updateRecipeCalc();
+}
+function setDirectUnit(u) {
+  _directUnit = u;
+  _styleToggle('unit-total', u === 'total');
+  _styleToggle('unit-serving', u === 'serving');
+  updateRecipeCalc();
+}
 
 function initRecipeTab() {
   if (_ingredients.length === 0) { addIngredientRow(); }
+  setRecipeMode(_recipeMode);
+  setDirectUnit(_directUnit);
   renderSavedRecipes();
 }
 
@@ -1596,21 +1639,32 @@ function removeIngredient(i) {
 }
 
 function recipeTotals() {
+  const servings = Math.max(1, parseInt(document.getElementById('recipeServings').value) || 1);
+  if (_recipeMode === 'direct') {
+    const per = _directUnit === 'serving';
+    const kcal = recipeNum('directKcal'), p = recipeNum('directP'), f = recipeNum('directF'), c = recipeNum('directC');
+    const perK = per ? kcal : kcal / servings;
+    const perP = per ? p : p / servings;
+    const perF = per ? f : f / servings;
+    const perC = per ? c : c / servings;
+    return { p: perP * servings, k: perK * servings, servings, perP, perK, perF, perC };
+  }
   const p = _ingredients.reduce((s, x) => s + (x.protein || 0), 0);
   const k = _ingredients.reduce((s, x) => s + (x.kcal || 0), 0);
-  const servings = Math.max(1, parseInt(document.getElementById('recipeServings').value) || 1);
-  return { p, k, servings, perP: p / servings, perK: k / servings };
+  return { p, k, servings, perP: p / servings, perK: k / servings, perF: 0, perC: 0 };
 }
 
 function updateRecipeCalc() {
   const t = recipeTotals();
-  document.getElementById('recipeTotal').textContent = `タンパク質 ${Math.round(t.p*10)/10}g・${Math.round(t.k)}kcal`;
-  document.getElementById('recipePerServing').textContent = `${Math.round(t.perP*10)/10}g P・${Math.round(t.perK)}kcal`;
+  const r1 = x => Math.round((x || 0) * 10) / 10;
+  document.getElementById('recipeTotal').textContent = `タンパク質 ${r1(t.p)}g・${Math.round(t.k)}kcal`;
+  const pfc = (t.perF || t.perC) ? `・F${r1(t.perF)}g・C${r1(t.perC)}g` : '';
+  document.getElementById('recipePerServing').textContent = `${r1(t.perP)}g P・${Math.round(t.perK)}kcal${pfc}`;
 }
 
 function recordRecipeServing() {
   const t = recipeTotals();
-  if (t.p <= 0) { alert('材料を入力してください'); return; }
+  if (t.perK <= 0 && t.perP <= 0) { alert('カロリーかタンパク質を入力してください'); return; }
   const name = (document.getElementById('recipeName').value.trim() || 'レシピ') + ' 1食分';
   _quickPendingFood = {
     name,
@@ -1629,13 +1683,18 @@ function saveRecipe() {
   const name = document.getElementById('recipeName').value.trim();
   if (!name) { alert('レシピ名を入力してください'); return; }
   const t = recipeTotals();
-  if (t.p <= 0) { alert('材料を入力してください'); return; }
+  if (t.perK <= 0 && t.perP <= 0) { alert('内容を入力してください'); return; }
+  const r1 = x => Math.round((x || 0) * 10) / 10;
   const fields = {
     name,
     servings: t.servings,
-    ingredients: _ingredients.filter(x => x.name || x.protein),
-    perP: Math.round(t.perP * 10) / 10,
+    mode: _recipeMode,
+    ingredients: _recipeMode === 'ingredients' ? _ingredients.filter(x => x.name || x.protein) : [],
+    direct: _recipeMode === 'direct' ? { unit: _directUnit, kcal: recipeNum('directKcal'), p: recipeNum('directP'), f: recipeNum('directF'), c: recipeNum('directC') } : null,
+    perP: r1(t.perP),
     perK: Math.round(t.perK),
+    perF: r1(t.perF),
+    perC: r1(t.perC),
     updatedAt: nowTs(),
   };
   const existing = recipesData.find(r => !r.deleted && r.name === name);
@@ -1644,7 +1703,7 @@ function saveRecipe() {
   saveToLocalStorage();
   saveData();
   renderSavedRecipes();
-  alert(`「${name}」を保存しました（1食 ${recipe.perP}g P）`);
+  alert(`「${name}」を保存しました（1食 ${fields.perP}g P）`);
 }
 
 function renderSavedRecipes() {
@@ -1658,7 +1717,7 @@ function renderSavedRecipes() {
     <div style="background:#1a1a1a;border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px">
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.name}</div>
-        <div style="font-size:12px;color:#4caf50">1食 ${r.perP}g P・${r.perK}kcal（${r.servings}食分）</div>
+        <div style="font-size:12px;color:#4caf50">1食 ${r.perP}g P・${r.perK}kcal${(r.perF || r.perC) ? ` ・F${r.perF}g C${r.perC}g` : ''}（${r.servings}食分）</div>
       </div>
       <button onclick="quickRecordRecipe(${i})" style="background:#4caf50;border:none;border-radius:8px;color:#fff;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer">記録</button>
       <button onclick="editRecipe(${i})" style="background:#2a2a2a;border:none;border-radius:8px;color:#aaa;padding:8px 10px;font-size:13px;cursor:pointer">編集</button>
@@ -1677,9 +1736,20 @@ function editRecipe(i) {
   const r = getRecipes()[i];
   document.getElementById('recipeName').value = r.name;
   document.getElementById('recipeServings').value = r.servings;
-  _ingredients = r.ingredients.map(x => ({ ...x }));
-  if (_ingredients.length === 0) _ingredients.push({ name: '', protein: 0, kcal: 0 });
-  renderIngredients();
+  if (r.mode === 'direct' && r.direct) {
+    setRecipeMode('direct');
+    setDirectUnit(r.direct.unit || 'total');
+    document.getElementById('directKcal').value = r.direct.kcal || '';
+    document.getElementById('directP').value = r.direct.p || '';
+    document.getElementById('directF').value = r.direct.f || '';
+    document.getElementById('directC').value = r.direct.c || '';
+  } else {
+    setRecipeMode('ingredients');
+    _ingredients = (r.ingredients || []).map(x => ({ ...x }));
+    if (_ingredients.length === 0) _ingredients.push({ name: '', protein: 0, kcal: 0 });
+    renderIngredients();
+  }
+  updateRecipeCalc();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
