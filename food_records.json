@@ -548,5 +548,25 @@
     "value": "gym",
     "updatedAt": 1782829341835
   },
-  "recipes": []
+  "recipes": [
+    {
+      "id": "fmr0qmsuiegm4",
+      "name": "シーフードトマトクリームパスタ",
+      "servings": 4,
+      "mode": "direct",
+      "ingredients": [],
+      "direct": {
+        "unit": "serving",
+        "kcal": 638,
+        "p": 41,
+        "f": 14.2,
+        "c": 93.5
+      },
+      "perP": 41,
+      "perK": 638,
+      "perF": 14.2,
+      "perC": 93.5,
+      "updatedAt": 1782829467018
+    }
+  ]
 }
