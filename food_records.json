@@ -494,7 +494,15 @@
     },
     "2026-06-30": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmr0qpydi7kcq",
+          "name": "寿司 1人前",
+          "protein": 38,
+          "kcal": 500,
+          "updatedAt": 1782829614150
+        }
+      ],
       "dinner": [
         {
           "id": "fmr0qmxzodbf6",
