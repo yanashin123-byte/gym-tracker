@@ -501,6 +501,13 @@
           "protein": 38,
           "kcal": 500,
           "updatedAt": 1782829614150
+        },
+        {
+          "id": "fmr0qq4ougiqf",
+          "name": "寿司 1人前",
+          "protein": 38,
+          "kcal": 500,
+          "updatedAt": 1782829622334
         }
       ],
       "dinner": [
