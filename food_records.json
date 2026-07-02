@@ -535,6 +535,26 @@
           "updatedAt": 1782829376652
         }
       ]
+    },
+    "2026-07-02": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-01": {
+      "breakfast": [
+        {
+          "id": "fmr2tsc6sg7er",
+          "name": "プロテイン",
+          "protein": 21,
+          "kcal": 120,
+          "updatedAt": 1782955696564
+        }
+      ],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
