@@ -539,7 +539,15 @@
     "2026-07-02": {
       "breakfast": [],
       "lunch": [],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmr4lqio399r3",
+          "name": "赤から鍋",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1783063107075
+        }
+      ],
       "snack": []
     },
     "2026-07-01": {
@@ -552,6 +560,12 @@
           "updatedAt": 1782955696564
         }
       ],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-03": {
+      "breakfast": [],
       "lunch": [],
       "dinner": [],
       "snack": []
