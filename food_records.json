@@ -566,7 +566,15 @@
     },
     "2026-07-03": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmr4mqh3398d0",
+          "name": "トマトクリームパスタ",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1783064784639
+        }
+      ],
       "dinner": [],
       "snack": []
     }
