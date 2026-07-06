@@ -33,9 +33,9 @@
         {
           "name": "モンスターエナジー",
           "protein": 0,
-          "kcal": 0,
+          "kcal": 170,
           "id": "2026-05-20-breakfast-3-leg",
-          "updatedAt": 0
+          "updatedAt": 1783348663177
         }
       ],
       "lunch": [
@@ -452,8 +452,8 @@
           "id": "fmqxtqzi5l8v8",
           "name": "REYS プロテイン",
           "protein": 17,
-          "kcal": 0,
-          "updatedAt": 1782653302589
+          "kcal": 85,
+          "updatedAt": 1783348663177
         }
       ]
     },
@@ -478,8 +478,8 @@
           "id": "fmqynafybb047",
           "name": "レイズプロテイン",
           "protein": 21,
-          "kcal": 0,
-          "updatedAt": 1782702919235
+          "kcal": 105,
+          "updatedAt": 1783348663177
         },
         {
           "id": "fmqyoc6i5hs8k",
@@ -617,8 +617,8 @@
           "id": "fmr95mf7of291",
           "name": "ビーレジェンド　プロテイン",
           "protein": 20,
-          "kcal": 0,
-          "updatedAt": 1783338372996
+          "kcal": 115,
+          "updatedAt": 1783348663177
         }
       ]
     },
