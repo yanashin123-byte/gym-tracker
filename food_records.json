@@ -589,7 +589,15 @@
       "breakfast": [],
       "lunch": [],
       "dinner": [],
-      "snack": []
+      "snack": [
+        {
+          "id": "fmr95mf7of291",
+          "name": "ビーレジェンド　プロテイン",
+          "protein": 20,
+          "kcal": 0,
+          "updatedAt": 1783338372996
+        }
+      ]
     },
     "2026-07-04": {
       "breakfast": [],
