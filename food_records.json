@@ -603,6 +603,13 @@
           "kcal": 440,
           "updatedAt": 1783348817803,
           "deleted": true
+        },
+        {
+          "id": "fmr9bur2njorh",
+          "name": "釜揚げうどん　得",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1783348839311
         }
       ],
       "dinner": [
