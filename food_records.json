@@ -584,6 +584,24 @@
       ],
       "dinner": [],
       "snack": []
+    },
+    "2026-07-06": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-04": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-05": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
@@ -621,11 +639,17 @@
         "gym-4": true
       },
       "updatedAt": 1782829341835
+    },
+    "2026-07-06": {
+      "items": {
+        "gym-0": true
+      },
+      "updatedAt": 1783330778801
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1782829341835
+    "updatedAt": 1783330778801
   },
   "recipes": [
     {
