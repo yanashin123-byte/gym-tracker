@@ -657,6 +657,50 @@
       "lunch": [],
       "dinner": [],
       "snack": []
+    },
+    "2026-07-07": {
+      "breakfast": [
+        {
+          "id": "fmr9ql43pgp9x",
+          "name": "バナナ",
+          "protein": 1.1,
+          "kcal": 86,
+          "updatedAt": 1783373583877
+        }
+      ],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-08": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-09": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-10": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-11": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-07-12": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
