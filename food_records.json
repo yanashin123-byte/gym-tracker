@@ -634,7 +634,8 @@
           "name": "ビーレジェンド　プロテイン",
           "protein": 20,
           "kcal": 115,
-          "updatedAt": 1783348663177
+          "updatedAt": 1783348855375,
+          "deleted": true
         }
       ]
     },
