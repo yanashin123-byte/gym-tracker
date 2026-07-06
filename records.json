@@ -699,6 +699,130 @@
         }
       ],
       "updatedAt": 1782826077091
+    },
+    {
+      "id": "rmr8z40bt8hh0",
+      "date": "2026-07-06",
+      "day": "B",
+      "exercises": [
+        {
+          "name": "ワイドプルダウン",
+          "weight": 40,
+          "sets": [
+            10,
+            10,
+            10,
+            10
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            9
+          ],
+          "rirs": [
+            3,
+            1,
+            1,
+            0
+          ],
+          "note": ""
+        },
+        {
+          "name": "ローロウ",
+          "weight": 20,
+          "sets": [
+            10,
+            10,
+            10,
+            11
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "note": "ワンハンド"
+        },
+        {
+          "name": "プルオーバー",
+          "weight": 12,
+          "sets": [
+            9,
+            8,
+            9,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ダンベルカール",
+          "weight": 10,
+          "sets": [
+            5,
+            4,
+            4,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            3,
+            null
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            null
+          ],
+          "note": "シーテッド"
+        },
+        {
+          "name": "リバースフライ",
+          "weight": 5,
+          "sets": [
+            9,
+            8,
+            9,
+            11
+          ],
+          "cheating": [
+            7,
+            7,
+            8,
+            null
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "note": ""
+        }
+      ],
+      "note": "彼女寝てたし、少し時間に余裕あった。あとずっと言ってなくて焦った",
+      "updatedAt": 1783327436201
     }
   ]
 }
