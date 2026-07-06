@@ -600,7 +600,8 @@
           "name": "丸亀製麺 釜揚げうどん 並",
           "protein": 11,
           "kcal": 440,
-          "updatedAt": 1783338390329
+          "updatedAt": 1783348817803,
+          "deleted": true
         }
       ],
       "dinner": [
