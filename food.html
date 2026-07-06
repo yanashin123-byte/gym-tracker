@@ -439,7 +439,7 @@
 
   <!-- よく使う食材 -->
   <div class="quick-section">
-    <div class="quick-title">⚡ クイック追加</div>
+    <div class="quick-title">⚡ よく使う（履歴から自動）</div>
     <div class="quick-grid" id="quickGrid"></div>
   </div>
 </div>
@@ -5737,9 +5737,14 @@ function renderProteinTrend() {
   if (!el) return;
   const DAY_LABELS = ['日','月','火','水','木','金','土'];
   const days = [];
-  for (let i = -6; i <= 0; i++) {
-    const d = new Date(currentDate.getTime() + i * 86400000);
-    days.push({ date: d, p: calcProtein(d) });
+  // 月曜〜日曜の固定週（currentDateが含まれる週）
+  const base = new Date(currentDate); base.setHours(0,0,0,0);
+  const offsetToMonday = (base.getDay() + 6) % 7; // 月=0..日=6
+  const monday = new Date(base.getTime() - offsetToMonday * 86400000);
+  const todayT = new Date(); todayT.setHours(0,0,0,0);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getTime() + i * 86400000);
+    days.push({ date: d, p: calcProtein(d), isToday: d.getTime() === todayT.getTime() });
   }
   const goal = 140;
   const maxP = Math.max(goal, ...days.map(x => x.p));
@@ -5751,7 +5756,7 @@ function renderProteinTrend() {
     const bx = i * bw + bw * 0.2;
     const by = H - padB - bh;
     const col = x.p >= goal ? '#4caf50' : x.p > 0 ? '#caa23a' : '#333';
-    const isToday = i === days.length - 1;
+    const isToday = x.isToday;
     const lbl = DAY_LABELS[x.date.getDay()];
     const val = x.p > 0 ? `<text x="${(i*bw+bw/2).toFixed(1)}" y="${(by-3).toFixed(1)}" font-size="9" fill="#aaa" text-anchor="middle">${Math.round(x.p)}</text>` : '';
     return `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${(bw*0.6).toFixed(1)}" height="${Math.max(0,bh).toFixed(1)}" rx="2" fill="${col}"/>${val}
@@ -5760,7 +5765,7 @@ function renderProteinTrend() {
   el.innerHTML = `
     <div style="background:#1a1a1a;border-radius:12px;padding:10px 12px;max-width:460px;margin:0 auto">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px">
-        <span>📈 直近7日のタンパク質</span><span style="color:#4caf50">目標 ${goal}g</span>
+        <span>📈 今週のタンパク質（月〜日）</span><span style="color:#4caf50">目標 ${goal}g</span>
       </div>
       <svg viewBox="0 0 ${W} ${H}" width="100%" style="height:auto;display:block">
         <line x1="0" y1="${goalY.toFixed(1)}" x2="${W}" y2="${goalY.toFixed(1)}" stroke="#4caf50" stroke-width="1" stroke-dasharray="4 3" opacity="0.6"/>
@@ -5840,13 +5845,41 @@ function render() {
     container.appendChild(sec);
   });
 
-  // クイック追加
+  // クイック追加（履歴ベース：実際によく使う食品だけ）
   const grid = document.getElementById('quickGrid');
-  grid.innerHTML = QUICK_FOODS.map(f => `
+  const freq = frequentFoods();
+  const list = freq.length ? freq : QUICK_FOODS;
+  grid.innerHTML = list.map(f => `
     <button class="quick-item" onclick="quickAdd(${JSON.stringify(f).replace(/"/g, '&quot;')})">
       ${f.label}${f.per100g ? '<span style="color:#888;font-size:10px">g選択</span>' : `<span>${f.protein}g P</span>`}
     </button>
   `).join('');
+}
+
+// 履歴からよく使う食品を算出（直近45日で使用・頻度＋直近性でソート）。使わなくなったものは自然に消える
+function frequentFoods() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const WINDOW = 45;
+  const stats = {};
+  Object.keys(data).forEach(date => {
+    const dd = new Date(date + 'T00:00:00');
+    const age = Math.round((today - dd) / 86400000);
+    const day = data[date]; if (!day) return;
+    ['breakfast','lunch','dinner','snack'].forEach(mid => {
+      (day[mid] || []).forEach(f => {
+        if (f.deleted || !f.name) return;
+        const s = stats[f.name] || (stats[f.name] = { count: 0, lastTime: 0, lastAge: 9999, protein: 0, kcal: 0 });
+        s.count++;
+        if (dd.getTime() >= s.lastTime) { s.lastTime = dd.getTime(); s.lastAge = age; s.protein = f.protein || 0; s.kcal = f.kcal || 0; }
+      });
+    });
+  });
+  return Object.entries(stats)
+    .map(([name, s]) => ({ name, ...s }))
+    .filter(s => s.lastAge <= WINDOW)                 // 最近使ってないものは除外
+    .sort((a, b) => (b.count - a.count) || (a.lastAge - b.lastAge))
+    .slice(0, 12)
+    .map(s => ({ name: s.name, label: s.name, protein: s.protein, kcal: s.kcal }));
 }
 
 function changeDay(d) {
