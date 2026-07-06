@@ -666,6 +666,13 @@
           "protein": 1.1,
           "kcal": 86,
           "updatedAt": 1783373583877
+        },
+        {
+          "id": "fmr9qt56u7ys9",
+          "name": "ビーレジェンド　ミルキー味",
+          "protein": 20,
+          "kcal": 120,
+          "updatedAt": 1783373958534
         }
       ],
       "lunch": [],
