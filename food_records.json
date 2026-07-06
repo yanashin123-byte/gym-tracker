@@ -594,6 +594,13 @@
           "protein": 11,
           "kcal": 440,
           "updatedAt": 1783338385424
+        },
+        {
+          "id": "fmr95msl5hnq",
+          "name": "丸亀製麺 釜揚げうどん 並",
+          "protein": 11,
+          "kcal": 440,
+          "updatedAt": 1783338390329
         }
       ],
       "dinner": [],
