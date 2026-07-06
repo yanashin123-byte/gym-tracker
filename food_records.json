@@ -603,7 +603,15 @@
           "updatedAt": 1783338390329
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmr95mzvzcamq",
+          "name": "唐揚げ定食",
+          "protein": 30,
+          "kcal": 800,
+          "updatedAt": 1783338399791
+        }
+      ],
       "snack": [
         {
           "id": "fmr95mf7of291",
