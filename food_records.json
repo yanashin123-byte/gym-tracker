@@ -644,14 +644,15 @@
       "items": {
         "gym-0": true,
         "gym-1": true,
-        "gym-2": true
+        "gym-2": true,
+        "gym-3": true
       },
-      "updatedAt": 1783330781631
+      "updatedAt": 1783330782764
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783330781631
+    "updatedAt": 1783330782764
   },
   "recipes": [
     {
