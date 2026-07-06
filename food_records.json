@@ -587,7 +587,15 @@
     },
     "2026-07-06": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmr95mosw45s4",
+          "name": "丸亀製麺 釜揚げうどん 並",
+          "protein": 11,
+          "kcal": 440,
+          "updatedAt": 1783338385424
+        }
+      ],
       "dinner": [],
       "snack": [
         {
