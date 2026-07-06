@@ -610,6 +610,13 @@
           "protein": 0,
           "kcal": 0,
           "updatedAt": 1783348839311
+        },
+        {
+          "id": "fmr9buzt95z2y",
+          "name": "おにぎり 明太子",
+          "protein": 6,
+          "kcal": 185,
+          "updatedAt": 1783348850637
         }
       ],
       "dinner": [
