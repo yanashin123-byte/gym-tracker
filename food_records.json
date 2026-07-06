@@ -642,14 +642,15 @@
     },
     "2026-07-06": {
       "items": {
-        "gym-0": true
+        "gym-0": true,
+        "gym-1": true
       },
-      "updatedAt": 1783330778801
+      "updatedAt": 1783330779363
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783330778801
+    "updatedAt": 1783330779363
   },
   "recipes": [
     {
