@@ -689,6 +689,13 @@
           "protein": 20,
           "kcal": 0,
           "updatedAt": 1783395691263
+        },
+        {
+          "id": "fmra3rjnrmm",
+          "name": "サラダチキンバー",
+          "protein": 11,
+          "kcal": 65,
+          "updatedAt": 1783395718983
         }
       ],
       "dinner": [],
