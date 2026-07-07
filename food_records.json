@@ -675,7 +675,15 @@
           "updatedAt": 1783373958534
         }
       ],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmra3qgrtj2ob",
+          "name": "SAVAS ミルクプロテイン 脂肪0 ココア",
+          "protein": 15,
+          "kcal": 102,
+          "updatedAt": 1783395668585
+        }
+      ],
       "dinner": [],
       "snack": []
     },
