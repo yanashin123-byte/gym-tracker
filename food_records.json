@@ -705,6 +705,13 @@
           "protein": 20,
           "kcal": 0,
           "updatedAt": 1783424041612
+        },
+        {
+          "id": "fmrakmyt6138q",
+          "name": "家系ラーメン 大盛り",
+          "protein": 34,
+          "kcal": 1050,
+          "updatedAt": 1783424058810
         }
       ],
       "snack": []
