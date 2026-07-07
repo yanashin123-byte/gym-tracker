@@ -698,7 +698,15 @@
           "updatedAt": 1783395718983
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrakmljgaaur",
+          "name": "ビーレジェンド　鳥貴族ミックスジュース味",
+          "protein": 20,
+          "kcal": 0,
+          "updatedAt": 1783424041612
+        }
+      ],
       "snack": []
     },
     "2026-07-08": {
