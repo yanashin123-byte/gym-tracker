@@ -712,6 +712,13 @@
           "protein": 34,
           "kcal": 1050,
           "updatedAt": 1783424058810
+        },
+        {
+          "id": "fmraknahjb99a",
+          "name": "串カツ盛り合わせ",
+          "protein": 25,
+          "kcal": 720,
+          "updatedAt": 1783424073943
         }
       ],
       "snack": []
