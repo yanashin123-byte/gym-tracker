@@ -682,6 +682,13 @@
           "protein": 15,
           "kcal": 102,
           "updatedAt": 1783395668585
+        },
+        {
+          "id": "fmra3qy9rhwfp",
+          "name": "SAVAS ストロベリー",
+          "protein": 20,
+          "kcal": 0,
+          "updatedAt": 1783395691263
         }
       ],
       "dinner": [],
