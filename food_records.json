@@ -724,7 +724,15 @@
       "snack": []
     },
     "2026-07-08": {
-      "breakfast": [],
+      "breakfast": [
+        {
+          "id": "fmrbxac8nizfp",
+          "name": "ビーレジェンド　鳥貴族ミックスジュース味",
+          "protein": 20,
+          "kcal": 115,
+          "updatedAt": 1783505770871
+        }
+      ],
       "lunch": [],
       "dinner": [],
       "snack": []
