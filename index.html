@@ -542,6 +542,7 @@
       style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;color:#ddd;padding:10px;font-size:13px;resize:vertical"></textarea>
   </div>
   <button class="save-btn save-A" id="save-btn" onclick="saveRecord()">✅ 保存</button>
+  <button class="new-session-btn" onclick="prefillFromLast()">⤴ 前回の値を全種目に入れる</button>
   <button class="new-session-btn" onclick="newSession()">＋ 別のセッションを記録（新規）</button>
 </div>
 
@@ -1064,6 +1065,33 @@ function getPrev(name) {
     if (ex) return { weight: ex.weight, date: records[i].date };
   }
   return null;
+}
+
+// 各種目の「前回の記録」オブジェクトを返す（編集中は除外）
+function getLastEx(name) {
+  for (let i = records.length - 1; i >= 0; i--) {
+    if (records[i].day !== currentDay) continue;
+    if (records[i].id === editingId) continue;
+    const ex = records[i].exercises.find(e => e.name === name);
+    if (ex && (ex.weight > 0 || (ex.sets||[]).some(s => s > 0))) return ex;
+  }
+  return null;
+}
+
+// 前回セッションの重量・レップ・RIR・チートを全種目に流し込む（微修正して保存する用）
+function prefillFromLast() {
+  let filled = 0;
+  activeExercises(currentDay).forEach(name => {
+    const ex = getLastEx(name);
+    if (!ex) return;
+    const w = document.getElementById(`${name}-weight`);
+    if (w) { w.value = ex.weight || ''; filled++; }
+    (ex.sets||[]).forEach((v,i) => { const el = document.getElementById(`${name}-set${i+1}`); if (el && v > 0) el.value = v; });
+    (ex.cheating||[]).forEach((v,i) => { const el = document.getElementById(`${name}-set${i+1}-cheat`); if (el && v) el.value = v; });
+    (ex.rirs||[]).forEach((v,i) => { const el = document.getElementById(`${name}-set${i+1}-rir`); if (el && typeof v === 'number') el.value = v; });
+  });
+  scheduleDraftSave();
+  showToast(filled ? '⤴ 前回の値を入れました（調整して保存）' : '前回の記録がありません');
 }
 
 function getRecommendation(name) {

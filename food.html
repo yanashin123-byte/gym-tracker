@@ -434,6 +434,10 @@
   <div id="breakfastWarn" style="padding:0 16px"></div>
   <div id="proteinTrend" style="padding:0 16px 4px"></div>
 
+  <div style="padding:4px 16px 0">
+    <button onclick="copyPrevDay()" style="width:100%;background:#1e1e1e;border:1px solid #333;border-radius:10px;color:#aaa;padding:9px;font-size:13px;cursor:pointer">📋 前回食べた日をこの日にコピー</button>
+  </div>
+
   <!-- 食事セクション -->
   <div id="mealSections"></div>
 
@@ -5724,6 +5728,31 @@ function getDayData(date) {
     data[key] = { breakfast: [], lunch: [], dinner: [], snack: [] };
   }
   return data[key];
+}
+
+// 直近の「食事が記録された過去日」の内容を現在日にコピー（ルーティン飯の時短）
+function copyPrevDay() {
+  const curKey = getKey(currentDate);
+  let srcKey = null;
+  Object.keys(data).sort().reverse().forEach(k => {
+    if (srcKey || k >= curKey) return;
+    const day = data[k];
+    const has = ['breakfast','lunch','dinner','snack'].some(m => (day[m]||[]).some(f => !f.deleted));
+    if (has) srcKey = k;
+  });
+  if (!srcKey) { alert('コピー元の記録が見つかりません'); return; }
+  const src = data[srcKey];
+  const dst = getDayData(currentDate);
+  const md = srcKey.slice(5).replace('-','/');
+  if (!confirm(`${md} の食事をこの日にコピーしますか？（今の記録に追加されます）`)) return;
+  const now = nowTs();
+  ['breakfast','lunch','dinner','snack'].forEach(m => {
+    (src[m]||[]).filter(f => !f.deleted).forEach(f => {
+      dst[m].push({ id: genId(), name: f.name, protein: f.protein||0, kcal: f.kcal||0, updatedAt: now });
+    });
+  });
+  saveData();
+  render();
 }
 
 function calcProtein(date) {
