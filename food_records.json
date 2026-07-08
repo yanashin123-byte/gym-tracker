@@ -748,6 +748,13 @@
           "protein": 2.5,
           "kcal": 156,
           "updatedAt": 1783505817371
+        },
+        {
+          "id": "fmrbxbl912gp5",
+          "name": "マトンビリヤニ",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1783505829205
         }
       ],
       "snack": []
