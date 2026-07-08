@@ -741,6 +741,13 @@
           "protein": 22,
           "kcal": 490,
           "updatedAt": 1783505795104
+        },
+        {
+          "id": "fmrbxbc4bfpzn",
+          "name": "白米ごはん",
+          "protein": 2.5,
+          "kcal": 156,
+          "updatedAt": 1783505817371
         }
       ],
       "snack": []
