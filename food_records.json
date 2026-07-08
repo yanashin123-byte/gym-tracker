@@ -734,7 +734,15 @@
         }
       ],
       "lunch": [],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrbxauxsmrx",
+          "name": "バターチキンカレー",
+          "protein": 22,
+          "kcal": 490,
+          "updatedAt": 1783505795104
+        }
+      ],
       "snack": []
     },
     "2026-07-09": {
