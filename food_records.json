@@ -769,7 +769,15 @@
     },
     "2026-07-09": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmrd5625b2hb3",
+          "name": "バナナ",
+          "protein": 1.1,
+          "kcal": 86,
+          "updatedAt": 1783579474271
+        }
+      ],
       "dinner": [],
       "snack": []
     },
