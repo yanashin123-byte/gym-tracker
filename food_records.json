@@ -850,18 +850,18 @@
     },
     "2026-07-09": {
       "items": {
-        "gym-0": false,
+        "gym-0": true,
         "gym-1": false,
         "gym-2": false,
         "gym-3": false,
         "gym-4": false
       },
-      "updatedAt": 1783559901791
+      "updatedAt": 1783579430790
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783559901791
+    "updatedAt": 1783579430790
   },
   "recipes": [
     {
