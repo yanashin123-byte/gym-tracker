@@ -819,7 +819,8 @@
           "name": "ちばちゃんからあげ　◯個",
           "protein": 0,
           "kcal": 0,
-          "updatedAt": 1783592215008
+          "updatedAt": 1783592804680,
+          "deleted": true
         }
       ],
       "snack": []
