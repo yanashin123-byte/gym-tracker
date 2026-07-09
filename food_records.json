@@ -841,14 +841,15 @@
     "2026-07-08": {
       "items": {
         "gym-0": true,
-        "gym-1": true
+        "gym-1": true,
+        "gym-2": true
       },
-      "updatedAt": 1783559889188
+      "updatedAt": 1783559889672
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783559889188
+    "updatedAt": 1783559889672
   },
   "recipes": [
     {
