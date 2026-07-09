@@ -854,14 +854,14 @@
         "gym-1": false,
         "gym-2": false,
         "gym-3": false,
-        "gym-4": false
+        "gym-4": true
       },
-      "updatedAt": 1783559901791
+      "updatedAt": 1783559900838
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783559901791
+    "updatedAt": 1783559900838
   },
   "recipes": [
     {
