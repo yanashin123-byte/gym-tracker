@@ -913,14 +913,14 @@
         "gym-1": true,
         "gym-2": false,
         "gym-3": false,
-        "gym-4": false
+        "gym-4": true
       },
-      "updatedAt": 1783601627426
+      "updatedAt": 1783601629293
     }
   },
   "checkMode": {
     "value": "gym",
-    "updatedAt": 1783601627426
+    "updatedAt": 1783601629293
   },
   "recipes": [
     {
