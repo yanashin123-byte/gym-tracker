@@ -828,6 +828,24 @@
           "protein": 32,
           "kcal": 450,
           "updatedAt": 1783604150301
+        },
+        {
+          "id": "f19f471956ccanlh",
+          "name": "焼きうどん（野菜なし）2玉",
+          "protein": 24,
+          "kcal": 900,
+          "fat": 30,
+          "carb": 132,
+          "updatedAt": 1783604270796
+        },
+        {
+          "id": "f19f471956cct6ah",
+          "name": "あらびきソーセージ 6本",
+          "protein": 18,
+          "kcal": 480,
+          "fat": 44.4,
+          "carb": 4.8,
+          "updatedAt": 1783604270796
         }
       ],
       "snack": []
