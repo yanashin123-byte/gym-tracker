@@ -790,6 +790,13 @@
           "protein": 20,
           "kcal": 115,
           "updatedAt": 1783579616405
+        },
+        {
+          "id": "fmrd59borjez4",
+          "name": "牛乳",
+          "protein": 6.6,
+          "kcal": 134,
+          "updatedAt": 1783579626603
         }
       ],
       "dinner": [],
