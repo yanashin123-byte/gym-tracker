@@ -889,7 +889,15 @@
           "updatedAt": 1783763334430
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrg6ndpyhajt",
+          "name": "炭火焼サラダチキン",
+          "protein": 16.2,
+          "kcal": 0,
+          "updatedAt": 1783763360566
+        }
+      ],
       "snack": []
     },
     "2026-07-12": {
