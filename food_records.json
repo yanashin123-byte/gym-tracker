@@ -873,7 +873,15 @@
           "updatedAt": 1783763310431
         }
       ],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmrg6mlsn6do6",
+          "name": "焼きうどん（野菜なし）",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1783763324375
+        }
+      ],
       "dinner": [],
       "snack": []
     },
