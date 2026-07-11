@@ -903,6 +903,13 @@
           "protein": 20,
           "kcal": 115,
           "updatedAt": 1783763369478
+        },
+        {
+          "id": "fmrg6nsvpinm7",
+          "name": "五目ご飯",
+          "protein": 4.6,
+          "kcal": 0,
+          "updatedAt": 1783763380213
         }
       ],
       "snack": []
