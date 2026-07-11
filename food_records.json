@@ -864,6 +864,13 @@
           "protein": 20,
           "kcal": 115,
           "updatedAt": 1783763304101
+        },
+        {
+          "id": "fmrg6mb1bhazi",
+          "name": "バナナ",
+          "protein": 1.1,
+          "kcal": 86,
+          "updatedAt": 1783763310431
         }
       ],
       "lunch": [],
