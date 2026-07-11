@@ -880,6 +880,13 @@
           "protein": 0,
           "kcal": 0,
           "updatedAt": 1783763324375
+        },
+        {
+          "id": "fmrg6mtjy2zg9",
+          "name": "あらびきソーセージ 6本",
+          "protein": 18,
+          "kcal": 480,
+          "updatedAt": 1783763334430
         }
       ],
       "dinner": [],
