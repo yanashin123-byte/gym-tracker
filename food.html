@@ -438,6 +438,25 @@
     <button onclick="copyPrevDay()" style="width:100%;background:#1e1e1e;border:1px solid #333;border-radius:10px;color:#aaa;padding:9px;font-size:13px;cursor:pointer">📋 前回食べた日をこの日にコピー</button>
   </div>
 
+  <!-- 文章でまとめて記録 -->
+  <div style="padding:10px 16px 0">
+    <div style="background:#1a1a1a;border-radius:12px;padding:12px">
+      <div style="font-size:12px;color:#888;margin-bottom:6px">✍️ 文章でまとめて記録（例：焼きうどん2玉、ソーセージ6本）</div>
+      <textarea id="freeTextInput" rows="2" placeholder="食べたものをまとめて書く…&#10;「、」「,」「と」区切りで複数OK。個数（2玉/6本/3個など）も認識します"
+        style="width:100%;box-sizing:border-box;background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:10px;font-size:13px;resize:vertical;margin-bottom:8px"></textarea>
+      <div style="display:flex;gap:6px;align-items:center">
+        <select id="freeTextMeal" style="background:#2a2a2a;border:none;border-radius:8px;color:#eee;padding:8px;font-size:12px">
+          <option value="breakfast">🌅朝食</option>
+          <option value="lunch">☀️昼食</option>
+          <option value="dinner">🌙夕食</option>
+          <option value="snack">🍎間食</option>
+        </select>
+        <button onclick="addFromFreeText()" style="flex:1;background:#4caf50;border:none;border-radius:8px;color:#fff;padding:9px;font-size:13px;font-weight:700;cursor:pointer">解析して追加</button>
+      </div>
+      <div id="freeTextResult" style="font-size:11px;color:#888;margin-top:6px"></div>
+    </div>
+  </div>
+
   <!-- 食事セクション -->
   <div id="mealSections"></div>
 
@@ -5756,6 +5775,74 @@ function copyPrevDay() {
   });
   saveData();
   render();
+}
+
+// 「焼きうどん2玉、ソーセージ6本」のような文章を品目に分解してDB照合し記録する
+function parseFreeTextFoods(text) {
+  const QTY_RE = /^([0-9]+(?:\.[0-9]+)?)\s*(個|本|玉|枚|杯|缶|皿|パック|袋|尾|切れ|貫|人前|g|ml)?\s*/;
+  const segments = text
+    .split(/[、,，\n]|(?:\s+と\s+)|(?:\s{2,})/)
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const results = [];
+  segments.forEach(seg => {
+    let qty = 1;
+    // 先頭の数量（例: "2玉 焼きうどん"）
+    let m = seg.match(QTY_RE);
+    let rest = seg;
+    if (m) { qty = parseFloat(m[1]); rest = seg.slice(m[0].length).trim(); }
+    // 末尾の数量（例: "焼きうどん2玉" "ソーセージ6本"）
+    const tailRe = /([0-9]+(?:\.[0-9]+)?)\s*(個|本|玉|枚|杯|缶|皿|パック|袋|尾|切れ|貫|人前)$/;
+    const tm = rest.match(tailRe);
+    if (tm) { qty = parseFloat(tm[1]); rest = rest.slice(0, rest.length - tm[0].length).trim(); }
+    if (!rest) rest = seg;
+
+    const candidates = searchFoodDB(rest);
+    if (candidates.length > 0) {
+      // 完全一致 > 前方一致 > 短い名前（＝チェーン修飾語が付いてない素の食品）を優先
+      const ranked = candidates.slice().sort((a, b) => {
+        const ax = a.name === rest ? 0 : a.name.startsWith(rest) ? 1 : 2;
+        const bx = b.name === rest ? 0 : b.name.startsWith(rest) ? 1 : 2;
+        if (ax !== bx) return ax - bx;
+        return a.name.length - b.name.length;
+      });
+      const f = ranked[0];
+      results.push({
+        name: qty !== 1 ? `${f.name} ${qty}${tm ? tm[2] : (m ? m[2] || '' : '')}`.trim() : f.name,
+        protein: Math.round((f.protein || 0) * qty * 10) / 10,
+        kcal: Math.round((f.kcal || 0) * qty),
+        matched: true, raw: seg,
+      });
+    } else {
+      // DB未一致 → そのまま記録（値0）。食事DB育成プロトコルで後ほど照合・修正する
+      results.push({ name: seg, protein: 0, kcal: 0, matched: false, raw: seg });
+    }
+  });
+  return results;
+}
+
+function addFromFreeText() {
+  const text = (document.getElementById('freeTextInput').value || '').trim();
+  if (!text) return;
+  const mealId = document.getElementById('freeTextMeal').value;
+  const items = parseFreeTextFoods(text);
+  if (!items.length) return;
+  const dayData = getDayData(currentDate);
+  const now = nowTs();
+  items.forEach(it => {
+    dayData[mealId].push({ id: genId(), name: it.name, protein: it.protein, kcal: it.kcal, updatedAt: now });
+  });
+  saveData();
+  render();
+  document.getElementById('freeTextInput').value = '';
+  const matched = items.filter(i => i.matched).length;
+  const unmatched = items.length - matched;
+  const resEl = document.getElementById('freeTextResult');
+  resEl.innerHTML = items.map(i =>
+    i.matched ? `✅ ${i.name}（${i.protein}g P・${i.kcal}kcal）` : `⚠️ ${i.raw}（DB未登録・値は後で確認）`
+  ).join('<br>');
+  showToast(unmatched > 0 ? `${matched}件追加・${unmatched}件は要確認` : `✅ ${matched}件追加しました`);
 }
 
 function calcProtein(date) {
