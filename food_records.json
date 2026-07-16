@@ -975,7 +975,22 @@
       "snack": []
     },
     "2026-07-17": {
-      "breakfast": [],
+      "breakfast": [
+        {
+          "id": "fmro2co4yf27z",
+          "name": "ポーク玉子おにぎり",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784239871794
+        },
+        {
+          "id": "fmro2co4yb7cw",
+          "name": "濃いお茶",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784239871794
+        }
+      ],
       "lunch": [],
       "dinner": [],
       "snack": []
