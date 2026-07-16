@@ -938,7 +938,22 @@
           "updatedAt": 1784213141198
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrnmg4xyg2iy",
+          "name": "ペヤング大盛り",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784213159686
+        },
+        {
+          "id": "fmrnmg4xyhwfo",
+          "name": "豚肉少し",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784213159686
+        }
+      ],
       "snack": []
     },
     "2026-07-13": {
