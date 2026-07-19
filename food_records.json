@@ -1033,7 +1033,15 @@
     "2026-07-19": {
       "breakfast": [],
       "lunch": [],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrrtoikwdcrw",
+          "name": "ベルクス　タルタルチキン弁当",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784467172624
+        }
+      ],
       "snack": []
     }
   },
