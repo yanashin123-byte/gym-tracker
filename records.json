@@ -831,7 +831,7 @@
       "exercises": [
         {
           "name": "チェスト＆デクラインコンボ",
-          "weight": 50,
+          "weight": 25,
           "sets": [
             12,
             12,
@@ -923,7 +923,131 @@
         }
       ],
       "note": "今日休みで午前中たっぷり寝たし、トレ前にエネルギー補給（プロテインとバナナ）してトレ行かなかったらもったいないと思った。",
-      "updatedAt": 1783594822582
+      "updatedAt": 1783585469595
+    },
+    {
+      "id": "rmrrw1jwh6e8s",
+      "date": "2026-07-19",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェスト＆デクラインコンボ",
+          "weight": 27.5,
+          "sets": [
+            9,
+            9,
+            8,
+            8
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            1,
+            0,
+            0
+          ],
+          "note": ""
+        },
+        {
+          "name": "チェストプレス",
+          "weight": 30,
+          "sets": [
+            12,
+            12,
+            12,
+            12
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            1,
+            0,
+            0
+          ],
+          "note": "4セット目8回目くらいからフォーム崩れてる"
+        },
+        {
+          "name": "ショルダープレスマシン",
+          "weight": 10,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 8,
+          "sets": [
+            11,
+            11,
+            13,
+            0
+          ],
+          "cheating": [
+            null,
+            8,
+            8,
+            null
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 15,
+          "sets": [
+            12,
+            12,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            2,
+            null,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "友達と約束したから",
+      "updatedAt": 1784471140097
     }
   ]
 }
