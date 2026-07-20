@@ -1048,6 +1048,130 @@
       ],
       "note": "友達と約束したから",
       "updatedAt": 1784471156813
+    },
+    {
+      "id": "rmrsmbg26736n",
+      "date": "2026-07-20",
+      "day": "B",
+      "exercises": [
+        {
+          "name": "ワイドプルダウン",
+          "weight": 40,
+          "sets": [
+            11,
+            8,
+            9,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            0,
+            0,
+            0,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ローロウ（テクノジム）",
+          "weight": 40,
+          "sets": [
+            12,
+            13,
+            12,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            1,
+            1,
+            1,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "プルオーバー",
+          "weight": 12,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ダンベルカール",
+          "weight": 10,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "リバースフライ",
+          "weight": 5,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "",
+      "updatedAt": 1784515271694
     }
   ]
 }
