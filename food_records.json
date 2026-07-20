@@ -1077,7 +1077,15 @@
           "updatedAt": 1784544562649
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmrt3royogawx",
+          "name": "豚山　小ラーメン",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784544583200
+        }
+      ],
       "snack": []
     },
     "2026-07-21": {
