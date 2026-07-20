@@ -1083,7 +1083,8 @@
           "name": "豚山　小ラーメン",
           "protein": 0,
           "kcal": 0,
-          "updatedAt": 1784544583200
+          "updatedAt": 1784544588078,
+          "deleted": true
         }
       ],
       "snack": []
