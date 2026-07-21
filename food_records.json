@@ -1112,6 +1112,13 @@
           "protein": 0,
           "kcal": 0,
           "updatedAt": 1784605099705
+        },
+        {
+          "id": "fmru3sy3i6q2d",
+          "name": "ビーレジェンド　鳥貴族ミックスジュース味",
+          "protein": 20,
+          "kcal": 115,
+          "updatedAt": 1784605107870
         }
       ],
       "dinner": [],
