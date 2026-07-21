@@ -1105,7 +1105,15 @@
     },
     "2026-07-21": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmru3srsp1bd",
+          "name": "焼きうどん　1.5玉（ソーセージ入り",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1784605099705
+        }
+      ],
       "dinner": [],
       "snack": []
     },
