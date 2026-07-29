@@ -1166,7 +1166,15 @@
         }
       ],
       "dinner": [],
-      "snack": []
+      "snack": [
+        {
+          "id": "fms5l3dyvfefe",
+          "name": "コーヒーフロート",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785299276407
+        }
+      ]
     },
     "2026-07-27": {
       "breakfast": [],
