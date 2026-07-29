@@ -1,6 +1,36 @@
 {
   "v": 2,
   "meals": {
+    "2026-07-29": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "id": "fms5l33ysgdr3",
+          "name": "六厘舎　つけ麺　特盛",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785299263444
+        }
+      ],
+      "dinner": [
+        {
+          "id": "fms6350pxb44u",
+          "name": "カツカレー大盛り",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785329585637
+        }
+      ],
+      "snack": [
+        {
+          "id": "fms5l3dyvfefe",
+          "name": "コーヒーフロート",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785299276407
+        }
+      ]
+    },
     "2026-05-18": {
       "breakfast": [],
       "lunch": [],
@@ -1153,28 +1183,6 @@
       "lunch": [],
       "dinner": [],
       "snack": []
-    },
-    "2026-07-29": {
-      "breakfast": [],
-      "lunch": [
-        {
-          "id": "fms5l33ysgdr3",
-          "name": "六厘舎　つけ麺　特盛",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785299263444
-        }
-      ],
-      "dinner": [],
-      "snack": [
-        {
-          "id": "fms5l3dyvfefe",
-          "name": "コーヒーフロート",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785299276407
-        }
-      ]
     },
     "2026-07-27": {
       "breakfast": [],
