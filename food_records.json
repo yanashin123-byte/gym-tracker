@@ -1238,7 +1238,15 @@
           "updatedAt": 1785399501804
         }
       ],
-      "snack": []
+      "snack": [
+        {
+          "id": "fms78rqsp3ksx",
+          "name": "ビーレジェンド　鳥貴族ミックスジュース味",
+          "protein": 20,
+          "kcal": 115,
+          "updatedAt": 1785399510121
+        }
+      ]
     },
     "2026-07-31": {
       "breakfast": [],
