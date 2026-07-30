@@ -1197,7 +1197,15 @@
       "snack": []
     },
     "2026-07-30": {
-      "breakfast": [],
+      "breakfast": [
+        {
+          "id": "fms6xy26k3xio",
+          "name": "ローソン からあげクン レッド",
+          "protein": 13,
+          "kcal": 227,
+          "updatedAt": 1785381329036
+        }
+      ],
       "lunch": [
         {
           "id": "fms6xwtiik67b",
