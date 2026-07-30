@@ -7,7 +7,7 @@
         {
           "id": "fms5l33ysgdr3",
           "name": "六厘舎　つけ麺　特盛",
-          "protein": 32.0,
+          "protein": 32,
           "kcal": 980,
           "updatedAt": 1785329715791
         }
@@ -16,7 +16,7 @@
         {
           "id": "fms6350pxb44u",
           "name": "カツカレー大盛り",
-          "protein": 30.0,
+          "protein": 30,
           "kcal": 1180,
           "updatedAt": 1785329715791
         }
@@ -25,7 +25,7 @@
         {
           "id": "fms5l3dyvfefe",
           "name": "コーヒーフロート",
-          "protein": 2.0,
+          "protein": 2,
           "kcal": 180,
           "updatedAt": 1785329715791
         }
