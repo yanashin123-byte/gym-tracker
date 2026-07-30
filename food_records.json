@@ -1205,6 +1205,13 @@
           "protein": 1.8,
           "kcal": 110,
           "updatedAt": 1785381271146
+        },
+        {
+          "id": "fms6xxjqk4xac",
+          "name": "ローソン　サラダチキンスモーク",
+          "protein": 23.8,
+          "kcal": 120,
+          "updatedAt": 1785381305132
         }
       ],
       "dinner": [],
