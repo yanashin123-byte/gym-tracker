@@ -1204,6 +1204,61 @@
       ],
       "note": "仕事終わりそのまま行けたし、今週全然行ってなかったから",
       "updatedAt": 1784972069945
+    },
+    {
+      "id": "rms7ludhb6tq3",
+      "date": "2026-07-30",
+      "day": "B",
+      "exercises": [
+        {
+          "name": "フロントロー",
+          "weight": 40,
+          "sets": [
+            12,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": "今日はお試し。とりあえずプレート総重量を記録する"
+        },
+        {
+          "name": "ローロウ（テクノジム）",
+          "weight": 45,
+          "sets": [
+            12,
+            12,
+            12,
+            13
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            2,
+            2,
+            2
+          ],
+          "note": "このマシンは5キロ刻み"
+        }
+      ],
+      "note": "友達と行くって約束したから",
+      "updatedAt": 1785421467839
     }
   ]
 }
