@@ -1198,7 +1198,15 @@
     },
     "2026-07-30": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fms6xwtiik67b",
+          "name": "赤城乳業チョコレートアイスバー",
+          "protein": 1.8,
+          "kcal": 110,
+          "updatedAt": 1785381271146
+        }
+      ],
       "dinner": [],
       "snack": []
     },
