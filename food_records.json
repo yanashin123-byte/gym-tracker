@@ -1229,7 +1229,15 @@
           "updatedAt": 1785383293848
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fms78rkdo1whn",
+          "name": "肉そば 大盛り",
+          "protein": 31,
+          "kcal": 690,
+          "updatedAt": 1785399501804
+        }
+      ],
       "snack": []
     },
     "2026-07-31": {
