@@ -1260,7 +1260,7 @@
         {
           "id": "fms8sihbg7eo5",
           "name": "てりたまサンド",
-          "protein": 12.0,
+          "protein": 12,
           "kcal": 320,
           "updatedAt": 1785493283890
         }
@@ -1269,14 +1269,14 @@
         {
           "id": "fms8sizqyb22s",
           "name": "ザバスプロテイン",
-          "protein": 15.0,
+          "protein": 15,
           "kcal": 80,
           "updatedAt": 1785493283890
         },
         {
           "id": "fms8sizqy4z8o",
           "name": "ガーリックトマトチキン弁当",
-          "protein": 25.0,
+          "protein": 25,
           "kcal": 560,
           "updatedAt": 1785493283890
         }
@@ -1285,14 +1285,14 @@
         {
           "id": "fms8sjd0kjuck",
           "name": "ザバスプロテイン",
-          "protein": 15.0,
+          "protein": 15,
           "kcal": 80,
           "updatedAt": 1785493283890
         },
         {
           "id": "fms8sjd0kiver",
           "name": "肉玉炒飯大盛り",
-          "protein": 18.0,
+          "protein": 18,
           "kcal": 750,
           "updatedAt": 1785493283890
         }
