@@ -1256,7 +1256,15 @@
       ]
     },
     "2026-07-31": {
-      "breakfast": [],
+      "breakfast": [
+        {
+          "id": "fms8sihbg7eo5",
+          "name": "てりたまサンド",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785493136428
+        }
+      ],
       "lunch": [],
       "dinner": [],
       "snack": []
