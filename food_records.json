@@ -1329,7 +1329,15 @@
           "updatedAt": 1785750652635
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmsd1u5lp1cne",
+          "name": "サイゼリヤ 若鶏のディアボラ風",
+          "protein": 42,
+          "kcal": 544,
+          "updatedAt": 1785750662365
+        }
+      ],
       "snack": []
     },
     "2026-08-04": {
