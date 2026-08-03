@@ -1336,6 +1336,13 @@
           "protein": 42,
           "kcal": 544,
           "updatedAt": 1785750662365
+        },
+        {
+          "id": "fmsd1uctzhvld",
+          "name": "ラージライス",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785750671735
         }
       ],
       "snack": []
