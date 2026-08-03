@@ -1343,6 +1343,13 @@
           "protein": 0,
           "kcal": 0,
           "updatedAt": 1785750671735
+        },
+        {
+          "id": "fmsd8gnnncx9c",
+          "name": "サイゼリヤ ミラノ風ドリア",
+          "protein": 15,
+          "kcal": 542,
+          "updatedAt": 1785761789891
         }
       ],
       "snack": []
