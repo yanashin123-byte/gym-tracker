@@ -1319,7 +1319,8 @@
           "name": "ぶぶか",
           "protein": 0,
           "kcal": 0,
-          "updatedAt": 1785750623960
+          "updatedAt": 1785814447339,
+          "deleted": true
         },
         {
           "id": "fmsd1ty3fau74",
