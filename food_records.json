@@ -1362,7 +1362,15 @@
       "snack": []
     },
     "2026-08-04": {
-      "breakfast": [],
+      "breakfast": [
+        {
+          "id": "fmse3pqgehmby",
+          "name": "漬けサーモンおにぎり",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785814281518
+        }
+      ],
       "lunch": [
         {
           "id": "fmse3ob2o3r2r",
