@@ -1370,6 +1370,13 @@
           "kcal": 0,
           "updatedAt": 1785814370477,
           "deleted": true
+        },
+        {
+          "id": "fmse3s3zhkgjs",
+          "name": "漬けサーモンおにぎり",
+          "protein": 3.7,
+          "kcal": 182,
+          "updatedAt": 1785814392365
         }
       ],
       "lunch": [
