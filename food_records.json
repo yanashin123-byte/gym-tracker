@@ -1418,7 +1418,15 @@
           "updatedAt": 1785815664201
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmsen3xie2edg",
+          "name": "油そば",
+          "protein": 60,
+          "kcal": 1500,
+          "updatedAt": 1785846856550
+        }
+      ],
       "snack": [
         {
           "id": "fmsemmhnzhzve",
