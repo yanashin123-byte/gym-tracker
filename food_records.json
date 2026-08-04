@@ -1327,7 +1327,8 @@
           "name": "寿司　12皿",
           "protein": 0,
           "kcal": 0,
-          "updatedAt": 1785750652635
+          "updatedAt": 1785814514817,
+          "deleted": true
         },
         {
           "id": "fmsd8h2ch17ij",
