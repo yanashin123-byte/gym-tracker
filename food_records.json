@@ -1343,6 +1343,13 @@
           "protein": 10.7,
           "kcal": 760,
           "updatedAt": 1785814463189
+        },
+        {
+          "id": "fmse3uzjlduur",
+          "name": "寿司　１２皿",
+          "protein": 90,
+          "kcal": 0,
+          "updatedAt": 1785814526577
         }
       ],
       "dinner": [
