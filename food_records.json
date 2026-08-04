@@ -1363,7 +1363,15 @@
     },
     "2026-08-04": {
       "breakfast": [],
-      "lunch": [],
+      "lunch": [
+        {
+          "id": "fmse3ob2o3r2r",
+          "name": "ローソン　鶏竜田揚げ弁当",
+          "protein": 27.2,
+          "kcal": 802,
+          "updatedAt": 1785814214928
+        }
+      ],
       "dinner": [],
       "snack": []
     },
