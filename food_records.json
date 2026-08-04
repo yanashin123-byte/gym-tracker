@@ -1368,7 +1368,8 @@
           "name": "漬けサーモンおにぎり",
           "protein": 0,
           "kcal": 0,
-          "updatedAt": 1785814281518
+          "updatedAt": 1785814370477,
+          "deleted": true
         }
       ],
       "lunch": [
