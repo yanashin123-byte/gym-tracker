@@ -1335,6 +1335,13 @@
           "protein": 20,
           "kcal": 0,
           "updatedAt": 1785761808929
+        },
+        {
+          "id": "fmse3tmmt7cjk",
+          "name": "ぶぶか",
+          "protein": 10.7,
+          "kcal": 760,
+          "updatedAt": 1785814463189
         }
       ],
       "dinner": [
