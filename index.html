@@ -1112,7 +1112,13 @@ function getRecommendation(name) {
     const weight = ex.weight || 0;
     const minReps = Math.min(...activeSets);
     const setCount = activeSets.length;
-    const inc = weight < 20 ? 1 : 2.5; // 約5%刻み
+    // マシンの刻み幅を前回の重量から自動判定（5kg刻み機は5、2.5刻み機は2.5、1kg刻みは1、それ以外は0.5）
+    let inc = 0.5;
+    if (weight > 0) {
+      if (weight % 5 === 0) inc = 5;
+      else if (weight % 2.5 === 0) inc = 2.5;
+      else if (weight % 1 === 0) inc = 1;
+    }
     // RIR: セット別なら最後の有効セットの値（最も疲労＝追い込み度）。旧データは単一rirにフォールバック
     let rir = null;
     if (Array.isArray(ex.rirs)) {
