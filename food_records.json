@@ -1419,7 +1419,15 @@
         }
       ],
       "dinner": [],
-      "snack": []
+      "snack": [
+        {
+          "id": "fmsemmhnzhzve",
+          "name": "ザバス　プロテイン　バナナ",
+          "protein": 20,
+          "kcal": 111,
+          "updatedAt": 1785846042863
+        }
+      ]
     },
     "2026-08-05": {
       "breakfast": [],
