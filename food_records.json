@@ -1409,6 +1409,13 @@
           "protein": 13.7,
           "kcal": 93,
           "updatedAt": 1785814256256
+        },
+        {
+          "id": "fmse4jdc9gb2b",
+          "name": "ザバス　プロテイン　バナナ",
+          "protein": 20,
+          "kcal": 111,
+          "updatedAt": 1785815664201
         }
       ],
       "dinner": [],
