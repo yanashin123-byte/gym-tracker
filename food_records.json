@@ -1370,6 +1370,13 @@
           "protein": 27.2,
           "kcal": 802,
           "updatedAt": 1785814214928
+        },
+        {
+          "id": "fmse3p6yohthu",
+          "name": "サラダチキン　炙りチーズ",
+          "protein": 13.7,
+          "kcal": 93,
+          "updatedAt": 1785814256256
         }
       ],
       "dinner": [],
