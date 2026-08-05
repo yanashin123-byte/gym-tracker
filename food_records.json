@@ -207,24 +207,24 @@
       "lunch": [
         {
           "name": "メガマフィンセット",
-          "protein": 0,
-          "kcal": 0,
+          "protein": 22.0,
+          "kcal": 720,
           "id": "2026-05-23-lunch-0-leg",
-          "updatedAt": 0
+          "updatedAt": 1785948354977
         },
         {
           "name": "コーラ",
-          "protein": 0,
-          "kcal": 0,
+          "protein": 0.0,
+          "kcal": 210,
           "id": "2026-05-23-lunch-1-leg",
-          "updatedAt": 0
+          "updatedAt": 1785948354977
         },
         {
           "name": "マックナゲット",
-          "protein": 0,
-          "kcal": 0,
+          "protein": 12.0,
+          "kcal": 270,
           "id": "2026-05-23-lunch-2-leg",
-          "updatedAt": 0
+          "updatedAt": 1785948354977
         }
       ],
       "dinner": [],
@@ -256,10 +256,10 @@
       "breakfast": [
         {
           "name": "ハンバーガー",
-          "protein": 0,
-          "kcal": 0,
+          "protein": 13.0,
+          "kcal": 256,
           "id": "2026-06-04-breakfast-0-leg",
-          "updatedAt": 0
+          "updatedAt": 1785948354977
         }
       ],
       "lunch": [],
@@ -573,9 +573,9 @@
         {
           "id": "fmr4lqio399r3",
           "name": "赤から鍋",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783063107075
+          "protein": 30.0,
+          "kcal": 550,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": []
@@ -600,16 +600,16 @@
         {
           "id": "fmr4mqh3398d0",
           "name": "トマトクリームパスタ",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783064784639
+          "protein": 14.0,
+          "kcal": 650,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmr4mqmulhr3d",
           "name": "ガトーショコラ",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783064792109
+          "protein": 5.0,
+          "kcal": 420,
+          "updatedAt": 1785948354977
         }
       ],
       "dinner": [],
@@ -637,9 +637,9 @@
         {
           "id": "fmr9bur2njorh",
           "name": "釜揚げうどん　得",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783348839311
+          "protein": 14.0,
+          "kcal": 560,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmr9buzt95z2y",
@@ -670,9 +670,9 @@
         {
           "id": "fmr9bvk2921pv",
           "name": "ビーレジェンド　鳥貴族ミックスジュース味",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783348876881
+          "protein": 20.0,
+          "kcal": 115,
+          "updatedAt": 1785948354977
         }
       ]
     },
@@ -782,9 +782,9 @@
         {
           "id": "fmrbxbl912gp5",
           "name": "マトンビリヤニ",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783505829205
+          "protein": 25.0,
+          "kcal": 650,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": [
@@ -907,9 +907,9 @@
         {
           "id": "fmrg6mlsn6do6",
           "name": "焼きうどん（野菜なし）",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1783763324375
+          "protein": 12.0,
+          "kcal": 450,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrg6mtjy2zg9",
@@ -956,32 +956,32 @@
         {
           "id": "fmrnmfqoe2dk2",
           "name": "かけラーメン一玉",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784213141198
+          "protein": 14.0,
+          "kcal": 420,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrnmfqoeja0a",
           "name": "豚肉すこし",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784213141198
+          "protein": 6.0,
+          "kcal": 80,
+          "updatedAt": 1785948354977
         }
       ],
       "dinner": [
         {
           "id": "fmrnmg4xyg2iy",
           "name": "ペヤング大盛り",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784213159686
+          "protein": 16.0,
+          "kcal": 780,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrnmg4xyhwfo",
           "name": "豚肉少し",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784213159686
+          "protein": 6.0,
+          "kcal": 80,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": []
@@ -1009,9 +1009,9 @@
         {
           "id": "fmro2co4yf27z",
           "name": "ポーク玉子おにぎり",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784239871794
+          "protein": 8.0,
+          "kcal": 280,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmro2co4yb7cw",
@@ -1032,23 +1032,23 @@
         {
           "id": "fmrq7sw4jybg",
           "name": "UFO大盛り",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784369959075
+          "protein": 14.0,
+          "kcal": 680,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrq7sw4klddx",
           "name": "ローソン　したらば",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784369959075
+          "protein": 5.0,
+          "kcal": 190,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrq7sw4khsoz",
           "name": "さけるチーズプレーン",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784369959075
+          "protein": 6.0,
+          "kcal": 67,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrqmhwzbbzdf",
@@ -1067,9 +1067,9 @@
         {
           "id": "fmrrtoikwdcrw",
           "name": "ベルクス　タルタルチキン弁当",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784467172624
+          "protein": 22.0,
+          "kcal": 650,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": []
@@ -1079,56 +1079,56 @@
         {
           "id": "fmrsfux6c8xee",
           "name": "ビーレジェンド　白バラコーヒー",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784504423028
+          "protein": 20.0,
+          "kcal": 120,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrsfux6cc3pr",
           "name": "そば200g",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784504423028
+          "protein": 14.0,
+          "kcal": 330,
+          "updatedAt": 1785948354977
         }
       ],
       "lunch": [
         {
           "id": "fmrt3r93tfe5e",
           "name": "焼きうどんふたたま",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784544562649
+          "protein": 24.0,
+          "kcal": 950,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrt3r93t463i",
           "name": "ビーレジェンド　白バラコーヒー",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784544562649
+          "protein": 20.0,
+          "kcal": 120,
+          "updatedAt": 1785948354977
         }
       ],
       "dinner": [
         {
           "id": "fmrt3royogawx",
           "name": "豚山　小ラーメン",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784544588078,
+          "protein": 20.0,
+          "kcal": 480,
+          "updatedAt": 1785948354977,
           "deleted": true
         },
         {
           "id": "fmrt3rzqrhd0k",
           "name": "豚山　小ラーメン",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784544597171
+          "protein": 20.0,
+          "kcal": 480,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmrt8rs9jjdj2",
           "name": "ビーレジェンド　白バラコーヒー",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784552985559
+          "protein": 20.0,
+          "kcal": 120,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": []
@@ -1139,9 +1139,9 @@
         {
           "id": "fmru3srsp1bd",
           "name": "焼きうどん　1.5玉（ソーセージ入り",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1784605099705
+          "protein": 27.0,
+          "kcal": 900,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmru3sy3i6q2d",
@@ -1363,9 +1363,9 @@
         {
           "id": "fmsd1uctzhvld",
           "name": "ラージライス",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785750671735
+          "protein": 8.8,
+          "kcal": 590,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmsd8gnnncx9c",
@@ -1443,32 +1443,32 @@
         {
           "id": "fmsgbeeq5cs6m",
           "name": "ローソン　ガーリックトマトチキン弁当",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785948122381
+          "protein": 25.0,
+          "kcal": 560,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmsgbep4z6kyr",
           "name": "ザバス　いちごミルク",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785948135875
+          "protein": 15.0,
+          "kcal": 106,
+          "updatedAt": 1785948354977
         },
         {
           "id": "fmsgbezzy4c1m",
           "name": "ローソン　サラダチキン",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785948149950
+          "protein": 24.0,
+          "kcal": 115,
+          "updatedAt": 1785948354977
         }
       ],
       "dinner": [
         {
           "id": "fmsgbf7o420qg",
           "name": "焼き鳥15本",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1785948159892
+          "protein": 100.0,
+          "kcal": 1450,
+          "updatedAt": 1785948354977
         }
       ],
       "snack": []
