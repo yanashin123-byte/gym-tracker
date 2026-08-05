@@ -1462,7 +1462,15 @@
           "updatedAt": 1785948149950
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmsgbf7o420qg",
+          "name": "焼き鳥15本",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1785948159892
+        }
+      ],
       "snack": []
     },
     "2026-08-06": {
