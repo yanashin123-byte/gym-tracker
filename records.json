@@ -1212,7 +1212,7 @@
       "exercises": [
         {
           "name": "フロントロー",
-          "weight": 20,
+          "weight": 40,
           "sets": [
             12,
             0,
@@ -1231,7 +1231,7 @@
             null,
             null
           ],
-          "note": "今日はお試し。とりあえずプレート総重量を記録する（片側プレート基準に統一・元は総重量40kg表記）"
+          "note": "今日はお試し。とりあえずプレート総重量を記録する"
         },
         {
           "name": "ローロウ（テクノジム）",
@@ -1258,7 +1258,7 @@
         }
       ],
       "note": "友達と行くって約束したから",
-      "updatedAt": 1785948373254
+      "updatedAt": 1785421467839
     },
     {
       "id": "rmscz7gr05lam",
@@ -1415,6 +1415,107 @@
       ],
       "note": "友達に誘われたから",
       "updatedAt": 1785851159972
+    },
+    {
+      "id": "rmsij6br7jhe3",
+      "date": "2026-08-07",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェスト＆デクラインコンボ",
+          "weight": 27.5,
+          "sets": [
+            12,
+            12,
+            12,
+            12
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            1,
+            1,
+            1,
+            0
+          ],
+          "note": ""
+        },
+        {
+          "name": "チェストプレス",
+          "weight": 35,
+          "sets": [
+            8,
+            8,
+            8,
+            9
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "note": ""
+        },
+        {
+          "name": "ショルダープレスマシン",
+          "weight": 15,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": "このマシンは5キロ刻み"
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 17.5,
+          "sets": [
+            12,
+            12,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            2,
+            0,
+            null,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "",
+      "updatedAt": 1786082114563
     }
   ]
 }
