@@ -564,14 +564,18 @@
     <div style="display:flex;align-items:center;gap:8px;margin:-8px 0 8px">
       <div id="nutritionStatus" style="font-size:12px;color:#888;flex:1;min-height:18px;"></div>
     </div>
+    <div class="form-group">
+      <label>何人前・何個分</label>
+      <input type="number" id="foodQty" value="1" min="0.5" step="0.5" oninput="applyFoodQty()" />
+    </div>
     <div class="form-row">
       <div class="form-group">
         <label>タンパク質 (g)</label>
-        <input type="number" id="foodProtein" placeholder="手入力" min="0" step="0.5" />
+        <input type="number" id="foodProtein" placeholder="手入力" min="0" step="0.5" oninput="onNutritionManualEdit()" />
       </div>
       <div class="form-group">
         <label>カロリー (kcal)</label>
-        <input type="number" id="foodKcal" placeholder="手入力" min="0" />
+        <input type="number" id="foodKcal" placeholder="手入力" min="0" oninput="onNutritionManualEdit()" />
       </div>
     </div>
     <div class="modal-btns">
@@ -8820,10 +8824,27 @@ function onFoodInput() {
 function selectFood(i) {
   const f = window._suggestions[i];
   document.getElementById('foodName').value = f.name;
+  window._foodBaseP = f.protein;
+  window._foodBaseK = f.kcal;
+  document.getElementById('foodQty').value = 1;
   document.getElementById('foodProtein').value = f.protein;
   document.getElementById('foodKcal').value = f.kcal;
   document.getElementById('suggestions').style.display = 'none';
-  setNutritionStatus(`✅ ${f.unit}: タンパク質${f.protein}g / ${f.kcal}kcal`, '#4CAF50');
+  setNutritionStatus(`✅ ${f.unit}: タンパク質${f.protein}g / ${f.kcal}kcal（1人前あたり）`, '#4CAF50');
+}
+
+// 「何人前」変更時：DB選択済みの1人前あたりの値から再計算
+function applyFoodQty() {
+  if (window._foodBaseP === undefined) return; // 手入力のみの場合は倍率をかけない
+  const qty = parseFloat(document.getElementById('foodQty').value) || 1;
+  document.getElementById('foodProtein').value = Math.round(window._foodBaseP * qty * 10) / 10;
+  document.getElementById('foodKcal').value = Math.round(window._foodBaseK * qty);
+}
+
+// タンパク質/カロリーを直接編集したら、以後は「何人前」の自動倍率をかけない（手入力を優先）
+function onNutritionManualEdit() {
+  window._foodBaseP = undefined;
+  window._foodBaseK = undefined;
 }
 
 function onFoodKeydown(e) {
@@ -9326,6 +9347,9 @@ function openModal(mealId) {
   document.getElementById('foodName').value = '';
   document.getElementById('foodProtein').value = '';
   document.getElementById('foodKcal').value = '';
+  document.getElementById('foodQty').value = 1;
+  window._foodBaseP = undefined;
+  window._foodBaseK = undefined;
   document.getElementById('suggestions').style.display = 'none';
   setNutritionStatus('', '#888');
   document.getElementById('addModal').classList.add('active');
@@ -9337,10 +9361,12 @@ function closeModal() {
 }
 
 function addFood() {
-  const name = document.getElementById('foodName').value.trim();
+  let name = document.getElementById('foodName').value.trim();
   const protein = parseFloat(document.getElementById('foodProtein').value) || 0;
   const kcal = parseFloat(document.getElementById('foodKcal').value) || 0;
+  const qty = parseFloat(document.getElementById('foodQty').value) || 1;
   if (!name) return;
+  if (qty !== 1) name = `${name} ×${qty}人前`;
 
   const dayData = getDayData(currentDate);
   dayData[currentMealId].push({ id: genId(), name, protein, kcal, updatedAt: nowTs() });
