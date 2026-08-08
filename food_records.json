@@ -412,7 +412,7 @@
         {
           "name": "Reys",
           "protein": 17,
-          "kcal": 0,
+          "kcal": 90,
           "id": "2026-06-25-snack-0-leg",
           "updatedAt": 0
         },
@@ -515,7 +515,7 @@
           "id": "fmqyoc6i5hs8k",
           "name": "だれうま　シーフードドリア 1食分",
           "protein": 20,
-          "kcal": 0,
+          "kcal": 480,
           "updatedAt": 1782704679917
         }
       ],
@@ -924,7 +924,7 @@
           "id": "fmrg6ndpyhajt",
           "name": "炭火焼サラダチキン",
           "protein": 16.2,
-          "kcal": 0,
+          "kcal": 75,
           "updatedAt": 1783763360566
         },
         {
@@ -938,7 +938,7 @@
           "id": "fmrg6nsvpinm7",
           "name": "五目ご飯",
           "protein": 4.6,
-          "kcal": 0,
+          "kcal": 260,
           "updatedAt": 1783763380213
         }
       ],
@@ -1334,7 +1334,7 @@
           "id": "fmsd8h2ch17ij",
           "name": "ビーレジェンド　白バラコーヒー",
           "protein": 20,
-          "kcal": 0,
+          "kcal": 120,
           "updatedAt": 1785761808929
         },
         {
@@ -1348,7 +1348,7 @@
           "id": "fmse3uzjlduur",
           "name": "寿司　１２皿",
           "protein": 90,
-          "kcal": 0,
+          "kcal": 1125,
           "updatedAt": 1785814526577
         }
       ],
