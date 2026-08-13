@@ -1548,6 +1548,38 @@
       ],
       "note": "今日行かないと罰金だったから",
       "updatedAt": 1786241875238
+    },
+    {
+      "id": "rmsrccxjodppt",
+      "date": "2026-08-13",
+      "day": "B",
+      "exercises": [
+        {
+          "name": "ローロウ（テクノジム）",
+          "weight": 60,
+          "sets": [
+            15,
+            13,
+            12,
+            0
+          ],
+          "cheating": [
+            null,
+            9,
+            9,
+            null
+          ],
+          "rirs": [
+            1,
+            0,
+            0,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "",
+      "updatedAt": 1786614861012
     }
   ]
 }
