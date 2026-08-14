@@ -1,6 +1,36 @@
 {
   "v": 2,
   "meals": {
+    "2026-07-29": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "id": "fms5l33ysgdr3",
+          "name": "六厘舎　つけ麺　特盛",
+          "protein": 32,
+          "kcal": 980,
+          "updatedAt": 1785329715791
+        }
+      ],
+      "dinner": [
+        {
+          "id": "fms6350pxb44u",
+          "name": "カツカレー大盛り",
+          "protein": 30,
+          "kcal": 1180,
+          "updatedAt": 1785329715791
+        }
+      ],
+      "snack": [
+        {
+          "id": "fms5l3dyvfefe",
+          "name": "コーヒーフロート",
+          "protein": 2,
+          "kcal": 180,
+          "updatedAt": 1785329715791
+        }
+      ]
+    },
     "2026-05-18": {
       "breakfast": [],
       "lunch": [],
@@ -1154,36 +1184,6 @@
       "dinner": [],
       "snack": []
     },
-    "2026-07-29": {
-      "breakfast": [],
-      "lunch": [
-        {
-          "id": "fms5l33ysgdr3",
-          "name": "六厘舎　つけ麺　特盛",
-          "protein": 32,
-          "kcal": 980,
-          "updatedAt": 1785329715791
-        }
-      ],
-      "dinner": [
-        {
-          "id": "fms6350pxb44u",
-          "name": "カツカレー大盛り",
-          "protein": 30,
-          "kcal": 1180,
-          "updatedAt": 1785329715791
-        }
-      ],
-      "snack": [
-        {
-          "id": "fms5l3dyvfefe",
-          "name": "コーヒーフロート",
-          "protein": 2,
-          "kcal": 180,
-          "updatedAt": 1785329715791
-        }
-      ]
-    },
     "2026-07-27": {
       "breakfast": [],
       "lunch": [],
@@ -1533,7 +1533,7 @@
         {
           "id": "fmssvtrfpil7z",
           "name": "生ビールでかいの",
-          "protein": 2.0,
+          "protein": 2,
           "kcal": 280,
           "updatedAt": 1786714270811
         },
