@@ -1580,6 +1580,107 @@
       ],
       "note": "",
       "updatedAt": 1786614861012
+    },
+    {
+      "id": "rmsszmxocg0oj",
+      "date": "2026-08-13",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェスト＆デクラインコンボ",
+          "weight": 30,
+          "sets": [
+            10,
+            8,
+            8,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ディップス",
+          "weight": 0,
+          "sets": [
+            8,
+            8,
+            8,
+            8
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": "60キロアシスト"
+        },
+        {
+          "name": "ショルダープレスマシン",
+          "weight": 15,
+          "sets": [
+            10,
+            8,
+            8,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "",
+      "updatedAt": 1786714425084
     }
   ]
 }
