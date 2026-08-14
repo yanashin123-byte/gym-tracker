@@ -1503,16 +1503,16 @@
         {
           "id": "fmssvt7wx3c5w",
           "name": "チキンカツ　１５０g",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1786707999825
+          "protein": 27.5,
+          "kcal": 400,
+          "updatedAt": 1786714270811
         },
         {
           "id": "fmssvt7wx6e15",
           "name": "ご飯３００g",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1786707999825
+          "protein": 7.5,
+          "kcal": 504,
+          "updatedAt": 1786714270811
         }
       ],
       "dinner": [
@@ -1533,9 +1533,9 @@
         {
           "id": "fmssvtrfpil7z",
           "name": "生ビールでかいの",
-          "protein": 0,
-          "kcal": 0,
-          "updatedAt": 1786708025125
+          "protein": 2.0,
+          "kcal": 280,
+          "updatedAt": 1786714270811
         },
         {
           "id": "fmssvtrfp3nnv",
