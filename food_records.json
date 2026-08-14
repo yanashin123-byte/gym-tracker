@@ -1515,7 +1515,36 @@
           "updatedAt": 1786707999825
         }
       ],
-      "dinner": [],
+      "dinner": [
+        {
+          "id": "fmssvtrfp2v61",
+          "name": "エビチリ",
+          "protein": 18,
+          "kcal": 320,
+          "updatedAt": 1786708025125
+        },
+        {
+          "id": "fmssvtrfpe4nr",
+          "name": "チャーハン 半チャーハン（半炒飯）",
+          "protein": 8,
+          "kcal": 330,
+          "updatedAt": 1786708025125
+        },
+        {
+          "id": "fmssvtrfpil7z",
+          "name": "生ビールでかいの",
+          "protein": 0,
+          "kcal": 0,
+          "updatedAt": 1786708025125
+        },
+        {
+          "id": "fmssvtrfp3nnv",
+          "name": "唐揚げ 2個",
+          "protein": 10,
+          "kcal": 160,
+          "updatedAt": 1786708025125
+        }
+      ],
       "snack": []
     },
     "2026-08-10": {
