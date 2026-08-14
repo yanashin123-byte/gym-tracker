@@ -1681,6 +1681,61 @@
       ],
       "note": "",
       "updatedAt": 1786714425084
+    },
+    {
+      "id": "rmst28fy140tq",
+      "date": "2026-08-14",
+      "day": "A",
+      "exercises": [
+        {
+          "name": "チェスト＆デクラインコンボ",
+          "weight": 20,
+          "sets": [
+            11,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": "筋肉痛あったから少しだけ"
+        },
+        {
+          "name": "ケーブルプッシュダウン",
+          "weight": 0,
+          "sets": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "cheating": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "rirs": [
+            null,
+            null,
+            null,
+            null
+          ],
+          "note": ""
+        }
+      ],
+      "note": "",
+      "updatedAt": 1786718787769
     }
   ]
 }
