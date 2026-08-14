@@ -985,7 +985,7 @@ function saveDraft() {
       note: (document.getElementById(`${name}-note`) || {}).value || ''
     }))
   };
-  localStorage.setItem('gym_draft', JSON.stringify(draft));
+  localStorage.setItem(`gym_draft_${currentDay}`, JSON.stringify(draft));
 }
 
 // フォーム復元：未保存の下書きを優先、無ければ保存済み記録を読み込む（再保存での消失を防ぐ）
@@ -995,7 +995,7 @@ function loadForm() {
 }
 
 function loadDraft() {
-  const s = localStorage.getItem('gym_draft');
+  const s = localStorage.getItem(`gym_draft_${currentDay}`);
   if (!s) return false;
   try {
     const draft = JSON.parse(s);
@@ -1054,7 +1054,7 @@ function fillFormFromRecord(rec) {
 }
 
 function clearDraft() {
-  localStorage.removeItem('gym_draft');
+  localStorage.removeItem(`gym_draft_${currentDay}`);
 }
 
 function getPrev(name) {
