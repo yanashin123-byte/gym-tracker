@@ -9159,6 +9159,43 @@ function copyPrevDay() {
 }
 
 // 「焼きうどん2玉、ソーセージ6本」のような文章を品目に分解してDB照合し記録する
+// 2文字ずつのbigramで類似度を測る（表記ゆれ・語順違いに強い）
+function bigrams(s) {
+  const set = new Set();
+  for (let i = 0; i < s.length - 1; i++) set.add(s.slice(i, i + 2));
+  return set;
+}
+function bigramSimilarity(a, b) {
+  const A = bigrams(a), B = bigrams(b);
+  if (A.size === 0 || B.size === 0) return 0;
+  let common = 0;
+  A.forEach(g => { if (B.has(g)) common++; });
+  return (2 * common) / (A.size + B.size);
+}
+// 完全一致/部分一致が無いときのあいまい検索（DB未一致を減らす）
+function fuzzySearchFoodDB(query, threshold) {
+  threshold = threshold || 0.5;
+  const q = query.toLowerCase();
+  let best = null, bestScore = 0;
+  FOOD_DB.forEach(f => {
+    const score = bigramSimilarity(q, f.name.toLowerCase());
+    if (score > bestScore) { bestScore = score; best = f; }
+  });
+  return bestScore >= threshold ? best : null;
+}
+
+// DBの単位（例:「6個(180g)」「1杯」）から、入力された個数に対する正しい倍率を出す
+// 単位が「N個/N本/N枚...」のように複数単位を1件として表してる場合、qty個食べたなら qty/N 倍にする
+function qtyScaleFactor(unitStr, qty) {
+  if (!unitStr) return qty;
+  const m = unitStr.match(/^([0-9]+(?:\.[0-9]+)?)\s*(個|本|枚|貫|切れ|尾|杯|缶|皿|パック|袋|玉)/);
+  if (m) {
+    const baseCount = parseFloat(m[1]);
+    if (baseCount > 1) return qty / baseCount;
+  }
+  return qty;
+}
+
 function parseFreeTextFoods(text) {
   const QTY_RE = /^([0-9]+(?:\.[0-9]+)?)\s*(個|本|玉|枚|杯|缶|皿|パック|袋|尾|切れ|貫|人前|g|ml)?\s*/;
   const segments = text
@@ -9189,15 +9226,28 @@ function parseFreeTextFoods(text) {
         return a.name.length - b.name.length;
       });
       const f = ranked[0];
+      const scale = qtyScaleFactor(f.unit, qty);
       results.push({
         name: qty !== 1 ? `${f.name} ${qty}${tm ? tm[2] : (m ? m[2] || '' : '')}`.trim() : f.name,
-        protein: Math.round((f.protein || 0) * qty * 10) / 10,
-        kcal: Math.round((f.kcal || 0) * qty),
+        protein: Math.round((f.protein || 0) * scale * 10) / 10,
+        kcal: Math.round((f.kcal || 0) * scale),
         matched: true, raw: seg,
       });
     } else {
-      // DB未一致 → そのまま記録（値0）。食事DB育成プロトコルで後ほど照合・修正する
-      results.push({ name: seg, protein: 0, kcal: 0, matched: false, raw: seg });
+      // 部分一致が無ければ、あいまい検索（表記ゆれ対応）で妥当な近似値を採用
+      const fz = fuzzySearchFoodDB(rest);
+      if (fz) {
+        const scale = qtyScaleFactor(fz.unit, qty);
+        results.push({
+          name: (qty !== 1 ? `${seg}` : seg) + '（推定値）',
+          protein: Math.round((fz.protein || 0) * scale * 10) / 10,
+          kcal: Math.round((fz.kcal || 0) * scale),
+          matched: true, fuzzy: true, raw: seg,
+        });
+      } else {
+        // それでも未一致 → 値0で記録。UIが即座に手入力を促す
+        results.push({ name: seg, protein: 0, kcal: 0, matched: false, raw: seg });
+      }
     }
   });
   return results;
@@ -9211,22 +9261,50 @@ function addFromFreeText() {
   if (!items.length) return;
   const dayData = getDayData(currentDate);
   const now = nowTs();
+  const toPrompt = [];
   items.forEach(it => {
-    dayData[mealId].push({ id: genId(), name: it.name, protein: it.protein, kcal: it.kcal, updatedAt: now });
+    if (it.matched) {
+      dayData[mealId].push({ id: genId(), name: it.name, protein: it.protein, kcal: it.kcal, updatedAt: now });
+    } else {
+      toPrompt.push(it.raw); // DB未一致は0のまま保存せず、その場で入力してもらう
+    }
   });
   saveData();
   render();
   document.getElementById('freeTextInput').value = '';
-  const matched = items.filter(i => i.matched).length;
-  const unmatched = items.length - matched;
+  const matched = items.length - toPrompt.length;
   const resEl = document.getElementById('freeTextResult');
   resEl.innerHTML = items.map(i =>
-    i.matched ? `✅ ${i.name}（${i.protein}g P・${i.kcal}kcal）` : `⚠️ ${i.raw}（DB未登録・値は後で確認）`
+    i.matched ? `✅ ${i.name}${i.fuzzy ? '' : ''}（${i.protein}g P・${i.kcal}kcal）` : `⚠️ ${i.raw}（この後すぐ入力を求めます）`
   ).join('<br>');
   const total = calcProtein(currentDate);
   const remain = 140 - total;
   const remainTxt = remain > 0 ? `残り${remain.toFixed(1)}g` : `🎉達成+${Math.abs(remain).toFixed(1)}g`;
-  showToast((unmatched > 0 ? `${matched}件追加・${unmatched}件は要確認` : `✅ ${matched}件追加`) + `（合計${total.toFixed(1)}g・${remainTxt}）`);
+  showToast(`${matched}件追加（合計${total.toFixed(1)}g・${remainTxt}）`);
+
+  if (toPrompt.length > 0) {
+    window._unmatchedQueue = toPrompt.map(name => ({ name, mealId }));
+    promptNextUnmatched();
+  }
+}
+
+// DB未一致だった食品を1件ずつその場で入力してもらう（0のまま放置しない）
+function promptNextUnmatched() {
+  const q = window._unmatchedQueue;
+  if (!q || q.length === 0) return;
+  const next = q.shift();
+  currentMealId = next.mealId;
+  document.getElementById('modalTitle').textContent = `📝 未登録：値を入力（残り${q.length + 1}件）`;
+  document.getElementById('foodName').value = next.name;
+  document.getElementById('foodProtein').value = '';
+  document.getElementById('foodKcal').value = '';
+  document.getElementById('foodQty').value = 1;
+  window._foodBaseP = undefined;
+  window._foodBaseK = undefined;
+  document.getElementById('suggestions').style.display = 'none';
+  setNutritionStatus('⚠️ DBに無い食品です。分かる範囲でタンパク質・カロリーを入力してください', '#e8b878');
+  document.getElementById('addModal').classList.add('active');
+  setTimeout(() => document.getElementById('foodProtein').focus(), 100);
 }
 
 function calcProtein(date) {
@@ -9416,6 +9494,7 @@ function openModal(mealId) {
 
 function closeModal() {
   document.getElementById('addModal').classList.remove('active');
+  window._unmatchedQueue = null; // 途中でキャンセルしたらキューも打ち切る
 }
 
 function addFood() {
@@ -9429,9 +9508,15 @@ function addFood() {
   const dayData = getDayData(currentDate);
   dayData[currentMealId].push({ id: genId(), name, protein, kcal, updatedAt: nowTs() });
   saveData();
-  closeModal();
   render();
   toastAdded(protein);
+
+  // 未一致キューが残っていれば続けて次の1件を入力してもらう。無ければ通常通り閉じる
+  if (window._unmatchedQueue && window._unmatchedQueue.length > 0) {
+    promptNextUnmatched();
+  } else {
+    closeModal();
+  }
 }
 
 // 追加直後にすぐ結果が見えるようトーストで通知（合計・残りgを表示）
