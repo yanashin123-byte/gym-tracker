@@ -397,6 +397,26 @@
 
   #checkView .chk-reset { padding:20px 16px 0; text-align:center; }
   #checkView .chk-reset-btn { background:transparent; border:1px solid #2a2a2a; border-radius:8px; color:#444; padding:8px 20px; font-size:12px; cursor:pointer; }
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%) translateY(10px);
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: #eee;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -428,6 +448,7 @@
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
+    <div id="proteinRemain" style="font-size:13px;color:#aaa;margin-top:6px;text-align:center"></div>
   </div>
 
   <!-- 7日タンパク質グラフ -->
@@ -9132,6 +9153,9 @@ function copyPrevDay() {
   });
   saveData();
   render();
+  const total = calcProtein(currentDate);
+  const remain = 140 - total;
+  showToast(`📋 コピーしました（合計${total.toFixed(1)}g・${remain > 0 ? `残り${remain.toFixed(1)}g` : `達成+${Math.abs(remain).toFixed(1)}g`}）`);
 }
 
 // 「焼きうどん2玉、ソーセージ6本」のような文章を品目に分解してDB照合し記録する
@@ -9199,7 +9223,10 @@ function addFromFreeText() {
   resEl.innerHTML = items.map(i =>
     i.matched ? `✅ ${i.name}（${i.protein}g P・${i.kcal}kcal）` : `⚠️ ${i.raw}（DB未登録・値は後で確認）`
   ).join('<br>');
-  showToast(unmatched > 0 ? `${matched}件追加・${unmatched}件は要確認` : `✅ ${matched}件追加しました`);
+  const total = calcProtein(currentDate);
+  const remain = 140 - total;
+  const remainTxt = remain > 0 ? `残り${remain.toFixed(1)}g` : `🎉達成+${Math.abs(remain).toFixed(1)}g`;
+  showToast((unmatched > 0 ? `${matched}件追加・${unmatched}件は要確認` : `✅ ${matched}件追加`) + `（合計${total.toFixed(1)}g・${remainTxt}）`);
 }
 
 function calcProtein(date) {
@@ -9283,6 +9310,14 @@ function render() {
   const fill = document.getElementById('progressFill');
   fill.style.width = pct + '%';
   fill.className = 'progress-fill' + (total > 140 ? ' over' : '');
+  const remainEl = document.getElementById('proteinRemain');
+  if (remainEl) {
+    const remain = 140 - total;
+    remainEl.textContent = remain > 0
+      ? `あと ${remain.toFixed(1)}g で目標達成`
+      : `🎉 目標達成！+${Math.abs(remain).toFixed(1)}g オーバー`;
+    remainEl.style.color = remain > 0 ? '#aaa' : '#4caf50';
+  }
 
   // 食事セクション
   const container = document.getElementById('mealSections');
@@ -9396,6 +9431,24 @@ function addFood() {
   saveData();
   closeModal();
   render();
+  toastAdded(protein);
+}
+
+// 追加直後にすぐ結果が見えるようトーストで通知（合計・残りgを表示）
+function toastAdded(addedProtein) {
+  const total = calcProtein(currentDate);
+  const remain = 140 - total;
+  const remainTxt = remain > 0 ? `残り${remain.toFixed(1)}g` : `🎉達成+${Math.abs(remain).toFixed(1)}g`;
+  showToast(`+${addedProtein.toFixed(1)}g P（合計${total.toFixed(1)}g・${remainTxt}）`);
+}
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
 let _quickPendingFood = null;
@@ -9446,6 +9499,7 @@ function quickAddToMeal(mealId) {
   dayData[mealId].push({ id: genId(), name: _quickPendingFood.name, protein: _quickPendingFood.protein, kcal: _quickPendingFood.kcal, updatedAt: nowTs() });
   saveData();
   render();
+  toastAdded(_quickPendingFood.protein || 0);
   document.getElementById('quickMealPicker').classList.remove('active');
   _quickPendingFood = null;
 }
@@ -9851,5 +9905,6 @@ function chkRenderWeekly() {
 loadData().then(() => render());
 // APIキーは設定タブから入力してください
 </script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
