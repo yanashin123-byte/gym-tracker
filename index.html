@@ -1411,23 +1411,7 @@ async function loadFromGitHub() {
       const data = await res.json();
       recordsSHA = data.sha;
       const decoded = JSON.parse(fromBase64UTF8(data.content));
-      const githubRecords = decoded.records || [];
-
-      const localStr = localStorage.getItem('gym_records');
-      const localRecords = localStr ? JSON.parse(localStr) : [];
-
-      // 旧データ互換: id/updatedAt を付与
-      const norm = r => ({ ...r, id: r.id || `${r.date}-${r.day}`, updatedAt: typeof r.updatedAt === 'number' ? r.updatedAt : 0 });
-
-      // マージ: id をキーに、updatedAt が新しい方を採用（ローカル編集を消さない）
-      const merged = new Map();
-      githubRecords.map(norm).forEach(r => merged.set(r.id, r));
-      localRecords.map(norm).forEach(r => {
-        const ex = merged.get(r.id);
-        if (!ex || (r.updatedAt || 0) >= (ex.updatedAt || 0)) merged.set(r.id, r);
-      });
-
-      records = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
+      mergeGymRemote(decoded.records || []);
       saveToLocalStorage();
 
       // マージ結果をGitHubに書き戻す（全デバイスで統一）
@@ -1467,6 +1451,20 @@ function fromBase64UTF8(b64) {
   return new TextDecoder().decode(bytes);
 }
 
+// records配列をid+updatedAtでマージ（新しい方を採用・ローカル編集を消さない）
+function mergeGymRemote(remoteRecords) {
+  const localStr = localStorage.getItem('gym_records');
+  const localRecords = localStr ? JSON.parse(localStr) : records;
+  const norm = r => ({ ...r, id: r.id || `${r.date}-${r.day}`, updatedAt: typeof r.updatedAt === 'number' ? r.updatedAt : 0 });
+  const merged = new Map();
+  (remoteRecords || []).map(norm).forEach(r => merged.set(r.id, r));
+  (localRecords || []).map(norm).forEach(r => {
+    const ex = merged.get(r.id);
+    if (!ex || (r.updatedAt || 0) >= (ex.updatedAt || 0)) merged.set(r.id, r);
+  });
+  records = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
 async function fetchSHA() {
   try {
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
@@ -1479,6 +1477,23 @@ async function fetchSHA() {
   } catch(e) {}
 }
 
+// 保存競合(409/422)時に呼ぶ：他端末の最新内容も取り込んでマージしてから再保存する
+// （SHAだけ取り直して上書きすると、他端末が直前に書いた変更が消える可能性があるため）
+async function fetchAndMergeGymRemoteIntoLocal() {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
+      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      recordsSHA = data.sha;
+      const decoded = JSON.parse(fromBase64UTF8(data.content));
+      mergeGymRemote(decoded.records || []);
+      saveToLocalStorage();
+    }
+  } catch(e) {}
+}
+
 async function saveToGitHub() {
   saveToLocalStorage();
   if (!GITHUB_TOKEN) {
@@ -1487,8 +1502,8 @@ async function saveToGitHub() {
     return;
   }
 
-  // SHAが未取得の場合は先にフェッチ（SHA無しでPUTすると422エラーになる）
-  if (!recordsSHA) await fetchSHA();
+  // SHAが未取得の場合は先にフェッチ（中身もマージして他端末の変更を消さないようにする）
+  if (!recordsSHA) await fetchAndMergeGymRemoteIntoLocal();
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
@@ -1513,8 +1528,8 @@ async function saveToGitHub() {
         pendingSync = false;
         return;
       } else if (res.status === 409) {
-        // SHA競合 → 再取得してリトライ
-        await fetchSHA();
+        // 競合 → 他端末の中身も取り込んでマージしてから再構築してリトライ
+        await fetchAndMergeGymRemoteIntoLocal();
         continue;
       } else if (res.status === 401) {
         showSyncStatus('🔑 トークンエラー');

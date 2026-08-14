@@ -9007,7 +9007,7 @@ async function loadData() {
 }
 let foodPendingSync = false;
 
-// 進行中の最新SHAを取得（保存前・409時に呼ぶ）
+// 進行中の最新SHAを取得（保存前に呼ぶ・中身は取り込まない軽量版）
 async function fetchFoodSHA() {
   const token = localStorage.getItem('github_token') || '';
   if (!token) return;
@@ -9020,14 +9020,35 @@ async function fetchFoodSHA() {
   } catch(e) {}
 }
 
+// 保存競合(409/422)時に呼ぶ：他端末の最新内容を取得してマージしてから再保存する
+// （SHAだけ取り直して上書きすると、他端末が競合直前に書いた変更が消える可能性があるため）
+async function fetchAndMergeRemoteIntoLocal() {
+  const token = localStorage.getItem('github_token') || '';
+  if (!token) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (res.ok) {
+      const d = await res.json();
+      foodSHA = d.sha;
+      const remote = JSON.parse(fromBase64UTF8(d.content));
+      mergeRemote(remote);
+      saveToLocalStorage();
+    } else if (res.status === 404) {
+      foodSHA = null;
+    }
+  } catch(e) {}
+}
+
 async function saveData() {
   saveToLocalStorage();
   const token = localStorage.getItem('github_token') || '';
   if (!token) { showSyncStatus('🔑 未設定'); foodPendingSync = true; return; }
-  // SHA未取得なら先に取りに行く（422防止）
-  if (!foodSHA) await fetchFoodSHA();
+  // SHA未取得なら先に取りに行く（422防止・中身もマージして他端末の変更を消さないようにする）
+  if (!foodSHA) await fetchAndMergeRemoteIntoLocal();
   showSyncStatus('⏳ 保存中');
-  const content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
+  let content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       const body = { message: `food records ${new Date().toISOString()}`, content };
@@ -9044,8 +9065,10 @@ async function saveData() {
         showSyncStatus('✅ 同期済み');
         return;
       } else if (res.status === 409 || res.status === 422) {
-        // SHA競合 → 最新を取り直して再試行
-        await fetchFoodSHA();
+        // 競合＝他端末が先に書き込んだ。中身も取り込んでマージしてから再構築して再試行
+        // （SHAだけ取り直すと他端末の変更を上書きして消してしまうため）
+        await fetchAndMergeRemoteIntoLocal();
+        content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
         continue;
       } else {
         showSyncStatus(`⚠️ 同期失敗 (${res.status})`);
