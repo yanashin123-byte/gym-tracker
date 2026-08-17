@@ -1268,19 +1268,39 @@ function getRecommendation(name) {
 
 function renderPicker() {
   const day = currentDay;
+  const regionVol = regionVolume14d(); // 部位内バランス（直近14日）→ 手薄なサブリージョンを選択時に案内する
   const rows = MENU[day].slots.map((slot, si) => {
     const chosen = chosenFor(day, si);
-    const opts = slotOptions(day, si).map(o =>
-      `<option value="${o}"${o === chosen ? ' selected' : ''}>${o}</option>`).join('');
+    const regions = REGION_GROUPS[slot.muscle];
+    const muscleData = regionVol[slot.muscle] || {};
+    const muscleTotal = regions ? regions.reduce((s, r) => s + (muscleData[r] || 0), 0) : 0;
+    const opts = slotOptions(day, si).map(o => {
+      const r = regionFor(o);
+      const neglected = regions && r && muscleTotal > 0 && (muscleData[r] || 0) === 0;
+      const label = r ? `${o}　${neglected ? '🎯' : ''}(${r})` : o;
+      return `<option value="${o}"${o === chosen ? ' selected' : ''}>${label}</option>`;
+    }).join('');
     const skipSel = chosen === SKIP ? ' selected' : '';
+    // 選んでいる種目が今、部位内で手薄なサブリージョンならヒントを出す
+    const chosenRegion = regionFor(chosen);
+    let hintHTML = '';
+    if (regions && chosenRegion) {
+      const neglectedNow = regions.filter(r => muscleTotal > 0 && (muscleData[r] || 0) === 0 && r !== chosenRegion);
+      if (neglectedNow.length) {
+        hintHTML = `<div style="font-size:10px;color:#e8b878;margin-top:2px">🎯 直近2週間 ${neglectedNow.join('・')}が手薄。バランス的には切り替えるのもアリ</div>`;
+      }
+    }
     return `
       <div class="slot-row">
         <span class="slot-name">${slot.slot}</span>
-        <select class="slot-select" onchange="onSlotChange('${day}',${si},this.value)">
-          ${opts}
-          <option value="${SKIP}"${skipSel}>― やらない</option>
-          <option value="${ADD}">＋ 自分で追加</option>
-        </select>
+        <div style="flex:1;min-width:0">
+          <select class="slot-select" style="width:100%;box-sizing:border-box" onchange="onSlotChange('${day}',${si},this.value)">
+            ${opts}
+            <option value="${SKIP}"${skipSel}>― やらない</option>
+            <option value="${ADD}">＋ 自分で追加</option>
+          </select>
+          ${hintHTML}
+        </div>
       </div>`;
   }).join('');
   const count = activeExercises(day).length;
