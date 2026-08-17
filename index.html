@@ -552,6 +552,10 @@
   </div>
   <div class="divider"></div>
   <div class="section-wrap">
+    <div id="region-balance-panel"></div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-wrap">
     <div class="section-title">過去の記録</div>
     <div id="history-list"></div>
   </div>
@@ -620,6 +624,31 @@ const MENU = {
     { slot: '内/外もも',  muscle: '内/外',    sets: 3, options: ['アダクション', 'アブダクション'] },
     { slot: 'カーフ・腹', muscle: 'カーフ・腹', sets: 3, options: ['カーフレイズ', 'アブドミナルクランチ', 'ロータリートーソー'] },
   ]},
+};
+
+// 種目名 → 部位内サブリージョン（同じ「胸」「肩」「背中」でも上部/下部・広背筋/脊柱起立筋等で偏りが出ないよう追跡する）
+const EXERCISE_REGION = {
+  // 胸：上部・中部・下部
+  'ベンチプレス': '中部', 'スミスマシンベンチプレス': '中部', 'チェストプレス': '中部', 'ダンベルプレス': '中部',
+  'インクラインチェストプレス': '上部', 'インクラインダンベルプレス': '上部',
+  'チェスト＆デクラインコンボ': '下部', 'ディップス': '下部',
+  'ペックフライ': '中部', 'ケーブルフライ': '中部',
+  // 肩：前部（プレス）・側部（サイド）・後部（リア）・僧帽
+  'ダンベルショルダープレス': '前部', 'ショルダープレスマシン': '前部', 'スミスマシンショルダープレス': '前部',
+  'サイドレイズ': '側部', 'ケーブルサイドレイズ': '側部',
+  'リバースフライ': '後部', 'シュラッグ': '僧帽',
+  // 背中：広背筋（縦引き系）・中背部（横引き系＝僧帽・菱形）・脊柱起立筋
+  'ラットプルダウン': '広背筋', 'ワイドプルダウン': '広背筋', '懸垂': '広背筋',
+  'フロントロー(斜め下引き)': '広背筋', 'プルオーバー': '広背筋', 'ケーブルプルオーバー': '広背筋',
+  'ローロウ': '中背部', 'ワンハンドダンベルロウ': '中背部',
+  'デッドリフト': '脊柱起立筋',
+};
+function regionFor(name) { return EXERCISE_REGION[name] || null; }
+// 各部位で追跡するサブリージョン一覧（表示順）
+const REGION_GROUPS = {
+  '胸': ['上部', '中部', '下部'],
+  '肩': ['前部', '側部', '後部', '僧帽'],
+  '背中': ['広背筋', '中背部', '脊柱起立筋'],
 };
 
 // 週間ボリューム目標（セット/週・部位別。筋肥大の用量反応に基づく10-20set/部位ベース）
@@ -745,6 +774,61 @@ function renderVolume() {
     ${alertHTML}
     <div class="vol-card">${rows}</div>
     <div class="vol-note">目標：各部位 週${'10-20'}set（小さい筋は6-12）／緑=適正・赤=不足・橙=過剰</div>`;
+  renderRegionBalance();
+}
+
+// 直近14日（約2週間＝Push/Pullを2周分）の部位内サブリージョン別セット数
+// 「胸はやってるが上部だけ抜けてる」のような偏りを検出する
+function regionVolume14d() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const from = new Date(today); from.setDate(from.getDate() - 13);
+  const vol = {}; // { '胸': {上部:0,中部:0,下部:0}, ... }
+  records.forEach(r => {
+    const d = new Date(r.date + 'T00:00:00');
+    if (d < from || d > today) return;
+    r.exercises.forEach(ex => {
+      const region = regionFor(ex.name);
+      if (!region) return;
+      const m = muscleFor(ex.name);
+      const doneSets = (ex.sets || []).filter(s => s > 0).length;
+      if (!vol[m]) vol[m] = {};
+      vol[m][region] = (vol[m][region] || 0) + doneSets;
+    });
+  });
+  return vol;
+}
+
+function renderRegionBalance() {
+  const el = document.getElementById('region-balance-panel');
+  if (!el) return;
+  const vol = regionVolume14d();
+  const muscles = Object.keys(REGION_GROUPS);
+  const blocks = muscles.map(m => {
+    const regions = REGION_GROUPS[m];
+    const data = vol[m] || {};
+    const total = regions.reduce((s, r) => s + (data[r] || 0), 0);
+    const maxOne = Math.max(1, ...regions.map(r => data[r] || 0));
+    const rows = regions.map(r => {
+      const n = data[r] || 0;
+      const neglected = total > 0 && n === 0; // 他は積んでるのにここだけ0＝偏り
+      const pct = Math.round(n / maxOne * 100);
+      const cls = neglected ? 'vol-under' : (n > 0 ? 'vol-ok' : '');
+      return `
+        <div class="vol-row">
+          <span class="vol-muscle">${r}${neglected ? ' ⚠️' : ''}</span>
+          <div class="vol-bar-bg"><div class="vol-bar ${cls}" style="width:${pct}%"></div></div>
+          <span class="vol-num ${cls}">${n}set</span>
+        </div>`;
+    }).join('');
+    const warn = regions.filter(r => total > 0 && (data[r] || 0) === 0);
+    const warnHTML = warn.length
+      ? `<div style="font-size:11px;color:#e07b6b;margin:2px 0 6px">⚠️ ${m}は${warn.join('・')}が抜けてます</div>` : '';
+    return `<div style="margin-bottom:12px"><div style="font-size:12px;color:#999;font-weight:700;margin-bottom:4px">${m}</div>${warnHTML}${rows}</div>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="section-title">部位内バランス（直近14日・上部/下部など）</div>
+    <div class="vol-card">${blocks}</div>
+    <div class="vol-note">同じ部位でも角度が偏ると発達が偏る。⚠️は「他はやってるのにここだけ0」の合図</div>`;
 }
 
 function onSlotChange(day, si, val) {
