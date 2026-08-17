@@ -561,8 +561,59 @@
   </div>
 </div>
 
+<div id="view-cardio" style="display:none">
+  <div class="section-wrap">
+    <div class="section-title">有酸素を記録</div>
+    <div style="background:#1e1e1e;border:1px solid #2a2a2a;border-radius:14px;padding:14px">
+      <div class="date-bar" style="padding:0 0 12px;border:none">
+        <label>日付</label>
+        <input type="date" id="cardio-date-input">
+        <button class="today-btn" onclick="setCardioToday()">今日</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <select id="cardio-type" style="grid-column:1/-1;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+          <option value="ランニング">🏃 ランニング</option>
+          <option value="バイク">🚴 バイク（エアロ/自転車）</option>
+          <option value="エリプティカル">🏋️ エリプティカル</option>
+          <option value="水泳">🏊 水泳</option>
+          <option value="ウォーキング">🚶 ウォーキング</option>
+          <option value="その他">その他</option>
+        </select>
+        <div>
+          <div style="font-size:11px;color:#777;margin-bottom:3px">時間 (分)</div>
+          <input type="number" id="cardio-min" min="0" step="1" inputmode="numeric" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+        </div>
+        <div>
+          <div style="font-size:11px;color:#777;margin-bottom:3px">距離 (km)</div>
+          <input type="number" id="cardio-km" min="0" step="0.1" inputmode="decimal" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+        </div>
+        <div>
+          <div style="font-size:11px;color:#777;margin-bottom:3px">平均心拍数 (bpm)</div>
+          <input type="number" id="cardio-hr" min="0" step="1" inputmode="numeric" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+        </div>
+        <div>
+          <div style="font-size:11px;color:#777;margin-bottom:3px">主観強度 RPE (1-10)</div>
+          <input type="number" id="cardio-rpe" min="1" max="10" step="1" inputmode="numeric" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+        </div>
+        <div style="grid-column:1/-1">
+          <div style="font-size:11px;color:#777;margin-bottom:3px">消費カロリー (kcal)</div>
+          <input type="number" id="cardio-kcal" min="0" step="1" inputmode="numeric" style="width:100%;box-sizing:border-box;background:#2a2a2a;border:1px solid #333;border-radius:8px;color:#eee;padding:10px;font-size:14px">
+        </div>
+      </div>
+      <input type="text" id="cardio-note" placeholder="📝 メモ（コース・体調など）" style="width:100%;box-sizing:border-box;background:#161616;border:1px solid #2a2a2a;border-radius:8px;color:#ccc;padding:9px 10px;font-size:12px;margin-bottom:12px">
+      <button class="save-btn" style="background:#2e8b8b" onclick="saveCardio()">✅ 有酸素を記録</button>
+    </div>
+  </div>
+  <div class="divider"></div>
+  <div class="section-wrap">
+    <div class="section-title">直近の有酸素記録</div>
+    <div id="cardio-history-list"></div>
+  </div>
+</div>
+
 <div class="tab-bar">
   <button class="tab-btn active" id="vtab-log" onclick="showView('log')"><span class="ic">📝</span>記録</button>
+  <button class="tab-btn" id="vtab-cardio" onclick="showView('cardio')"><span class="ic">🏃</span>有酸素</button>
   <button class="tab-btn" id="vtab-history" onclick="showView('history')"><span class="ic">📊</span>履歴</button>
 </div>
 
@@ -914,10 +965,84 @@ let currentView = 'log';
 function showView(view) {
   currentView = view;
   document.getElementById('view-log').style.display = view === 'log' ? 'block' : 'none';
+  document.getElementById('view-cardio').style.display = view === 'cardio' ? 'block' : 'none';
   document.getElementById('view-history').style.display = view === 'history' ? 'block' : 'none';
   document.getElementById('vtab-log').className = 'tab-btn' + (view === 'log' ? ' active' : '');
+  document.getElementById('vtab-cardio').className = 'tab-btn' + (view === 'cardio' ? ' active' : '');
   document.getElementById('vtab-history').className = 'tab-btn' + (view === 'history' ? ' active' : '');
   if (view === 'history') { renderHistory(); renderVolume(); }
+  if (view === 'cardio') { setCardioToday(); renderCardioHistory(); }
+}
+
+// ===== 有酸素運動の記録（Push/Pullとは別枠。同じGitHubファイルに cardio 配列として同期） =====
+let cardio = [];
+function setCardioToday() {
+  const el = document.getElementById('cardio-date-input');
+  if (!el) return;
+  const d = new Date();
+  el.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function saveCardio() {
+  const date = document.getElementById('cardio-date-input').value;
+  if (!date) { showToast('日付を入力してください'); return; }
+  const entry = {
+    id: genId(),
+    date,
+    type: document.getElementById('cardio-type').value,
+    min: parseFloat(document.getElementById('cardio-min').value) || 0,
+    km: parseFloat(document.getElementById('cardio-km').value) || 0,
+    hr: parseFloat(document.getElementById('cardio-hr').value) || 0,
+    rpe: parseFloat(document.getElementById('cardio-rpe').value) || 0,
+    kcal: parseFloat(document.getElementById('cardio-kcal').value) || 0,
+    note: document.getElementById('cardio-note').value.trim(),
+    updatedAt: Date.now(),
+  };
+  cardio.push(entry);
+  cardio.sort((a,b) => a.date.localeCompare(b.date));
+  saveToGitHub();
+  ['cardio-min','cardio-km','cardio-hr','cardio-rpe','cardio-kcal','cardio-note'].forEach(id => document.getElementById(id).value = '');
+  renderCardioHistory();
+  showToast('✅ 有酸素を記録しました');
+}
+function deleteCardio(id) {
+  const c = cardio.find(x => x.id === id);
+  if (!c) return;
+  if (!confirm(`${fmt(c.date)} ${c.type} の記録を削除しますか？`)) return;
+  cardio = cardio.filter(x => x.id !== id);
+  saveToGitHub();
+  renderCardioHistory();
+}
+function renderCardioHistory() {
+  const el = document.getElementById('cardio-history-list');
+  if (!el) return;
+  const list = cardio.slice().reverse().slice(0, 20);
+  if (!list.length) { el.innerHTML = '<div class="empty">まだ記録がありません</div>'; return; }
+  el.innerHTML = list.map(c => `
+    <div class="history-card">
+      <div class="history-date-bar" style="background:#1a3a3a">
+        <span>${fmt(c.date)} — ${c.type}</span>
+        <button onclick="deleteCardio('${c.id}')" style="background:none;border:none;color:#666;font-size:16px;cursor:pointer;padding:0 4px;">🗑️</button>
+      </div>
+      <div style="padding:10px 12px;font-size:13px;color:#ccc;display:flex;flex-wrap:wrap;gap:10px">
+        ${c.min ? `<span>⏱ ${c.min}分</span>` : ''}
+        ${c.km ? `<span>📏 ${c.km}km</span>` : ''}
+        ${c.hr ? `<span>❤️ ${c.hr}bpm</span>` : ''}
+        ${c.rpe ? `<span>💪 RPE${c.rpe}</span>` : ''}
+        ${c.kcal ? `<span>🔥 ${c.kcal}kcal</span>` : ''}
+      </div>
+      ${c.note ? `<div style="padding:0 12px 10px;font-size:12px;color:#9ab">📝 ${c.note}</div>` : ''}
+    </div>`).join('');
+}
+// records配列と同じくid+updatedAtでマージ
+function mergeCardioRemote(remoteCardio) {
+  const norm = c => ({ ...c, updatedAt: typeof c.updatedAt === 'number' ? c.updatedAt : 0 });
+  const merged = new Map();
+  (remoteCardio || []).map(norm).forEach(c => merged.set(c.id, c));
+  (cardio || []).map(norm).forEach(c => {
+    const ex = merged.get(c.id);
+    if (!ex || (c.updatedAt || 0) >= (ex.updatedAt || 0)) merged.set(c.id, c);
+  });
+  cardio = Array.from(merged.values()).sort((a,b) => a.date.localeCompare(b.date));
 }
 
 function updateSaveBtnLabel() {
@@ -1516,6 +1641,7 @@ async function loadFromGitHub() {
       recordsSHA = data.sha;
       const decoded = JSON.parse(fromBase64UTF8(data.content));
       mergeGymRemote(decoded.records || []);
+      mergeCardioRemote(decoded.cardio || []);
       saveToLocalStorage();
 
       // マージ結果をGitHubに書き戻す（全デバイスで統一）
@@ -1593,6 +1719,7 @@ async function fetchAndMergeGymRemoteIntoLocal() {
       recordsSHA = data.sha;
       const decoded = JSON.parse(fromBase64UTF8(data.content));
       mergeGymRemote(decoded.records || []);
+      mergeCardioRemote(decoded.cardio || []);
       saveToLocalStorage();
     }
   } catch(e) {}
@@ -1612,7 +1739,7 @@ async function saveToGitHub() {
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
       showSyncStatus(attempt > 1 ? `⏳ 再試行中... (${attempt}/3)` : '⏳ 保存中...');
-      const content = toBase64UTF8(JSON.stringify({ records }, null, 2));
+      const content = toBase64UTF8(JSON.stringify({ records, cardio }, null, 2));
       const body = { message: `Update records ${new Date().toISOString()}`, content };
       if (recordsSHA) body.sha = recordsSHA;
 
@@ -1715,6 +1842,7 @@ function deleteRecord(id) {
 
 function saveToLocalStorage() {
   localStorage.setItem('gym_records', JSON.stringify(records));
+  localStorage.setItem('gym_cardio', JSON.stringify(cardio));
 }
 
 function genId() {
@@ -1731,10 +1859,12 @@ function loadFromLocalStorage() {
   const s = localStorage.getItem('gym_records');
   if (s) records = JSON.parse(s);
   normalizeRecords();
+  const c = localStorage.getItem('gym_cardio');
+  if (c) { try { cardio = JSON.parse(c); } catch(e) { cardio = []; } }
 }
 
 function getJSON() {
-  return JSON.stringify({ records }, null, 2);
+  return JSON.stringify({ records, cardio }, null, 2);
 }
 function exportData() {
   const blob = new Blob([getJSON()], { type: 'application/json' });
