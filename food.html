@@ -8791,6 +8791,9 @@ const FOOD_DB = [
   { name: '焼き鳥 15本（盛り合わせ平均）', unit: '15本', protein: 100.0, kcal: 1450, fat: 90.0, carb: 15.0 },
   // ===== NR個別追加 2026-08-14 =====
   { name: '生ビール ジョッキ大（でかいの）', unit: '1杯(約700ml)', protein: 2.0, kcal: 280, fat: 0.0, carb: 21.0 },
+  // ===== 汎用エントリ追加（ブランド名への誤変換防止） 2026-08-14 =====
+  { name: 'からあげ', unit: '5個(約150g)', protein: 25.0, kcal: 400, fat: 26.0, carb: 13.0 },
+  { name: 'から揚げ', unit: '5個(約150g)', protein: 25.0, kcal: 400, fat: 26.0, carb: 13.0 },
 ];
 
 // 食品名からDBを検索
@@ -8817,6 +8820,13 @@ function searchFoodDB(query) {
   const hist = userFoodHistory().filter(f => f.name.toLowerCase().includes(q));
   const histNames = new Set(hist.map(f => f.name));
   const db = FOOD_DB.filter(f => f.name.toLowerCase().includes(q) && !histNames.has(f.name));
+  // 完全一致 > 前方一致 > 短い名前（＝ブランド名などの修飾語が付いてない素の食品）を優先
+  db.sort((a, b) => {
+    const ax = a.name === query ? 0 : a.name.toLowerCase().startsWith(q) ? 1 : 2;
+    const bx = b.name === query ? 0 : b.name.toLowerCase().startsWith(q) ? 1 : 2;
+    if (ax !== bx) return ax - bx;
+    return a.name.length - b.name.length;
+  });
   return [...hist, ...db].slice(0, 10);
 }
 
