@@ -1582,6 +1582,63 @@
       "lunch": [],
       "dinner": [],
       "snack": []
+    },
+    "2026-08-17": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "id": "fmswzrfm9e74i",
+          "name": "大盛りチャーハン（推定値）",
+          "protein": 17,
+          "kcal": 800,
+          "updatedAt": 1786956499665
+        },
+        {
+          "id": "fmswzrfm9gvey",
+          "name": "チキンカツレツ　3個（推定値）",
+          "protein": 66,
+          "kcal": 960,
+          "updatedAt": 1786956499665
+        }
+      ],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-18": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-19": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-20": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-21": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-22": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
+    },
+    "2026-08-23": {
+      "breakfast": [],
+      "lunch": [],
+      "dinner": [],
+      "snack": []
     }
   },
   "checks": {
