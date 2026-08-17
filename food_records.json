@@ -1624,6 +1624,13 @@
           "protein": 40,
           "kcal": 850,
           "updatedAt": 1786970909483
+        },
+        {
+          "id": "fmsx8d156d5bl",
+          "name": "マグロ赤身",
+          "protein": 26.4,
+          "kcal": 125,
+          "updatedAt": 1786970944266
         }
       ],
       "snack": []
