@@ -443,12 +443,26 @@
     <div class="protein-numbers">
       <span class="protein-current" id="totalProtein">0</span>
       <span class="protein-unit">g</span>
-      <span class="protein-target">/ 140g</span>
+      <span class="protein-target" id="proteinTargetLabel">/ 160g</span>
     </div>
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill" style="width:0%"></div>
     </div>
     <div id="proteinRemain" style="font-size:13px;color:#aaa;margin-top:6px;text-align:center"></div>
+  </div>
+
+  <!-- カロリーサマリー（リコンプ期：厳密なTDEE計算はせず目安として表示） -->
+  <div class="protein-summary" style="margin-top:8px">
+    <div class="protein-label">今日のカロリー</div>
+    <div class="protein-numbers">
+      <span class="protein-current" id="totalKcal" style="color:#e8a94c">0</span>
+      <span class="protein-unit">kcal</span>
+      <span class="protein-target" id="kcalTargetLabel">/ 2400kcal 目安</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="kcalFill" style="width:0%;background:#e8a94c"></div>
+    </div>
+    <div id="kcalRemain" style="font-size:13px;color:#aaa;margin-top:6px;text-align:center"></div>
   </div>
 
   <!-- 7日タンパク質グラフ -->
@@ -9156,7 +9170,7 @@ function copyPrevDay() {
   saveData();
   render();
   const total = calcProtein(currentDate);
-  const remain = 140 - total;
+  const remain = PROTEIN_TARGET - total;
   showToast(`📋 コピーしました（合計${total.toFixed(1)}g・${remain > 0 ? `残り${remain.toFixed(1)}g` : `達成+${Math.abs(remain).toFixed(1)}g`}）`);
 }
 
@@ -9280,7 +9294,7 @@ function addFromFreeText() {
     i.matched ? `✅ ${i.name}${i.fuzzy ? '' : ''}（${i.protein}g P・${i.kcal}kcal）` : `⚠️ ${i.raw}（この後すぐ入力を求めます）`
   ).join('<br>');
   const total = calcProtein(currentDate);
-  const remain = 140 - total;
+  const remain = PROTEIN_TARGET - total;
   const remainTxt = remain > 0 ? `残り${remain.toFixed(1)}g` : `🎉達成+${Math.abs(remain).toFixed(1)}g`;
   showToast(`${matched}件追加（合計${total.toFixed(1)}g・${remainTxt}）`);
 
@@ -9309,9 +9323,20 @@ function promptNextUnmatched() {
   setTimeout(() => document.getElementById('foodProtein').focus(), 100);
 }
 
+// リコンプ期（2026-08-17〜）：体脂肪26.4%→14%へ減量しつつ筋肉量を増やす。
+// タンパク質は体重93.3kg×1.8g/kg≒168g→切りよく160gに設定（減量中は上限寄りが無難・エビデンス集item6）。
+// カロリーは厳密なTDEE計算はせず、増量期の上乗せ（白米大盛り等）をやめる程度の緩い赤字を想定した目安値。
+const PROTEIN_TARGET = 160;
+const KCAL_TARGET = 2400; // 目安（維持〜わずかな赤字）。増量期のような上乗せはしない。
+
 function calcProtein(date) {
   const d = getDayData(date);
   return MEALS.reduce((sum, m) => sum + (d[m.id] || []).filter(f => !f.deleted).reduce((s, f) => s + (f.protein || 0), 0), 0);
+}
+
+function calcKcal(date) {
+  const d = getDayData(date);
+  return MEALS.reduce((sum, m) => sum + (d[m.id] || []).filter(f => !f.deleted).reduce((s, f) => s + (f.kcal || 0), 0), 0);
 }
 
 // 直近7日のタンパク質を棒グラフで（目標140g）
@@ -9329,7 +9354,7 @@ function renderProteinTrend() {
     const d = new Date(monday.getTime() + i * 86400000);
     days.push({ date: d, p: calcProtein(d), isToday: d.getTime() === todayT.getTime() });
   }
-  const goal = 140;
+  const goal = PROTEIN_TARGET;
   const maxP = Math.max(goal, ...days.map(x => x.p));
   const W = 320, H = 150, padB = 20, padT = 16;
   const bw = W / days.length;
@@ -9373,7 +9398,7 @@ function render() {
 
   const dayData = getDayData(currentDate);
   const total = calcProtein(currentDate);
-  const pct = Math.min(total / 140 * 100, 100);
+  const pct = Math.min(total / PROTEIN_TARGET * 100, 100);
 
   document.getElementById('totalProtein').textContent = total.toFixed(1);
   renderProteinTrend();
@@ -9389,14 +9414,33 @@ function render() {
   }
   const fill = document.getElementById('progressFill');
   fill.style.width = pct + '%';
-  fill.className = 'progress-fill' + (total > 140 ? ' over' : '');
+  fill.className = 'progress-fill' + (total > PROTEIN_TARGET ? ' over' : '');
   const remainEl = document.getElementById('proteinRemain');
   if (remainEl) {
-    const remain = 140 - total;
+    const remain = PROTEIN_TARGET - total;
     remainEl.textContent = remain > 0
       ? `あと ${remain.toFixed(1)}g で目標達成`
       : `🎉 目標達成！+${Math.abs(remain).toFixed(1)}g オーバー`;
     remainEl.style.color = remain > 0 ? '#aaa' : '#4caf50';
+  }
+
+  // カロリーサマリー（リコンプ期：目安として表示、超過は軽い警告のみ）
+  const totalK = calcKcal(currentDate);
+  const kcalPct = Math.min(totalK / KCAL_TARGET * 100, 100);
+  const totalKcalEl = document.getElementById('totalKcal');
+  if (totalKcalEl) totalKcalEl.textContent = totalK.toFixed(0);
+  const kcalFill = document.getElementById('kcalFill');
+  if (kcalFill) {
+    kcalFill.style.width = kcalPct + '%';
+    kcalFill.style.background = totalK > KCAL_TARGET ? 'linear-gradient(90deg, #FF9800, #F44336)' : '#e8a94c';
+  }
+  const kcalRemainEl = document.getElementById('kcalRemain');
+  if (kcalRemainEl) {
+    const kcalRemain = KCAL_TARGET - totalK;
+    kcalRemainEl.textContent = kcalRemain > 0
+      ? `あと ${kcalRemain.toFixed(0)}kcal で目安到達`
+      : `目安 +${Math.abs(kcalRemain).toFixed(0)}kcal オーバー`;
+    kcalRemainEl.style.color = kcalRemain > 0 ? '#aaa' : '#e8a94c';
   }
 
   // 食事セクション
@@ -9524,7 +9568,7 @@ function addFood() {
 // 追加直後にすぐ結果が見えるようトーストで通知（合計・残りgを表示）
 function toastAdded(addedProtein) {
   const total = calcProtein(currentDate);
-  const remain = 140 - total;
+  const remain = PROTEIN_TARGET - total;
   const remainTxt = remain > 0 ? `残り${remain.toFixed(1)}g` : `🎉達成+${Math.abs(remain).toFixed(1)}g`;
   showToast(`+${addedProtein.toFixed(1)}g P（合計${total.toFixed(1)}g・${remainTxt}）`);
 }
@@ -9850,7 +9894,7 @@ function renderHistory() {
       <div class="history-day">
         <div class="history-day-header">
           <span class="history-day-date">${label}</span>
-          <span class="history-day-protein">${total.toFixed(1)}g / 140g</span>
+          <span class="history-day-protein">${total.toFixed(1)}g / ${PROTEIN_TARGET}g</span>
         </div>
         <div style="font-size:13px;color:#666">${allFoods.slice(0,5).join('・')}${allFoods.length > 5 ? ' 他' : ''}</div>
       </div>
