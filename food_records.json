@@ -1598,7 +1598,8 @@
           "name": "チキンカツレツ　3個（推定値）",
           "protein": 66,
           "kcal": 960,
-          "updatedAt": 1786956499665
+          "updatedAt": 1786956513028,
+          "deleted": true
         }
       ],
       "dinner": [],
