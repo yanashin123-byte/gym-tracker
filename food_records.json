@@ -1639,12 +1639,21 @@
       "breakfast": [
         {
           "id": "f1a01452574fi9o0",
-          "name": "明治 ザバス MILK PROTEIN 脂肪0 バナナ風味",
-          "protein": 15.0,
-          "kcal": 103,
-          "fat": 0.0,
-          "carb": 10.8,
-          "updatedAt": 1787047335759
+          "name": "明治ザバス ホエイプロテイン100（袋） バナナ味",
+          "protein": 20.0,
+          "kcal": 112,
+          "fat": 1.7,
+          "carb": 4.5,
+          "updatedAt": 1787047455598
+        },
+        {
+          "id": "f1a014542b6ev6ag",
+          "name": "低脂肪牛乳 1L",
+          "protein": 38.0,
+          "kcal": 460,
+          "fat": 5.0,
+          "carb": 58.0,
+          "updatedAt": 1787047455598
         }
       ],
       "lunch": [
