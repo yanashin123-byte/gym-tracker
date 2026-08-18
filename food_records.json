@@ -1636,9 +1636,57 @@
       "snack": []
     },
     "2026-08-18": {
-      "breakfast": [],
-      "lunch": [],
-      "dinner": [],
+      "breakfast": [
+        {
+          "id": "f1a01452574fi9o0",
+          "name": "明治 ザバス MILK PROTEIN 脂肪0 バナナ風味",
+          "protein": 15.0,
+          "kcal": 103,
+          "fat": 0.0,
+          "carb": 10.8,
+          "updatedAt": 1787047335759
+        }
+      ],
+      "lunch": [
+        {
+          "id": "f1a01452574flc8h",
+          "name": "ローソン コロッケ",
+          "protein": 4.5,
+          "kcal": 170,
+          "fat": 9.5,
+          "carb": 18.0,
+          "updatedAt": 1787047335759
+        },
+        {
+          "id": "f1a01452574fyt54",
+          "name": "ローソン メンチカツ",
+          "protein": 8.5,
+          "kcal": 250,
+          "fat": 16.0,
+          "carb": 16.0,
+          "updatedAt": 1787047335759
+        },
+        {
+          "id": "f1a01452574fjdab",
+          "name": "白米 大盛り",
+          "protein": 5.0,
+          "kcal": 336,
+          "fat": 0.6,
+          "carb": 74.2,
+          "updatedAt": 1787047335759
+        }
+      ],
+      "dinner": [
+        {
+          "id": "f1a01452574fuvsy",
+          "name": "サムヤン ブルダックポックンミョン カルボナーラ（ピンク） 2袋",
+          "protein": 18.0,
+          "kcal": 1170,
+          "fat": 38.0,
+          "carb": 168.0,
+          "updatedAt": 1787047335759
+        }
+      ],
       "snack": []
     },
     "2026-08-19": {
