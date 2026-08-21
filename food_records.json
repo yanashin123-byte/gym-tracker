@@ -1,6 +1,36 @@
 {
   "v": 2,
   "meals": {
+    "2026-07-29": {
+      "breakfast": [],
+      "lunch": [
+        {
+          "id": "fms5l33ysgdr3",
+          "name": "六厘舎　つけ麺　特盛",
+          "protein": 32,
+          "kcal": 980,
+          "updatedAt": 1785329715791
+        }
+      ],
+      "dinner": [
+        {
+          "id": "fms6350pxb44u",
+          "name": "カツカレー大盛り",
+          "protein": 30,
+          "kcal": 1180,
+          "updatedAt": 1785329715791
+        }
+      ],
+      "snack": [
+        {
+          "id": "fms5l3dyvfefe",
+          "name": "コーヒーフロート",
+          "protein": 2,
+          "kcal": 180,
+          "updatedAt": 1785329715791
+        }
+      ]
+    },
     "2026-05-18": {
       "breakfast": [],
       "lunch": [],
@@ -1154,36 +1184,6 @@
       "dinner": [],
       "snack": []
     },
-    "2026-07-29": {
-      "breakfast": [],
-      "lunch": [
-        {
-          "id": "fms5l33ysgdr3",
-          "name": "六厘舎　つけ麺　特盛",
-          "protein": 32,
-          "kcal": 980,
-          "updatedAt": 1785329715791
-        }
-      ],
-      "dinner": [
-        {
-          "id": "fms6350pxb44u",
-          "name": "カツカレー大盛り",
-          "protein": 30,
-          "kcal": 1180,
-          "updatedAt": 1785329715791
-        }
-      ],
-      "snack": [
-        {
-          "id": "fms5l3dyvfefe",
-          "name": "コーヒーフロート",
-          "protein": 2,
-          "kcal": 180,
-          "updatedAt": 1785329715791
-        }
-      ]
-    },
     "2026-07-27": {
       "breakfast": [],
       "lunch": [],
@@ -1640,7 +1640,7 @@
         {
           "id": "f1a01452574fi9o0",
           "name": "明治ザバス ホエイプロテイン100（袋） バナナ味",
-          "protein": 20.0,
+          "protein": 20,
           "kcal": 112,
           "fat": 1.7,
           "carb": 4.5,
@@ -1649,10 +1649,10 @@
         {
           "id": "f1a014542b6ev6ag",
           "name": "低脂肪牛乳 1L",
-          "protein": 38.0,
+          "protein": 38,
           "kcal": 460,
-          "fat": 5.0,
-          "carb": 58.0,
+          "fat": 5,
+          "carb": 58,
           "updatedAt": 1787047455598
         }
       ],
@@ -1663,7 +1663,7 @@
           "protein": 4.5,
           "kcal": 170,
           "fat": 9.5,
-          "carb": 18.0,
+          "carb": 18,
           "updatedAt": 1787047335759
         },
         {
@@ -1671,14 +1671,14 @@
           "name": "ローソン メンチカツ",
           "protein": 8.5,
           "kcal": 250,
-          "fat": 16.0,
-          "carb": 16.0,
+          "fat": 16,
+          "carb": 16,
           "updatedAt": 1787047335759
         },
         {
           "id": "f1a01452574fjdab",
           "name": "白米 大盛り",
-          "protein": 5.0,
+          "protein": 5,
           "kcal": 336,
           "fat": 0.6,
           "carb": 74.2,
@@ -1689,10 +1689,10 @@
         {
           "id": "f1a01452574fuvsy",
           "name": "サムヤン ブルダックポックンミョン カルボナーラ（ピンク） 2袋",
-          "protein": 18.0,
+          "protein": 18,
           "kcal": 1170,
-          "fat": 38.0,
-          "carb": 168.0,
+          "fat": 38,
+          "carb": 168,
           "updatedAt": 1787047335759
         }
       ],
