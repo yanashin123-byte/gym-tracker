@@ -930,8 +930,6 @@ function removeExtra(day, name) {
   loadForm();
 }
 
-init();
-
 function init() {
   setToday();
   loadFromLocalStorage();
@@ -1935,6 +1933,8 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
+
+init(); // 全ての宣言（GITHUB_TOKEN等）が済んでから最後に起動する
 </script>
 </body>
 </html>
