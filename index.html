@@ -938,9 +938,25 @@ function removeExtra(day, name) {
   loadForm();
 }
 
+// 固定メニュー（毎回選ばずに済むよう、実績とバランスに基づいて確定した種目）
+// 順番は空き状況で自由に前後してOK。疲れてる日はセット数を自分で減らして良い。
+const FIXED_MENU_VERSION = 1;
+const FIXED_SELECTION = {
+  A: { 0: 'チェスト＆デクラインコンボ', 1: 'インクラインチェストプレス', 2: 'ショルダープレスマシン', 3: 'サイドレイズ', 4: 'ケーブルプッシュダウン' },
+  B: { 0: 'ラットプルダウン', 1: 'ローロウ', 2: 'ケーブルプルオーバー', 3: 'ダンベルカール', 4: 'リバースフライ' },
+};
+function applyFixedMenuIfNeeded() {
+  if (localStorage.getItem('gym_menu_fixed_version') === String(FIXED_MENU_VERSION)) return;
+  selection.A = { ...(selection.A || {}), ...FIXED_SELECTION.A };
+  selection.B = { ...(selection.B || {}), ...FIXED_SELECTION.B };
+  saveSelection();
+  localStorage.setItem('gym_menu_fixed_version', String(FIXED_MENU_VERSION));
+}
+
 function init() {
   setToday();
   loadFromLocalStorage();
+  applyFixedMenuIfNeeded();
   switchDay('A');
   loadFromGitHub();
   // GitHub読込後にもdraftを適用するため、loadFromGitHub内でも呼ぶ
