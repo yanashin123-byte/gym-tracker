@@ -1988,13 +1988,6 @@ function restTimerDone() {
   clearInterval(restTimerInterval);
   restTimerInterval = null;
   if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.value = 880; g.gain.value = 0.2;
-    o.start(); setTimeout(() => { o.stop(); ctx.close(); }, 350);
-  } catch(e) {}
   showToast('⏱ 休憩終了！次のセットへ');
   setTimeout(stopRestTimer, 3000);
 }
