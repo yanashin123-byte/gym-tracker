@@ -1163,6 +1163,38 @@ function renderDaySuggest() {
   el.onclick = () => switchDay(next);
 }
 
+// 指定週（月曜開始のDateオブジェクト）に「トレした」日付の集合を返す
+// 【最低ラインの公式ルール】筋トレ(records)だけでなく有酸素(cardio)もカウントする。
+// HYROXが新目標のため「きつい日は走るだけでもOK」を正式に採用（サボりではなくレース練習として扱う）
+function trainingDatesInWeek(monday, sunday) {
+  const dates = new Set();
+  records.forEach(r => {
+    const d = new Date(r.date + 'T00:00:00');
+    if (d >= monday && d <= sunday) dates.add(r.date);
+  });
+  (cardio || []).forEach(c => {
+    const d = new Date(c.date + 'T00:00:00');
+    if (d >= monday && d <= sunday) dates.add(c.date);
+  });
+  return dates;
+}
+
+// 何週連続で週4回を達成してるか（今週は集計中なので対象外、先週から遡る）
+function computeStreak(TARGET) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const offsetToMonday = (today.getDay() + 6) % 7;
+  let monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
+  monday.setDate(monday.getDate() - 7); // 先週の月曜から遡る
+  let streak = 0;
+  for (let i = 0; i < 52; i++) {
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    const n = trainingDatesInWeek(monday, sunday).size;
+    if (n >= TARGET) { streak++; monday.setDate(monday.getDate() - 7); }
+    else break;
+  }
+  return streak;
+}
+
 function renderWeekCounter() {
   const el = document.getElementById('week-counter');
   if (!el) return;
@@ -1171,22 +1203,23 @@ function renderWeekCounter() {
   // 月曜始まりの今週（月〜日）
   const offsetToMonday = (today.getDay() + 6) % 7; // 月=0..日=6
   const monday = new Date(today); monday.setDate(today.getDate() - offsetToMonday);
-  // 今週のトレ日数（記録のある日付の数。同日に複数セッションでも1日換算）
-  const trainDates = new Set();
-  records.forEach(r => {
-    const d = new Date(r.date + 'T00:00:00');
-    if (d >= monday && d <= today) trainDates.add(r.date);
-  });
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const trainDates = trainingDatesInWeek(monday, sunday);
   const n = trainDates.size;
   const hit = n >= TARGET;
   const dots = Array.from({length: TARGET}, (_, i) => `<div class="wc-dot${i < n ? ' on' : ''}"></div>`).join('');
   const extra = n > TARGET ? ` <span style="color:#2ecc71">+${n - TARGET}</span>` : '';
+  const streak = computeStreak(TARGET);
+  const streakHTML = streak > 0
+    ? `<div style="font-size:12px;color:#ff9f43;margin-top:6px">🔥 ${streak}週連続 週4達成中</div>` : '';
   el.innerHTML = `
     <div class="wc-top">
       <span class="wc-title">今週のトレ（月〜日）</span>
       <span class="wc-count ${hit ? 'hit' : 'miss'}">${n}/${TARGET}回${hit ? ' ✓' : ''}${extra}</span>
     </div>
-    <div class="wc-dots">${dots}</div>`;
+    <div class="wc-dots">${dots}</div>
+    ${streakHTML}
+    <div style="font-size:11px;color:#666;margin-top:6px">💡 最低ライン：きつい日は🏃有酸素タブで走るだけでもOK（HYROX練習として1回にカウント）</div>`;
   renderDaySuggest();
 }
 
