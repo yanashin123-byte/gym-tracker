@@ -616,18 +616,22 @@
   <button class="tab-btn" id="vtab-history" onclick="showView('history')"><span class="ic">📊</span>履歴</button>
 </div>
 
-<!-- 設定モーダル -->
+<!-- 設定モーダル（ログイン） -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
-    <h3>⚙️ GitHub設定</h3>
-    <p style="font-size:12px;color:#666;margin-bottom:12px;">GitHub Fine-grained PATを入力してください。<br>このデバイスのみに保存されます。</p>
-    <input type="password" id="token-input"
-      style="width:100%;background:#111;border:1px solid #333;border-radius:10px;color:#6aff6a;font-family:monospace;font-size:13px;padding:12px;margin-bottom:8px;"
-      placeholder="github_pat_...">
-    <div id="token-status" style="font-size:12px;color:#666;margin-bottom:12px;min-height:16px;"></div>
+    <h3>🔐 アカウント</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;">ログインするとPCとiPhoneで自動的に同期されます（task-appと同じ仕組み）。<br>両方の端末で同じメール・パスワードでログインしてください。</p>
+    <input type="email" id="login-email" autocomplete="username"
+      style="width:100%;background:#111;border:1px solid #333;border-radius:10px;color:#eee;font-size:14px;padding:12px;margin-bottom:8px;"
+      placeholder="メールアドレス">
+    <input type="password" id="login-password" autocomplete="current-password"
+      style="width:100%;background:#111;border:1px solid #333;border-radius:10px;color:#eee;font-size:14px;padding:12px;margin-bottom:8px;"
+      placeholder="パスワード">
+    <div id="login-status" style="font-size:12px;color:#666;margin-bottom:12px;min-height:16px;"></div>
     <div class="modal-btns">
-      <button class="modal-btn modal-copy" onclick="saveToken()">保存</button>
-      <button class="modal-btn" style="background:#5a1a1a;color:#f08080;" onclick="clearToken()">削除</button>
+      <button class="modal-btn modal-copy" onclick="doLogin()">ログイン</button>
+      <button class="modal-btn" style="background:#1a3a2a;color:#7dd8a8;" onclick="doSignup()">はじめて（新規登録）</button>
+      <button class="modal-btn" style="background:#5a1a1a;color:#f08080;" onclick="doLogout()">ログアウト</button>
       <button class="modal-btn" style="background:#1a3a2a;color:#7dd8a8;" onclick="exportData()">📥 バックアップ</button>
       <button class="modal-btn modal-close" onclick="closeSettings()">閉じる</button>
     </div>
@@ -958,8 +962,7 @@ function init() {
   loadFromLocalStorage();
   applyFixedMenuIfNeeded();
   switchDay('A');
-  loadFromGitHub();
-  // GitHub読込後にもdraftを適用するため、loadFromGitHub内でも呼ぶ
+  initCloud();
 }
 
 function setToday() {
@@ -1685,63 +1688,113 @@ function fmt(s) {
   return `${d.getMonth()+1}/${d.getDate()}`;
 }
 
-// GitHub sync
-let GITHUB_TOKEN = localStorage.getItem('github_token') || '';
-const GITHUB_REPO = 'yanashin123-byte/gym-tracker';
-const RECORDS_FILE = 'records.json';
-let recordsSHA = null;
+// ===== クラウド同期（Firebase・task-appと同じプロジェクトを間借り。ログインでPC/iPhone間を自動同期） =====
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAYsqtzAcVdSWvx7to2kG7cd0jKT-AG8ko",
+  authDomain: "task-app-5fc1f.firebaseapp.com",
+  projectId: "task-app-5fc1f",
+  storageBucket: "task-app-5fc1f.firebasestorage.app",
+  messagingSenderId: "576610270379",
+  appId: "1:576610270379:web:dfd8d101e89de3ed7a0bee",
+};
+let fbMods = null, fbDb = null, fbAuth = null, fbUser = null, unsubGymDoc = null;
 let pendingSync = false;
 
-// アプリ復帰時に自動同期
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && pendingSync && GITHUB_TOKEN) {
-    loadFromGitHub();
-  }
-});
-
-async function loadFromGitHub() {
-  if (!GITHUB_TOKEN) {
-    loadFromLocalStorage();
-    showSyncStatus('🔑 トークン未設定');
-    return;
-  }
+async function initCloud() {
   try {
-    showSyncStatus('⏳ 読込中...');
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+    const [appMod, fs, authMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+    ]);
+    fbMods = { fs, authMod };
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    fbDb = fs.initializeFirestore(app, { experimentalForceLongPolling: true });
+    fbAuth = authMod.getAuth(app);
+    authMod.onAuthStateChanged(fbAuth, (user) => {
+      fbUser = user;
+      updateLoginStatusUI();
+      if (unsubGymDoc) { unsubGymDoc(); unsubGymDoc = null; }
+      if (user) {
+        subscribeCloud();
+      } else {
+        loadFromLocalStorage();
+        renderExercises(); loadForm(); renderHistory(); renderVolume(); renderWeekCounter(); renderCardioHistory();
+        showSyncStatus('🔑 未ログイン');
+      }
     });
-    if (res.ok) {
-      const data = await res.json();
-      recordsSHA = data.sha;
-      const decoded = JSON.parse(fromBase64UTF8(data.content));
-      mergeGymRemote(decoded.records || []);
-      mergeCardioRemote(decoded.cardio || []);
-      saveToLocalStorage();
-
-      // マージ結果をGitHubに書き戻す（全デバイスで統一）
-      await saveToGitHub();
-
-      renderExercises();
-      loadForm();
-      renderHistory();
-  renderVolume();
-      renderWeekCounter();
-      showSyncStatus('✅ 同期済み');
-    } else if (res.status === 404) {
-      // ファイルがまだない → ローカルから読んでそのまま使う
-      loadFromLocalStorage();
-      showSyncStatus('📱 ローカル（新規）');
-    } else if (res.status === 401) {
-      loadFromLocalStorage();
-      showSyncStatus('🔑 トークンエラー');
-    } else {
-      loadFromLocalStorage();
-      showSyncStatus('⚠️ 読込失敗');
-    }
-  } catch(e) {
+  } catch (e) {
     loadFromLocalStorage();
     showSyncStatus('📵 オフライン');
   }
+}
+
+function subscribeCloud() {
+  const { fs } = fbMods;
+  const ref = fs.doc(fbDb, 'gymData', 'main');
+  showSyncStatus('⏳ 読込中...');
+  unsubGymDoc = fs.onSnapshot(ref, (snap) => {
+    if (snap.exists()) {
+      const remote = snap.data();
+      mergeGymRemote(remote.records || []);
+      mergeCardioRemote(remote.cardio || []);
+    }
+    saveToLocalStorage();
+    renderExercises(); loadForm(); renderHistory(); renderVolume(); renderWeekCounter(); renderCardioHistory();
+    showSyncStatus('✅ 同期済み');
+    pendingSync = false;
+  }, (_err) => {
+    showSyncStatus('📵 オフライン');
+  });
+}
+
+// 呼び出し元互換のため名前は維持（実体はFirestoreの手動再読込）
+async function loadFromGitHub() {
+  if (!fbAuth) { await initCloud(); return; }
+  if (!fbUser) { loadFromLocalStorage(); showSyncStatus('🔑 未ログイン'); openSettings(); return; }
+  subscribeCloud();
+}
+
+function updateLoginStatusUI() {
+  const status = document.getElementById('login-status');
+  if (!status) return;
+  status.textContent = fbUser ? `✅ ログイン中：${fbUser.email}` : '未ログイン';
+  status.style.color = fbUser ? '#6aff6a' : '#888';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value;
+  if (!email || !pw) { showToast('メールとパスワードを入力してください'); return; }
+  try {
+    await fbMods.authMod.signInWithEmailAndPassword(fbAuth, email, pw);
+    closeSettings();
+    showToast('✅ ログインしました');
+  } catch (e) {
+    document.getElementById('login-status').textContent = '⚠️ ログイン失敗：' + e.message;
+    document.getElementById('login-status').style.color = '#f08080';
+  }
+}
+
+async function doSignup() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-password').value;
+  if (!email || !pw) { showToast('メールとパスワードを入力してください'); return; }
+  try {
+    await fbMods.authMod.createUserWithEmailAndPassword(fbAuth, email, pw);
+    closeSettings();
+    showToast('✅ 登録してログインしました');
+  } catch (e) {
+    document.getElementById('login-status').textContent = '⚠️ 登録失敗：' + e.message;
+    document.getElementById('login-status').style.color = '#f08080';
+  }
+}
+
+async function doLogout() {
+  if (!fbAuth) return;
+  await fbMods.authMod.signOut(fbAuth);
+  closeSettings();
+  showToast('👋 ログアウトしました');
 }
 
 function toBase64UTF8(str) {
@@ -1769,129 +1822,35 @@ function mergeGymRemote(remoteRecords) {
   records = Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
-async function fetchSHA() {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      recordsSHA = data.sha;
-    }
-  } catch(e) {}
-}
-
-// 保存競合(409/422)時に呼ぶ：他端末の最新内容も取り込んでマージしてから再保存する
-// （SHAだけ取り直して上書きすると、他端末が直前に書いた変更が消える可能性があるため）
-async function fetchAndMergeGymRemoteIntoLocal() {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      recordsSHA = data.sha;
-      const decoded = JSON.parse(fromBase64UTF8(data.content));
-      mergeGymRemote(decoded.records || []);
-      mergeCardioRemote(decoded.cardio || []);
-      saveToLocalStorage();
-    }
-  } catch(e) {}
-}
-
+// 呼び出し元互換のため名前は維持（実体はFirestoreへの書き込み）
 async function saveToGitHub() {
   saveToLocalStorage();
-  if (!GITHUB_TOKEN) {
-    showSyncStatus('🔑 トークン未設定');
+  if (!fbUser || !fbDb) {
+    showSyncStatus('🔑 未ログイン');
     pendingSync = true;
     return;
   }
-
-  // SHAが未取得の場合は先にフェッチ（中身もマージして他端末の変更を消さないようにする）
-  if (!recordsSHA) await fetchAndMergeGymRemoteIntoLocal();
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      showSyncStatus(attempt > 1 ? `⏳ 再試行中... (${attempt}/3)` : '⏳ 保存中...');
-      const content = toBase64UTF8(JSON.stringify({ records, cardio }, null, 2));
-      const body = { message: `Update records ${new Date().toISOString()}`, content };
-      if (recordsSHA) body.sha = recordsSHA;
-
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${RECORDS_FILE}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        recordsSHA = data.content.sha;
-        showSyncStatus('✅ 同期済み');
-        pendingSync = false;
-        return;
-      } else if (res.status === 409) {
-        // 競合 → 他端末の中身も取り込んでマージしてから再構築してリトライ
-        await fetchAndMergeGymRemoteIntoLocal();
-        continue;
-      } else if (res.status === 401) {
-        showSyncStatus('🔑 トークンエラー');
-        pendingSync = true;
-        return;
-      } else {
-        if (attempt < 3) {
-          await new Promise(r => setTimeout(r, 2000 * attempt));
-          continue;
-        }
-        showSyncStatus('⚠️ 同期失敗');
-        pendingSync = true;
-        return;
-      }
-    } catch(e) {
-      if (attempt < 3) {
-        await new Promise(r => setTimeout(r, 2000 * attempt));
-        continue;
-      }
-      showSyncStatus('📵 オフライン保存');
-      pendingSync = true;
-      return;
-    }
+  const { fs } = fbMods;
+  try {
+    showSyncStatus('⏳ 保存中...');
+    await fs.setDoc(fs.doc(fbDb, 'gymData', 'main'), { records, cardio, updatedAt: Date.now() });
+    showSyncStatus('✅ 同期済み');
+    pendingSync = false;
+  } catch (e) {
+    showSyncStatus('⚠️ 同期失敗');
+    pendingSync = true;
   }
 }
 
 function openSettings() {
-  const input = document.getElementById('token-input');
-  input.value = '';
-  input.placeholder = GITHUB_TOKEN ? '（設定済み — 変更する場合は新しいトークンを入力）' : 'github_pat_...';
-  const status = document.getElementById('token-status');
-  status.textContent = GITHUB_TOKEN ? '✅ トークン設定済み' : '⚠️ トークン未設定';
-  status.style.color = GITHUB_TOKEN ? '#6aff6a' : '#f0a040';
+  document.getElementById('login-email').value = fbUser ? fbUser.email : '';
+  document.getElementById('login-password').value = '';
+  updateLoginStatusUI();
   document.getElementById('settings-modal').classList.add('open');
 }
 
 function closeSettings() {
   document.getElementById('settings-modal').classList.remove('open');
-}
-
-function saveToken() {
-  const val = document.getElementById('token-input').value.trim();
-  if (!val) { showToast('トークンを入力してください'); return; }
-  GITHUB_TOKEN = val;
-  localStorage.setItem('github_token', val);
-  closeSettings();
-  showToast('✅ トークンを保存しました');
-  loadFromGitHub();
-}
-
-function clearToken() {
-  if (!confirm('トークンを削除しますか？')) return;
-  GITHUB_TOKEN = '';
-  localStorage.removeItem('github_token');
-  closeSettings();
-  showSyncStatus('🔑 トークン未設定');
-  showToast('🗑️ トークンを削除しました');
 }
 
 function showSyncStatus(msg) {

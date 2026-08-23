@@ -622,10 +622,14 @@
 
 <div id="settingsView" style="display:none;padding:16px">
   <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
-    <div style="font-size:14px;font-weight:600;margin-bottom:8px">🔗 GitHub同期</div>
-    <div style="font-size:12px;color:#888;margin-bottom:8px">Personal Access Tokenを設定するとMac・iPhone間でデータが同期されます</div>
-    <input type="password" id="tokenInput" placeholder="github_pat_..." style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
-    <button onclick="saveGitHubToken()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer">トークンを保存</button>
+    <div style="font-size:14px;font-weight:600;margin-bottom:8px">🔐 アカウント</div>
+    <div style="font-size:12px;color:#888;margin-bottom:8px">ログインするとMac・iPhone間で自動同期されます（task-appと同じ仕組み）。両方の端末で同じメール・パスワードでログインしてください。</div>
+    <input type="email" id="loginEmail" autocomplete="username" placeholder="メールアドレス" style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
+    <input type="password" id="loginPassword" autocomplete="current-password" placeholder="パスワード" style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#eee;padding:12px;font-size:13px;margin-bottom:8px" />
+    <div id="loginStatus" style="font-size:12px;color:#888;margin-bottom:8px;min-height:16px"></div>
+    <button onclick="doLogin()" style="width:100%;background:#4CAF50;border:none;border-radius:10px;color:#fff;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">ログイン</button>
+    <button onclick="doSignup()" style="width:100%;background:#2a2a2a;border:none;border-radius:10px;color:#7dd8a8;padding:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">はじめて（新規登録）</button>
+    <button onclick="doLogout()" style="width:100%;background:#3a1a1a;border:none;border-radius:10px;color:#f08080;padding:12px;font-size:14px;font-weight:700;cursor:pointer">ログアウト</button>
   </div>
   <div style="background:#1a1a1a;border-radius:14px;padding:16px;margin-bottom:16px">
     <div style="font-size:14px;font-weight:600;margin-bottom:8px">💾 バックアップ</div>
@@ -695,9 +699,16 @@ const MEALS = [
   { id: 'snack',     label: '間食', emoji: '🍎' },
 ];
 
-const GITHUB_REPO = 'yanashin123-byte/gym-tracker';
-const FOOD_FILE = 'food_records.json';
-let foodSHA = null;
+// ===== クラウド同期（Firebase・task-appと同じプロジェクトを間借り。ログインでMac/iPhone間を自動同期） =====
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAYsqtzAcVdSWvx7to2kG7cd0jKT-AG8ko",
+  authDomain: "task-app-5fc1f.firebaseapp.com",
+  projectId: "task-app-5fc1f",
+  storageBucket: "task-app-5fc1f.firebasestorage.app",
+  messagingSenderId: "576610270379",
+  appId: "1:576610270379:web:dfd8d101e89de3ed7a0bee",
+};
+let fbMods = null, fbDb = null, fbAuth = null, fbUser = null, unsubFoodDoc = null;
 
 const QUICK_FOODS = [
   { name: 'VITASホエイプロテイン', label: 'VITASホエイ 1杯', protein: 22, kcal: 120 },
@@ -9032,126 +9043,109 @@ function mergeRemote(remote) {
   });
   recipesData = Array.from(rmap.values());
 }
-async function loadData() {
-  const token = localStorage.getItem('github_token') || '';
-  if (!token) { loadFromLocalStorage(); showSyncStatus('🔑 未設定'); return; }
-  try {
-    showSyncStatus('⏳');
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
-      headers: { 'Authorization': `token ${token}` }
-    });
-    if (res.ok) {
-      const d = await res.json();
-      foodSHA = d.sha;
-      loadFromLocalStorage();                       // ローカルを土台に
-      const remote = JSON.parse(fromBase64UTF8(d.content));
-      mergeRemote(remote);                          // 項目ごとにマージ（消さない）
-      saveToLocalStorage();
-      saveData();                                   // マージ結果を書き戻し（全デバイス統一）
-      showSyncStatus('✅ 同期済み');
-    } else if (res.status === 404) {
-      loadFromLocalStorage(); showSyncStatus('📱 新規');
-    } else if (res.status === 401) {
-      loadFromLocalStorage(); showSyncStatus('🔑 エラー');
-    } else {
-      loadFromLocalStorage(); showSyncStatus('⚠️ 失敗');
-    }
-  } catch(e) { loadFromLocalStorage(); showSyncStatus('📵 オフライン'); }
-}
 let foodPendingSync = false;
 
-// 進行中の最新SHAを取得（保存前に呼ぶ・中身は取り込まない軽量版）
-async function fetchFoodSHA() {
-  const token = localStorage.getItem('github_token') || '';
-  if (!token) return;
+async function initCloud() {
   try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
-      headers: { 'Authorization': `token ${token}` }
+    const [appMod, fs, authMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"),
+    ]);
+    fbMods = { fs, authMod };
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    fbDb = fs.initializeFirestore(app, { experimentalForceLongPolling: true });
+    fbAuth = authMod.getAuth(app);
+    authMod.onAuthStateChanged(fbAuth, (user) => {
+      fbUser = user;
+      updateLoginStatusUI();
+      if (unsubFoodDoc) { unsubFoodDoc(); unsubFoodDoc = null; }
+      if (user) {
+        subscribeCloud();
+      } else {
+        loadFromLocalStorage();
+        render();
+        showSyncStatus('\ud83d\udd11 \u672a\u30ed\u30b0\u30a4\u30f3');
+      }
     });
-    if (res.ok) { const d = await res.json(); foodSHA = d.sha; }
-    else if (res.status === 404) { foodSHA = null; }
-  } catch(e) {}
+  } catch (e) {
+    loadFromLocalStorage();
+    render();
+    showSyncStatus('\ud83d\udcf5 \u30aa\u30d5\u30e9\u30a4\u30f3');
+  }
 }
 
-// 保存競合(409/422)時に呼ぶ：他端末の最新内容を取得してマージしてから再保存する
-// （SHAだけ取り直して上書きすると、他端末が競合直前に書いた変更が消える可能性があるため）
-async function fetchAndMergeRemoteIntoLocal() {
-  const token = localStorage.getItem('github_token') || '';
-  if (!token) return;
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
-      headers: { 'Authorization': `token ${token}` }
-    });
-    if (res.ok) {
-      const d = await res.json();
-      foodSHA = d.sha;
-      const remote = JSON.parse(fromBase64UTF8(d.content));
-      mergeRemote(remote);
-      saveToLocalStorage();
-    } else if (res.status === 404) {
-      foodSHA = null;
-    }
-  } catch(e) {}
+function subscribeCloud() {
+  const { fs } = fbMods;
+  const ref = fs.doc(fbDb, 'foodData', 'main');
+  showSyncStatus('\u23f3 \u8aad\u8fbc\u4e2d...');
+  unsubFoodDoc = fs.onSnapshot(ref, (snap) => {
+    loadFromLocalStorage();
+    if (snap.exists()) mergeRemote(snap.data());
+    saveToLocalStorage();
+    render();
+    showSyncStatus('\u2705 \u540c\u671f\u6e08\u307f');
+    foodPendingSync = false;
+  }, (_err) => {
+    showSyncStatus('\ud83d\udcf5 \u30aa\u30d5\u30e9\u30a4\u30f3');
+  });
+}
+
+async function loadData() {
+  if (!fbAuth) { await initCloud(); return; }
+  if (!fbUser) { loadFromLocalStorage(); showSyncStatus('\ud83d\udd11 \u672a\u30ed\u30b0\u30a4\u30f3'); return; }
+  subscribeCloud();
 }
 
 async function saveData() {
   saveToLocalStorage();
-  const token = localStorage.getItem('github_token') || '';
-  if (!token) { showSyncStatus('🔑 未設定'); foodPendingSync = true; return; }
-  // SHA未取得なら先に取りに行く（422防止・中身もマージして他端末の変更を消さないようにする）
-  if (!foodSHA) await fetchAndMergeRemoteIntoLocal();
-  showSyncStatus('⏳ 保存中');
-  let content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      const body = { message: `food records ${new Date().toISOString()}`, content };
-      if (foodSHA) body.sha = foodSHA;
-      const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${FOOD_FILE}`, {
-        method: 'PUT',
-        headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (res.ok) {
-        const d = await res.json();
-        foodSHA = d.content.sha;
-        foodPendingSync = false;
-        showSyncStatus('✅ 同期済み');
-        return;
-      } else if (res.status === 409 || res.status === 422) {
-        // 競合＝他端末が先に書き込んだ。中身も取り込んでマージしてから再構築して再試行
-        // （SHAだけ取り直すと他端末の変更を上書きして消してしまうため）
-        await fetchAndMergeRemoteIntoLocal();
-        content = toBase64UTF8(JSON.stringify(buildSync(), null, 2));
-        continue;
-      } else {
-        showSyncStatus(`⚠️ 同期失敗 (${res.status})`);
-        foodPendingSync = true;
-        return;
-      }
-    } catch(e) {
-      // 通信エラー → バックオフして再試行
-      if (attempt < 3) { await new Promise(r => setTimeout(r, 2000 * attempt)); continue; }
-      showSyncStatus('📵 オフライン保存');
-      foodPendingSync = true;
-      return;
-    }
+  if (!fbUser || !fbDb) { showSyncStatus('\ud83d\udd11 \u672a\u30ed\u30b0\u30a4\u30f3'); foodPendingSync = true; return; }
+  const { fs } = fbMods;
+  try {
+    showSyncStatus('\u23f3 \u4fdd\u5b58\u4e2d');
+    await fs.setDoc(fs.doc(fbDb, 'foodData', 'main'), { ...buildSync(), updatedAt: Date.now() });
+    foodPendingSync = false;
+    showSyncStatus('\u2705 \u540c\u671f\u6e08\u307f');
+  } catch (e) {
+    showSyncStatus('\u26a0\ufe0f \u540c\u671f\u5931\u6557');
+    foodPendingSync = true;
   }
-  showSyncStatus('⚠️ 同期失敗');
-  foodPendingSync = true;
 }
 
-// アプリ復帰時に未同期があれば再同期を試みる
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && foodPendingSync && localStorage.getItem('github_token')) {
-    saveData();
+function updateLoginStatusUI() {
+  const status = document.getElementById('loginStatus');
+  if (!status) return;
+  status.textContent = fbUser ? `\u2705 \u30ed\u30b0\u30a4\u30f3\u4e2d\uff1a${fbUser.email}` : '\u672a\u30ed\u30b0\u30a4\u30f3';
+  status.style.color = fbUser ? '#6aff6a' : '#888';
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  if (!email || !pw) { alert('\u30e1\u30fc\u30eb\u3068\u30d1\u30b9\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044'); return; }
+  try {
+    await fbMods.authMod.signInWithEmailAndPassword(fbAuth, email, pw);
+  } catch (e) {
+    document.getElementById('loginStatus').textContent = '\u26a0\ufe0f \u30ed\u30b0\u30a4\u30f3\u5931\u6557\uff1a' + e.message;
+    document.getElementById('loginStatus').style.color = '#f08080';
   }
-});
-function saveGitHubToken() {
-  const val = document.getElementById('tokenInput').value.trim();
-  if (!val) return;
-  localStorage.setItem('github_token', val);
-  alert('保存しました');
-  loadData().then(() => render());
+}
+
+async function doSignup() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  if (!email || !pw) { alert('\u30e1\u30fc\u30eb\u3068\u30d1\u30b9\u30ef\u30fc\u30c9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044'); return; }
+  try {
+    await fbMods.authMod.createUserWithEmailAndPassword(fbAuth, email, pw);
+  } catch (e) {
+    document.getElementById('loginStatus').textContent = '\u26a0\ufe0f \u767b\u9332\u5931\u6557\uff1a' + e.message;
+    document.getElementById('loginStatus').style.color = '#f08080';
+  }
+}
+
+async function doLogout() {
+  if (!fbAuth) return;
+  await fbMods.authMod.signOut(fbAuth);
 }
 
 function getDayData(date) {
