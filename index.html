@@ -630,6 +630,7 @@
     <div id="login-status" style="font-size:12px;color:#666;margin-bottom:12px;min-height:16px;"></div>
     <div class="modal-btns">
       <button class="modal-btn modal-copy" onclick="doLogin()">ログイン</button>
+      <button class="modal-btn" style="background:#1a3a2a;color:#7dd8a8;" onclick="doResetPassword()">🔁 パスワードを忘れた場合</button>
       <button class="modal-btn" style="background:#1a3a2a;color:#7dd8a8;" onclick="doSignup()">はじめて（新規登録）</button>
       <button class="modal-btn" style="background:#5a1a1a;color:#f08080;" onclick="doLogout()">ログアウト</button>
       <button class="modal-btn" style="background:#1a3a2a;color:#7dd8a8;" onclick="exportData()">📥 バックアップ</button>
@@ -1729,17 +1730,36 @@ async function initCloud() {
   }
 }
 
+// 初回ログイン時：クラウドが空なら、旧GitHub同期ファイル(records.json)＋このデバイスのローカル記録を
+// 取り込んでからクラウドに書き込む（データを消さずに引き継ぐため）
+let gymSeeded = false;
+async function seedGymFromLegacyIfEmpty() {
+  if (gymSeeded) return;
+  gymSeeded = true;
+  try {
+    const res = await fetch('https://raw.githubusercontent.com/yanashin123-byte/gym-tracker/main/records.json?_=' + Date.now());
+    if (res.ok) {
+      const legacy = await res.json();
+      mergeGymRemote(legacy.records || []);
+      mergeCardioRemote(legacy.cardio || []);
+    }
+  } catch (e) {}
+  await saveToGitHub();
+}
+
 function subscribeCloud() {
   const { fs } = fbMods;
   const ref = fs.doc(fbDb, 'gymData', 'main');
   showSyncStatus('⏳ 読込中...');
-  unsubGymDoc = fs.onSnapshot(ref, (snap) => {
+  unsubGymDoc = fs.onSnapshot(ref, async (snap) => {
     if (snap.exists()) {
       const remote = snap.data();
       mergeGymRemote(remote.records || []);
       mergeCardioRemote(remote.cardio || []);
+      saveToLocalStorage();
+    } else {
+      await seedGymFromLegacyIfEmpty();
     }
-    saveToLocalStorage();
     renderExercises(); loadForm(); renderHistory(); renderVolume(); renderWeekCounter(); renderCardioHistory();
     showSyncStatus('✅ 同期済み');
     pendingSync = false;
@@ -1795,6 +1815,19 @@ async function doLogout() {
   await fbMods.authMod.signOut(fbAuth);
   closeSettings();
   showToast('👋 ログアウトしました');
+}
+
+async function doResetPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { showToast('メールアドレスを入力してください'); return; }
+  try {
+    await fbMods.authMod.sendPasswordResetEmail(fbAuth, email);
+    document.getElementById('login-status').textContent = '✅ 再設定メールを送信しました。メールを確認してください';
+    document.getElementById('login-status').style.color = '#6aff6a';
+  } catch (e) {
+    document.getElementById('login-status').textContent = '⚠️ 送信失敗：' + e.message;
+    document.getElementById('login-status').style.color = '#f08080';
+  }
 }
 
 function toBase64UTF8(str) {
