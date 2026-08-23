@@ -1195,6 +1195,21 @@ function computeStreak(TARGET) {
   return streak;
 }
 
+// 直近何日、筋トレも有酸素も記録が無いか（3日以上で強制的に最低ラインを促す）
+function daysSinceLastTraining() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const allDates = new Set();
+  records.forEach(r => allDates.add(r.date));
+  (cardio || []).forEach(c => allDates.add(c.date));
+  if (allDates.size === 0) return 999;
+  let maxDate = null;
+  allDates.forEach(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    if (!maxDate || d > maxDate) maxDate = d;
+  });
+  return Math.round((today - maxDate) / 86400000);
+}
+
 function renderWeekCounter() {
   const el = document.getElementById('week-counter');
   if (!el) return;
@@ -1212,6 +1227,10 @@ function renderWeekCounter() {
   const streak = computeStreak(TARGET);
   const streakHTML = streak > 0
     ? `<div style="font-size:12px;color:#ff9f43;margin-top:6px">🔥 ${streak}週連続 週4達成中</div>` : '';
+  const gapDays = daysSinceLastTraining();
+  const gapHTML = gapDays >= 3
+    ? `<div style="background:#3a1414;border:1px solid #6a2424;border-radius:10px;padding:10px 12px;margin-top:8px;font-size:13px;color:#f08080;font-weight:700">🚨 ${gapDays}日間トレなし。最低ラインを発動：今日は🏃有酸素タブで走るだけでもいいから行こう</div>`
+    : '';
   el.innerHTML = `
     <div class="wc-top">
       <span class="wc-title">今週のトレ（月〜日）</span>
@@ -1219,6 +1238,7 @@ function renderWeekCounter() {
     </div>
     <div class="wc-dots">${dots}</div>
     ${streakHTML}
+    ${gapHTML}
     <div style="font-size:11px;color:#666;margin-top:6px">💡 最低ライン：きつい日は🏃有酸素タブで走るだけでもOK（HYROX練習として1回にカウント）</div>`;
   renderDaySuggest();
 }
