@@ -627,6 +627,11 @@
 <!-- 設定モーダル（ログイン） -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal">
+    <h3>⏱ 休憩タイマー</h3>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#1a1a1a;border-radius:10px;padding:12px;margin-bottom:16px">
+      <span style="font-size:13px;color:#ccc">セット入力時に自動で開始する</span>
+      <button id="rest-timer-toggle" onclick="toggleRestTimerEnabled()" style="border:none;border-radius:20px;width:48px;height:26px;cursor:pointer;position:relative;padding:0"></button>
+    </div>
     <h3>🔐 アカウント</h3>
     <p style="font-size:12px;color:#666;margin-bottom:12px;">ログインするとPCとiPhoneで自動的に同期されます（task-appと同じ仕組み）。<br>両方の端末で同じメール・パスワードでログインしてください。</p>
     <input type="email" id="login-email" autocomplete="username"
@@ -1891,6 +1896,7 @@ function openSettings() {
   document.getElementById('login-email').value = fbUser ? fbUser.email : '';
   document.getElementById('login-password').value = '';
   updateLoginStatusUI();
+  updateRestTimerToggleUI();
   document.getElementById('settings-modal').classList.add('open');
 }
 
@@ -2020,7 +2026,24 @@ let restTimerInterval = null;
 let restTimerRemaining = 0;
 const REST_TIMER_DEFAULT = 90;
 
+// 休憩タイマーの自動起動ON/OFF（設定モーダルのトグルで切替）
+let restTimerEnabled = localStorage.getItem('gym_rest_timer_enabled') !== '0'; // 既定ON
+function updateRestTimerToggleUI() {
+  const btn = document.getElementById('rest-timer-toggle');
+  if (!btn) return;
+  btn.style.background = restTimerEnabled ? '#2ecc71' : '#444';
+  btn.innerHTML = `<span style="position:absolute;top:2px;${restTimerEnabled ? 'right:2px' : 'left:2px'};width:22px;height:22px;background:#fff;border-radius:50%;display:block;transition:all .15s"></span>`;
+}
+function toggleRestTimerEnabled() {
+  restTimerEnabled = !restTimerEnabled;
+  localStorage.setItem('gym_rest_timer_enabled', restTimerEnabled ? '1' : '0');
+  updateRestTimerToggleUI();
+  if (!restTimerEnabled) stopRestTimer();
+  showToast(restTimerEnabled ? '⏱ 休憩タイマーON' : '⏱ 休憩タイマーOFF');
+}
+
 function startRestTimer(seconds) {
+  if (!restTimerEnabled) return;
   restTimerRemaining = seconds || REST_TIMER_DEFAULT;
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.style.display = 'flex';
