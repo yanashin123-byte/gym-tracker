@@ -961,10 +961,10 @@ function removeExtra(day, name) {
 
 // 固定メニュー（毎回選ばずに済むよう、実績とバランスに基づいて確定した種目）
 // 順番は空き状況で自由に前後してOK。疲れてる日はセット数を自分で減らして良い。
-const FIXED_MENU_VERSION = 1;
+const FIXED_MENU_VERSION = 2;
 const FIXED_SELECTION = {
   A: { 0: 'チェスト＆デクラインコンボ', 1: 'インクラインチェストプレス', 2: 'ショルダープレスマシン', 3: 'サイドレイズ', 4: 'ケーブルプッシュダウン' },
-  B: { 0: 'ラットプルダウン', 1: 'ローロウ', 2: 'ケーブルプルオーバー', 3: 'ダンベルカール', 4: 'リバースフライ' },
+  B: { 0: 'ラットプルダウン', 1: 'ローロウ', 2: 'ケーブルプルオーバー', 3: 'ケーブルカール', 4: 'リバースフライ' },
 };
 function applyFixedMenuIfNeeded() {
   if (localStorage.getItem('gym_menu_fixed_version') === String(FIXED_MENU_VERSION)) return;
