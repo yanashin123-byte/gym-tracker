@@ -2092,7 +2092,7 @@ function flashScreen(times) {
 function restTimerDone() {
   clearInterval(restTimerInterval);
   restTimerInterval = null;
-  flashScreen(3);
+  flashScreen(5);
   if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
   if (earphoneMode) {
     try {
