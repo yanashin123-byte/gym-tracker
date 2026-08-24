@@ -502,6 +502,14 @@
 
   .modal-copy { background: #4285f4; color: #fff; }
   .modal-close { background: #2a2a2a; color: #aaa; }
+
+  /* 休憩終了フラッシュ（バイブがiOSで動かないため、確実に気づける視覚合図） */
+  #rest-flash {
+    position: fixed; inset: 0; z-index: 1500;
+    background: #2ecc71; opacity: 0; pointer-events: none;
+    transition: opacity 0.15s ease-out;
+  }
+  #rest-flash.on { opacity: 0.55; }
 </style>
 </head>
 <body>
@@ -652,6 +660,8 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div id="rest-flash"></div>
 
 <div id="rest-timer-bar" style="display:none;position:fixed;left:0;right:0;bottom:52px;z-index:998;background:#14241c;border-top:1px solid #25402f;padding:10px 16px;align-items:center;gap:10px;justify-content:center">
   <span style="font-size:12px;color:#7dd8a8">休憩</span>
@@ -2063,9 +2073,26 @@ function toggleEarphoneMode() {
   showToast(earphoneMode ? '🎧 イヤホンモードON（休憩終了で音も鳴らす）' : '🎧 イヤホンモードOFF（バイブのみ）');
 }
 
+// iPhone SafariはnavigatorバイブAPI非対応のため、画面フラッシュで確実に気づけるようにする
+function flashScreen(times) {
+  const el = document.getElementById('rest-flash');
+  if (!el) return;
+  let n = 0;
+  const blink = () => {
+    el.classList.add('on');
+    setTimeout(() => {
+      el.classList.remove('on');
+      n++;
+      if (n < times) setTimeout(blink, 150);
+    }, 180);
+  };
+  blink();
+}
+
 function restTimerDone() {
   clearInterval(restTimerInterval);
   restTimerInterval = null;
+  flashScreen(3);
   if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
   if (earphoneMode) {
     try {
