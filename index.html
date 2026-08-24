@@ -2095,12 +2095,18 @@ function restTimerDone() {
   flashScreen(5);
   if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
   if (earphoneMode) {
+    // 大音量で音楽を聴いてても唐突にならないよう、フェードイン/アウトで柔らかい音にする
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const o = ctx.createOscillator(); const g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = 880; g.gain.value = 0.2;
-      o.start(); setTimeout(() => { o.stop(); ctx.close(); }, 350);
+      o.frequency.value = 880;
+      const now = ctx.currentTime;
+      g.gain.setValueAtTime(0, now);
+      g.gain.linearRampToValueAtTime(0.1, now + 0.06);   // フェードイン
+      g.gain.linearRampToValueAtTime(0.1, now + 0.25);
+      g.gain.linearRampToValueAtTime(0, now + 0.45);      // フェードアウト
+      o.start(now); setTimeout(() => { o.stop(); ctx.close(); }, 500);
     } catch(e) {}
   }
   showToast('⏱ 休憩終了！次のセットへ');
