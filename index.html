@@ -2044,6 +2044,7 @@ function toggleRestTimerEnabled() {
 
 function startRestTimer(seconds) {
   if (!restTimerEnabled) return;
+  if (earphoneMode) ensureRestTimerAudio();
   restTimerRemaining = seconds || REST_TIMER_DEFAULT;
   const bar = document.getElementById('rest-timer-bar');
   if (bar) bar.style.display = 'flex';
@@ -2089,10 +2090,22 @@ function updateEarphoneToggleUI() {
   btn.style.background = earphoneMode ? '#1b5e20' : '#2a2a2a';
   btn.style.color = earphoneMode ? '#fff' : '#888';
 }
+// iPhone Safariは「ユーザーの直接操作の中で作った音」でないと再生されない（無音のまま失敗する）。
+// タイマー終了時（setIntervalの中）に新規で音を作っても鳴らないため、ここ（実際のタップ）で
+// あらかじめAudioContextを用意・再開しておき、鳴らすときは使い回す。
+let restTimerAudioCtx = null;
+function ensureRestTimerAudio() {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!restTimerAudioCtx) restTimerAudioCtx = new Ctx();
+    if (restTimerAudioCtx.state === 'suspended') restTimerAudioCtx.resume();
+  } catch (e) {}
+}
 function toggleEarphoneMode() {
   earphoneMode = !earphoneMode;
   localStorage.setItem('gym_earphone_mode', earphoneMode ? '1' : '0');
   updateEarphoneToggleUI();
+  if (earphoneMode) ensureRestTimerAudio();
   showToast(earphoneMode ? '🎧 イヤホンモードON（休憩終了で音も鳴らす）' : '🎧 イヤホンモードOFF（バイブのみ）');
 }
 
@@ -2119,17 +2132,26 @@ function restTimerDone() {
   if (navigator.vibrate) { try { navigator.vibrate([200, 100, 200]); } catch(e) {} }
   if (earphoneMode) {
     // 大音量で音楽を聴いてても唐突にならないよう、フェードイン/アウトで柔らかい音にする
+    // （AudioContextはここで新規に作らず、ensureRestTimerAudioで用意済みのものを使い回す。
+    //   setInterval経由のこの場所で新規作成すると、iPhone Safariでは無音のまま失敗するため）
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ctx.createOscillator(); const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = 880;
-      const now = ctx.currentTime;
-      g.gain.setValueAtTime(0, now);
-      g.gain.linearRampToValueAtTime(0.1, now + 0.06);   // フェードイン
-      g.gain.linearRampToValueAtTime(0.1, now + 0.25);
-      g.gain.linearRampToValueAtTime(0, now + 0.45);      // フェードアウト
-      o.start(now); setTimeout(() => { o.stop(); ctx.close(); }, 500);
+      ensureRestTimerAudio();
+      const ctx = restTimerAudioCtx;
+      if (ctx) {
+        const beepAt = (startTime) => {
+          const o = ctx.createOscillator(); const g = ctx.createGain();
+          o.connect(g); g.connect(ctx.destination);
+          o.frequency.value = 880;
+          g.gain.setValueAtTime(0, startTime);
+          g.gain.linearRampToValueAtTime(0.35, startTime + 0.06);   // フェードイン
+          g.gain.linearRampToValueAtTime(0.35, startTime + 0.25);
+          g.gain.linearRampToValueAtTime(0, startTime + 0.45);      // フェードアウト
+          o.start(startTime); o.stop(startTime + 0.5);
+        };
+        const now = ctx.currentTime;
+        beepAt(now);
+        beepAt(now + 0.55);
+      }
     } catch(e) {}
   }
   showToast('⏱ 休憩終了！次のセットへ');
