@@ -2119,6 +2119,19 @@ function ensureRestBeepEl() {
   if (!restBeepEl) {
     restBeepEl = new Audio(REST_BEEP_DATA_URI);
     restBeepEl.preload = 'auto';
+    // このビープ音がロック画面/コントロールセンターの再生コントロールを
+    // 乗っ取ってしまい、音楽アプリの「再生」ボタンを押してもビープ音が
+    // もう一度鳴るだけになる問題への対処。再生が終わった瞬間に「このページは
+    // もう何も再生していない」とiOSに明示的に伝え、控えを音楽アプリに返す。
+    restBeepEl.addEventListener('ended', () => {
+      try { if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none'; } catch (e) {}
+    });
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.setActionHandler('play', null);
+        navigator.mediaSession.setActionHandler('pause', null);
+      } catch (e) {}
+    }
   }
   return restBeepEl;
 }
@@ -2142,6 +2155,7 @@ function playRestBeepAudio() {
     const el = ensureRestBeepEl();
     el.currentTime = 0;
     el.volume = 1.0;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     const p = el.play();
     if (p && p.catch) p.catch(() => {});
   } catch (e) {}
