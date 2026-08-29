@@ -695,6 +695,8 @@ const MENU = {
     { slot: '背中 補助',   muscle: '背中', sets: 3, options: ['プルオーバー', 'デッドリフト', 'ケーブルプルオーバー'] },
     { slot: '二頭',        muscle: '二頭', sets: 3, options: ['ダンベルカール', 'インクラインダンベルカール', 'ケーブルカール'] },
     { slot: '後肩・僧帽',  muscle: '後肩', sets: 3, options: ['リバースフライ', 'シュラッグ'] },
+    { slot: '脚 軽め',     muscle: '脚',       sets: 2, options: ['レッグプレス', 'スクワット', 'ハックスクワット'] },
+    { slot: 'カーフ',      muscle: 'カーフ・腹', sets: 2, options: ['カーフレイズ'] },
   ]},
   C: { name: 'Legs', slots: [
     { slot: '脚 メイン',  muscle: '脚',       sets: 4, options: ['スクワット', 'ハックスクワット', 'レッグプレス', 'アングルドレッグプレス', 'スミスマシンスクワット'] },
@@ -961,10 +963,10 @@ function removeExtra(day, name) {
 
 // 固定メニュー（毎回選ばずに済むよう、実績とバランスに基づいて確定した種目）
 // 順番は空き状況で自由に前後してOK。疲れてる日はセット数を自分で減らして良い。
-const FIXED_MENU_VERSION = 2;
+const FIXED_MENU_VERSION = 3;
 const FIXED_SELECTION = {
   A: { 0: 'チェスト＆デクラインコンボ', 1: 'インクラインチェストプレス', 2: 'ショルダープレスマシン', 3: 'サイドレイズ', 4: 'ケーブルプッシュダウン' },
-  B: { 0: 'ラットプルダウン', 1: 'ローロウ', 2: 'ケーブルプルオーバー', 3: 'ケーブルカール', 4: 'リバースフライ' },
+  B: { 0: 'ラットプルダウン', 1: 'ローロウ', 2: 'ケーブルプルオーバー', 3: 'ケーブルカール', 4: 'リバースフライ', 5: 'レッグプレス', 6: 'カーフレイズ' },
 };
 function applyFixedMenuIfNeeded() {
   if (localStorage.getItem('gym_menu_fixed_version') === String(FIXED_MENU_VERSION)) return;
