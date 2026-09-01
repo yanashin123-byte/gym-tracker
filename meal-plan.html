@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>週間食事プラン</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+  :root {
+    --ground: #f3efe6;
+    --surface: #ffffff;
+    --surface-2: #ece6d8;
+    --surface-3: #e2dac6;
+    --border: #d9d0bd;
+    --text: #232019;
+    --muted: #746c5c;
+    --teal: #2f7d6b;
+    --teal-soft: #e4efe9;
+    --amber: #b9601f;
+    --amber-soft: #f5e9dc;
+    --vermillion: #a13f34;
+    --indigo: #34518f;
+    --good: #3d7a4c;
+    --warn: #a9812f;
+    --dim: #b0a68e;
+    --shadow: 0 1px 2px rgba(35,32,25,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #15130f; --surface: #1c1a15; --surface-2: #242019; --surface-3: #2b2620;
+      --border: #38332a; --text: #ece6d8; --muted: #9c9280;
+      --teal: #6fb8a4; --teal-soft: #1c2a24; --amber: #e08a4a; --amber-soft: #2b2119;
+      --vermillion: #d97a6c; --indigo: #8ea6db;
+      --good: #7fbf8f; --warn: #d4af6a; --dim: #55503f;
+      --shadow: 0 1px 2px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #15130f; --surface: #1c1a15; --surface-2: #242019; --surface-3: #2b2620;
+    --border: #38332a; --text: #ece6d8; --muted: #9c9280;
+    --teal: #6fb8a4; --teal-soft: #1c2a24; --amber: #e08a4a; --amber-soft: #2b2119;
+    --vermillion: #d97a6c; --indigo: #8ea6db;
+    --good: #7fbf8f; --warn: #d4af6a; --dim: #55503f;
+    --shadow: 0 1px 2px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  header { margin-bottom: 36px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--teal); font-weight: 700; margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Shippori Mincho', serif; font-weight: 700; font-size: clamp(28px, 4vw, 38px);
+    margin: 0 0 8px; text-wrap: balance; letter-spacing: .01em;
+  }
+  .lede { color: var(--muted); font-size: 15px; max-width: 62ch; line-height: 1.75; margin: 0; }
+
+  .phase-strip {
+    display: flex; gap: 14px; flex-wrap: wrap; margin-top: 24px;
+  }
+  .phase-card {
+    flex: 1 1 200px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .phase-card .k { font-size: 11px; color: var(--muted); letter-spacing: .04em; margin-bottom: 6px; }
+  .phase-card .v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .phase-card .v small { font-family: 'Zen Kaku Gothic New', sans-serif; font-size: 12px; color: var(--muted); font-weight: 500; }
+  .phase-card.accent { border-color: var(--teal); background: var(--teal-soft); }
+  .phase-card.accent .v { color: var(--teal); }
+
+  section { margin-top: 44px; }
+  h2 {
+    font-family: 'Shippori Mincho', serif; font-size: 20px; font-weight: 700; margin: 0 0 4px;
+  }
+  .section-note { color: var(--muted); font-size: 13px; margin: 0 0 18px; line-height: 1.7; }
+
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); box-shadow: var(--shadow); }
+  table { border-collapse: collapse; width: 100%; min-width: 760px; }
+  thead th {
+    text-align: left; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted); font-weight: 700;
+    padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--surface-2);
+    white-space: nowrap;
+  }
+  thead th:first-child { border-top-left-radius: 12px; }
+  thead th:last-child { border-top-right-radius: 12px; }
+  tbody td {
+    padding: 16px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 14px; line-height: 1.6;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-2); }
+  .shift-name { font-weight: 700; white-space: nowrap; }
+  .shift-time { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .meal-time { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--teal); font-weight: 700; margin-bottom: 4px; font-variant-numeric: tabular-nums; }
+  .meal-item { font-weight: 500; }
+  .meal-macro { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+  .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 4px; }
+  .menu-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+  }
+  .menu-card .tag {
+    align-self: flex-start; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .06em;
+    text-transform: uppercase; padding: 3px 8px; border-radius: 999px; font-weight: 700;
+  }
+  .tag.breakfast { background: var(--amber-soft); color: var(--amber); }
+  .tag.lunch { background: var(--teal-soft); color: var(--teal); }
+  .tag.dinner { background: var(--surface-3); color: var(--muted); }
+  .menu-card h3 { font-family: 'Shippori Mincho', serif; font-size: 17px; margin: 0; font-weight: 700; }
+  .menu-card ul { margin: 0; padding-left: 18px; font-size: 13.5px; line-height: 1.85; color: var(--text); }
+  .menu-card .macro-row {
+    display: flex; gap: 16px; padding-top: 10px; border-top: 1px dashed var(--border);
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-variant-numeric: tabular-nums;
+  }
+  .menu-card .macro-row b { color: var(--teal); }
+
+  .override {
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--warn);
+    border-radius: 8px; padding: 16px 20px; font-size: 13.5px; line-height: 1.8; color: var(--text);
+  }
+  .override b { color: var(--warn); }
+
+  footer {
+    margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--dim); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+
+  @media (max-width: 600px) {
+    .wrap { padding: 32px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">健康管理部 — 食事プラン</div>
+    <h1>週間食事プラン（リコンプ期）</h1>
+    <p class="lede">JBBFフィジーク大会出場が最終目標。体脂肪25.9%→14%（KGI期限2027-05-31・大会日程はまだ未確定）を、実測データから計算した摂取目標とシフト別の固定メニューで支える。</p>
+
+    <div class="phase-strip">
+      <div class="phase-card accent">
+        <div class="k">現在のフェーズ</div>
+        <div class="v">リコンプ<small>脂肪↓・筋肉↑を同時に狙う</small></div>
+      </div>
+      <div class="phase-card">
+        <div class="k">摂取カロリー目標</div>
+        <div class="v">約2,500<small>kcal / 日</small></div>
+      </div>
+      <div class="phase-card">
+        <div class="k">タンパク質目標</div>
+        <div class="v">約155<small>g / 日</small></div>
+      </div>
+      <div class="phase-card">
+        <div class="k">直近実測（08/25）</div>
+        <div class="v">91.1kg<small>体脂肪25.9% / 筋肉64.0kg / 25歳</small></div>
+      </div>
+    </div>
+  </header>
+
+  <section style="margin-top:32px">
+    <h2>摂取目標の根拠</h2>
+    <p class="section-note">Mifflin-St Jeor式でBMRを算出し、活動係数・減量ペースから逆算。数値が古くなったら体重・体脂肪の再測定で更新する。</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>項目</th><th>計算</th><th>結果</th></tr></thead>
+        <tbody>
+          <tr><td>BMR</td><td>10×91.1 + 6.25×175 − 5×25 + 5</td><td>1,885 kcal</td></tr>
+          <tr><td>TDEE</td><td>BMR × 活動係数1.55（立ち仕事＋週トレ想定）</td><td>約2,920 kcal</td></tr>
+          <tr><td>摂取目標</td><td>TDEE − 400kcal（筋肉維持しつつ脂肪優先で減らす赤字）</td><td>約2,500 kcal</td></tr>
+          <tr><td>タンパク質</td><td>筋肉量64.0kg × 2.2g/kg（ISSN基準の減量期上限寄り）</td><td>約155 g（620kcal）</td></tr>
+          <tr><td>脂質</td><td>総カロリーの約25%</td><td>約70 g（630kcal）</td></tr>
+          <tr><td>炭水化物</td><td>残り</td><td>約310 g（1,250kcal）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>シフト別タイムテーブル</h2>
+    <p class="section-note">曜日ではなくシフトの型に紐づける（型は週ごとに変わるため）。目安時刻で、前後は勤務状況に合わせて調整してよい。夜勤の1食目は「朝食」ではなく、10:00頃に食べてから仮眠→起床して出発するルーティンに合わせた時刻。</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>シフト</th><th>朝食</th><th>昼食</th><th>夕食</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="shift-name">日勤</span><span class="shift-time">8:15–16:45</span></td>
+            <td><span class="meal-time">6:00頃</span><span class="meal-item">出発前</span></td>
+            <td><span class="meal-time">12:00頃</span><span class="meal-item">休憩中</span></td>
+            <td><span class="meal-time">18:00頃</span><span class="meal-item">帰宅後</span></td>
+          </tr>
+          <tr>
+            <td><span class="shift-name">午前勤</span><span class="shift-time">8:15–12:45</span></td>
+            <td><span class="meal-time">6:00頃</span><span class="meal-item">出発前</span></td>
+            <td><span class="meal-time">13:00頃</span><span class="meal-item">勤務後</span></td>
+            <td><span class="meal-time">18:00頃</span><span class="meal-item">通常通り</span></td>
+          </tr>
+          <tr>
+            <td><span class="shift-name">午後勤</span><span class="shift-time">12:15–16:45</span></td>
+            <td><span class="meal-time">8:00頃</span><span class="meal-item">通常通り</span></td>
+            <td><span class="meal-time">11:00頃</span><span class="meal-item">出発前</span></td>
+            <td><span class="meal-time">18:00頃</span><span class="meal-item">通常通り</span></td>
+          </tr>
+          <tr>
+            <td><span class="shift-name">夜勤</span><span class="shift-time">15:45–翌8:45</span></td>
+            <td><span class="meal-time">10:00頃</span><span class="meal-item">仮眠前にしっかり</span></td>
+            <td><span class="meal-time">17-20時のどこか</span><span class="meal-item">1時間休憩中・弁当持参（実質の夕食）</span></td>
+            <td><span class="meal-time">翌8:45以降</span><span class="meal-item">退勤後・軽め</span></td>
+          </tr>
+          <tr>
+            <td><span class="shift-name">休み</span><span class="shift-time">—</span></td>
+            <td colspan="3"><span class="meal-item">時刻は自由。内容（下記メニュー）と総タンパク質量だけ揃える</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>固定メニュー（詳細レシピ）</h2>
+    <p class="section-note">スチーマー・電子レンジ・炊飯器を使う前提。グラム数は目安、ご飯の量だけ日々±50gで微調整して合計2,400〜2,600kcalに収める。</p>
+    <div class="menu-grid">
+
+      <div class="menu-card">
+        <span class="tag breakfast">朝食</span>
+        <h3>オーバーナイトオーツ</h3>
+        <ul>
+          <li>オートミール（ロールドオーツ）40g</li>
+          <li>無調整豆乳 200ml</li>
+          <li>ビーレジェンド ホエイ 1食 30g（白バラコーヒー / ミルキー）</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">前夜、容器に3つ入れて混ぜ、冷蔵庫へ。朝は出すだけ。</p>
+        <div class="macro-row"><span>P <b>約35g</b></span><span>約350kcal</span></div>
+      </div>
+
+      <div class="menu-card">
+        <span class="tag lunch">昼食</span>
+        <h3>スチーム弁当</h3>
+        <ul>
+          <li>鶏胸肉（皮なし）150g</li>
+          <li>ブロッコリー 100g</li>
+          <li>ご飯 250g</li>
+          <li>ごま油 5g</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">鶏肉は一口大に切り塩少々→スチーマー15分。同時にブロッコリーを別段で6分。鶏肉にごま油を絡めてご飯と詰める。</p>
+        <div class="macro-row"><span>P <b>約46g</b></span><span>約700kcal</span></div>
+      </div>
+
+      <div class="menu-card">
+        <span class="tag lunch" style="background:var(--amber-soft);color:var(--amber)">間食</span>
+        <h3>プチ補給セット</h3>
+        <ul>
+          <li>おにぎり 1個（180g・鮭 / ツナマヨ）</li>
+          <li>ゆで卵 2個</li>
+          <li>ミックスナッツ 35g</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">勤務中の休憩や、トレ前後など好きなタイミングで。買い置きでOK。</p>
+        <div class="macro-row"><span>P <b>約26g</b></span><span>約570kcal</span></div>
+      </div>
+
+      <div class="menu-card">
+        <span class="tag dinner">夕食</span>
+        <h3>鶏むね＋卵＋ご飯</h3>
+        <ul>
+          <li>鶏胸肉（皮なし）220g</li>
+          <li>ゆで卵 1個</li>
+          <li>ご飯 200g</li>
+        </ul>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">納豆・豆腐は不使用にして鶏肉の量を増やして代替（2026-08-30変更）。鶏肉は昼と同時に仕込んでおくと楽。スチーマー15分、ゆで卵は作り置きでOK。<b>自宅で食べる回のみ</b>。夜勤の日は職場での休憩中の食事（17-20時）が実質の夕食になるため、この回は使わず「昼食」のスチーム弁当を持参する。</p>
+        <div class="macro-row"><span>P <b>約63g</b></span><span>約655kcal</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>予定との連携</h2>
+    <div class="override">
+      <b>飲み会・外出予定がある日は、この表を適用しない。</b>秘書室が把握しているカレンダー予定と突き合わせて、対象日があれば健康管理部から事前に声をかける。その日はタンパク質量だけ意識してざっくり選べばよく、固定メニューに戻すのは翌日から。
+    </div>
+  </section>
+
+  <footer>
+    <span>健康管理部 — 2026-08-29 策定</span>
+    <span>関連：鬼速PDCA全体マップ（JBBF KGI） / 健康管理部 CLAUDE.md</span>
+  </footer>
+
+</div>
+
+</body>
+</html>
